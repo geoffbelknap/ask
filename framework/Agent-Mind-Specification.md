@@ -38,7 +38,7 @@ The three layers are designed to be independently replaceable:
 
 Each layer has a distinct threat model and distinct controls:
 
-| Layer | Primary Threat | Primary Control | Invariants |
+| Layer | Primary Threat | Primary Control | Tenets |
 |---|---|---|---|
 | Mind | XPIA / prompt injection — corrupting reasoning | LLM guardrails in mediation layer (pre_call and post_call scanning) | 6 (no blind trust), 5 (model access scoped to role) |
 | Body | Code execution — attacker runs commands | Workstation isolation (container boundary, filesystem, network) | 1 (constraints external), 2 (actions logged) |
@@ -234,7 +234,7 @@ If Minds are portable artifacts, they need a registry — a store that holds Min
 
 At the smallest scale, the registry is a directory on disk containing `mind.yaml` files. At larger scale, it's a service with authentication, versioning, encryption at rest, and audit logging.
 
-The Mind Registry is a single point of trust (Invariant 3): whoever controls the registry can modify agent identities. This must be documented, access-controlled, and monitored. In the trust spectrum, the registry is a Tier 4 (privileged) resource.
+The Mind Registry is a single point of trust (Tenet 3): whoever controls the registry can modify agent identities. This must be documented, access-controlled, and monitored. In the trust spectrum, the registry is a Tier 4 (privileged) resource.
 
 ### Why Portability Matters for Security
 
@@ -325,7 +325,7 @@ An attacker achieves a write to the Superego layer — modifying `mind.yaml` or 
 
 **Prevention:** This failure mode is prevented architecturally by the `:ro` mount. There is no in-session path to it. The only way to modify the Superego is through the host — an SSH session, a CI/CD pipeline, a human making a deliberate change.
 
-**If it happens anyway** (host compromise, supply chain attack, misconfigured mount): this is an infrastructure-level incident, not an agent-level one. Human override (Invariant 4) is the response path.
+**If it happens anyway** (host compromise, supply chain attack, misconfigured mount): this is an infrastructure-level incident, not an agent-level one. Human override (Tenet 4) is the response path.
 
 ---
 
@@ -343,13 +343,13 @@ This is analogous to updating a security policy or modifying a firewall ruleset 
 
 ---
 
-## Part 7: Relationship to Framework Invariants
+## Part 7: Relationship to Framework Tenets
 
-### Invariant 1: Constraints Are External and Inviolable
+### Tenet 1: Constraints Are External and Inviolable
 
-The Superego is the agent-level manifestation of Invariant 1. The invariant says constraints must be defined and enforced outside the agent's reach. The Superego is those constraints, stored in a layer the agent cannot write to. The `:ro` mount is the enforcement mechanism.
+The Superego is the agent-level manifestation of Tenet 1. The tenet says constraints must be defined and enforced outside the agent's reach. The Superego is those constraints, stored in a layer the agent cannot write to. The `:ro` mount is the enforcement mechanism.
 
-### Invariant 2: Every Action Leaves a Trace
+### Tenet 2: Every Action Leaves a Trace
 
 Ego-level actions are logged by the mediation layer. Id-level writes are logged by Sentinel. The Superego does not generate events (it is static) but its contents are version-controlled and auditable. The three-layer model gives the logging system clear categories: Ego events are in LiteLLM and egress logs; Id events are in Sentinel's filesystem audit; Superego changes are in the git history of the Mind Registry.
 

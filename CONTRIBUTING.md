@@ -4,7 +4,7 @@ Thank you for your interest in contributing to the ASK operating framework.
 
 ## What This Project Is
 
-ASK is an operating framework for agent security — a set of principles, invariants, and architectural patterns for running AI agents safely. It is agent-agnostic, platform-agnostic, and vendor-neutral. Contributions are to the framework documentation: the theory, the architecture, the threat model, and the reference material.
+ASK is an operating framework for agent security — a set of principles, tenets, and architectural patterns for running AI agents safely. It is agent-agnostic, platform-agnostic, and vendor-neutral. Contributions are to the framework documentation: the theory, the architecture, the threat model, and the reference material.
 
 ## How to Contribute
 
@@ -15,7 +15,7 @@ The most valuable contributions right now are:
 - **Review and critique.** Read the framework documents and identify gaps, contradictions, or assumptions that don't hold.
 - **Real-world testing.** If you build against ASK, report what works, what doesn't, and what's missing.
 - **Threat model contributions.** New attack vectors, kill chains, or control gaps we haven't considered.
-- **Architectural alternatives.** Different enforcement mechanisms or deployment patterns that satisfy the invariants.
+- **Architectural alternatives.** Different enforcement mechanisms or deployment patterns that satisfy the tenets.
 
 Open an issue to start a discussion.
 
@@ -30,7 +30,7 @@ For changes to the framework documents:
 
 ### What Makes a Good Contribution
 
-- **Respects the invariants.** The 23 invariants are the foundation. If a proposed change would violate an invariant, the change is wrong — not the invariant. If you believe an invariant should be modified, make the case explicitly.
+- **Respects the tenets.** The 23 tenets are the foundation. If a proposed change would violate an tenet, the change is wrong — not the tenet. If you believe an tenet should be modified, make the case explicitly.
 - **Is concrete.** Specific architectural proposals with clear threat model justification are more useful than general suggestions.
 - **Acknowledges limitations.** ASK is honest about its gaps (see [Limitations.md](reference/Limitations.md)). Contributions should be equally honest.
 

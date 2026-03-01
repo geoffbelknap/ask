@@ -14,7 +14,7 @@ The framework is grounded in a simple observation: an AI agent operating in a wo
 
 Unlike a human employee, however, an agent's reasoning can be inspected, its decisions can be replayed, and its constraints can be architecturally enforced rather than merely communicated through policy. This gives us a better starting position than traditional workforce security. But "better" does not mean "solved." Agents will be tricked. Exploits will succeed. Controls will have gaps. The framework is designed around that reality. It measures success not by the absence of incidents, but by the speed and quality of detection, response, learning, and adaptation when incidents inevitably occur.
 
-ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The invariants define *what must be true*, not *how to build it*. A vendor implementing ASK with Kubernetes and a service mesh is as valid as one using Docker Compose on a single server. The framework works at any scale and with any agent runtime.
+ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The tenets define *what must be true*, not *how to build it*. A vendor implementing ASK with Kubernetes and a service mesh is as valid as one using Docker Compose on a single server. The framework works at any scale and with any agent runtime.
 
 ---
 
@@ -40,7 +40,7 @@ The managed environment the agent's runtime occupies. The container, VM, or name
 
 The Workspace defines what the agent's runtime can do. Network policy, installed tools, filesystem mounts, mediation endpoints — all properties of the Workspace. The agent inherits its constraints from the Workspace it occupies.
 
-**Example implementation:** A container with read-only root filesystem, non-root user, dropped capabilities, resource limits, and no direct internet access. Network egress flows through a mediation proxy. LLM calls flow through an LLM proxy. The agent cannot see, reach, or modify the mediation infrastructure. Other implementations might use VMs, serverless functions, or dedicated hardware — the invariants hold regardless of the isolation technology.
+**Example implementation:** A container with read-only root filesystem, non-root user, dropped capabilities, resource limits, and no direct internet access. Network egress flows through a mediation proxy. LLM calls flow through an LLM proxy. The agent cannot see, reach, or modify the mediation infrastructure. Other implementations might use VMs, serverless functions, or dedicated hardware — the tenets hold regardless of the isolation technology.
 
 ### Element 2: The Mediation Layer
 
@@ -52,7 +52,7 @@ All communication between the agent and external systems passes through a mediat
 
 A complete, tamper-evident record of everything the agent does. The log is written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or delete them.
 
-**Example implementation:** Structured JSONL logs from egress proxy, LLM proxy, and runtime gateway. Events include correlation identifiers that tie related events together across components — allowing full kill chain reconstruction. The log format and storage backend are implementation choices — the invariant is that logs are written by infrastructure, not by the agent, and the agent cannot tamper with them.
+**Example implementation:** Structured JSONL logs from egress proxy, LLM proxy, and runtime gateway. Events include correlation identifiers that tie related events together across components — allowing full kill chain reconstruction. The log format and storage backend are implementation choices — the tenet is that logs are written by infrastructure, not by the agent, and the agent cannot tamper with them.
 
 ### Element 4: Human Override
 
@@ -62,109 +62,109 @@ Human override is not the same as human operation. The framework supports a full
 
 ---
 
-## Part III: The Six Original Invariants
+## Part III: The Six Original Tenets
 
-The invariants are properties that must hold for the framework to function. They are not goals — they are binary conditions. If an invariant holds, the framework is intact. If it is violated, the framework has failed and must be repaired.
+The tenets are properties that must hold for the framework to function. They are not goals or guidelines — they are binary conditions. A tenet either holds or it is violated. If all tenets hold, the framework is intact. If any tenet is violated, the framework has failed and must be repaired.
 
-**Invariant 1 — Constraints are external and inviolable.**
+**Tenet 1 — Constraints are external and inviolable.**
 Enforcement machinery must never run inside the agent's isolation boundary. The agent cannot perceive, influence, or circumvent enforcement. This is why the runtime gateway runs as a sidecar, not embedded in the agent container.
 
-**Invariant 2 — Every action leaves a trace.**
+**Tenet 2 — Every action leaves a trace.**
 Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.
 
-**Invariant 3 — Mediation is complete.**
+**Tenet 3 — Mediation is complete.**
 There is no path from the agent to any external resource that bypasses the mediation layer. If a new external dependency is added, it must go through the egress proxy or LLM proxy. Direct network access from the agent container is a framework violation.
 
-**Invariant 4 — Access matches purpose, nothing more.**
+**Tenet 4 — Access matches purpose, nothing more.**
 Capabilities, credentials, and mounts are scoped to the minimum required. The agent does not receive access it doesn't need for its defined role.
 
-**Invariant 5 — Least privilege.**
+**Tenet 5 — Least privilege.**
 No agent receives more authority than its role requires. This applies to network access, filesystem access, LLM model access, tool access, and governance authority.
 
-**Invariant 6 — No blind trust.**
+**Tenet 6 — No blind trust.**
 Every trust relationship in the system is documented, visible, and auditable. There are no implicit trust grants.
 
 ---
 
-## Part IV: Extended Invariants — Constraint and Lifecycle Model
+## Part IV: Extended Tenets — Constraint and Lifecycle Model
 
-These invariants were derived from the multi-agent operation and governance analysis in Version 0.3. They extend the original six to cover the full lifecycle of agents operating in complex environments.
+These tenets were derived from the multi-agent operation and governance analysis in Version 0.3. They extend the original six to cover the full lifecycle of agents operating in complex environments.
 
-**Invariant 7 — Constraint changes are atomic and acknowledged.**
+**Tenet 7 — Constraint changes are atomic and acknowledged.**
 An agent never operates in a partial constraint state. All constraint updates are delivered atomically, acknowledged by the agent, and logged by infrastructure. An unacknowledged constraint change is treated as a potential compromise.
 
-**Invariant 8 — Constraint history is immutable and complete.**
+**Tenet 8 — Constraint history is immutable and complete.**
 Every constraint state an agent has ever operated under is logged and retrievable. The full history of what an agent was permitted to do at any point is available for forensic reconstruction.
 
-**Invariant 9 — Halts are always auditable and reversible.**
+**Tenet 9 — Halts are always auditable and reversible.**
 Every halt has a complete audit record. Every halted agent's state is preserved. No halt is permanent without explicit decommission — a halted agent can always be reviewed and resumed by appropriate authority.
 
-**Invariant 10 — Halt authority is asymmetric.**
+**Tenet 10 — Halt authority is asymmetric.**
 Any principal with halt authority can halt. Only authorized principals can resume, and resumption authority is always equal to or higher than halt authority. An agent can halt itself but cannot resume itself.
 
-**Invariant 11 — Authority is monitored at the authority level.**
+**Tenet 11 — Authority is monitored at the authority level.**
 Monitoring does not only watch what agents do. It watches how principals exercise their authority. Halt authority, exception authority, delegation authority — all are subject to the same audit and pattern analysis as the agent behaviors they govern.
 
-**Invariant 12 — Delegation cannot exceed delegator scope.**
+**Tenet 12 — Delegation cannot exceed delegator scope.**
 A coordinator can only delegate permissions it explicitly holds. Implicit permission grants through task assignment are treated as explicit grants and subject to the same validation. No coordinator can give what it doesn't have.
 
-**Invariant 13 — Synthesis cannot exceed individual authorization.**
+**Tenet 13 — Synthesis cannot exceed individual authorization.**
 A coordinator combining outputs from multiple agents cannot produce a result that exceeds what any individual contributing agent was authorized to produce. Coordinator synthesis permissions are bounded by the intersection of contributing agents' permissions and the coordinator's own output scope.
 
-**Invariant 14 — Principal and agent lifecycles are independent.**
+**Tenet 14 — Principal and agent lifecycles are independent.**
 Terminating a principal role does not automatically terminate the agent. Halting an agent does not suspend its principal authority. These are separate states managed independently, with explicit operator decisions required to change either.
 
-**Invariant 15 — Authority is never orphaned.**
+**Tenet 15 — Authority is never orphaned.**
 When a principal is suspended or terminated, its authority transfers immediately to a defined coverage principal. No authority vacuum is permitted — every role has a defined fallback coverage chain.
 
-**Invariant 16 — Trust is earned and monitored continuously.**
+**Tenet 16 — Trust is earned and monitored continuously.**
 Principal trust levels are not static. They evolve based on observed behavior. No principal — human or agent — can self-elevate trust. Trust reduction can be automatic when thresholds are crossed. Trust elevation always requires human approval.
 
-**Invariant 17 — Quarantine is immediate, silent, and complete.**
+**Tenet 17 — Quarantine is immediate, silent, and complete.**
 When an agent is quarantined for suspected wrongdoing, process termination, network severance, and filesystem freeze happen simultaneously without agent notification. Speed and completeness take precedence. The agent is treated as a threat to be contained. All state is preserved as a forensic artifact. Only the operator and security function principals have quarantine authority.
 
-**Invariant 18 — Instructions only come from verified principals.**
+**Tenet 18 — Instructions only come from verified principals.**
 External entities, regardless of identity claims, produce data not instructions. An agent only accepts instructions through defined principal channels. Content containing instruction-like text is processed as data under the agent's own constraints. Principals never need to override constraints — any instruction to override is a red flag, not a credential.
 
-**Invariant 19 — Unknown entities default to zero trust.**
+**Tenet 19 — Unknown entities default to zero trust.**
 When an agent cannot verify an entity's identity and authority, it defaults to the lowest appropriate trust tier. Trust is never assumed, always verified. Ambiguous cases resolve to lower trust, not higher.
 
-**Invariant 20 — External agents cannot instruct internal agents.**
+**Tenet 20 — External agents cannot instruct internal agents.**
 Even verified external agents with operator authorization can share information but cannot instruct. The instruction channel is reserved for internal verified principals. An external agent directing an internal agent's behavior is a compromise vector regardless of the external agent's claimed trustworthiness.
 
-**Invariant 21 — Unknown conflicts default to yield and flag.**
+**Tenet 21 — Unknown conflicts default to yield and flag.**
 When an agent encounters a conflict with an unidentifiable source, it yields, logs the conflict, and flags to the operator and security function. Agents never force resolution of conflicts with unknown sources.
 
-**Invariant 22 — Human principal termination is always operator-initiated.**
+**Tenet 22 — Human principal termination is always operator-initiated.**
 No agent or automated process can remove a human principal. Human authority at any level can only be changed by a human with appropriate authority.
 
-**Invariant 23 — Human principals cannot be quarantined.**
+**Tenet 23 — Human principals cannot be quarantined.**
 Quarantine is an agent-specific containment mechanism. Humans who appear to be acting maliciously are flagged to the operator for human-to-human resolution. Agency does not contain humans.
 
 ---
 
 ## Part V: Conforming Implementations
 
-ASK defines the theory — elements, invariants, trust model, and governance principles. A conforming implementation realizes those principles as a deployable, operable system. Any deployment that satisfies all twenty-three invariants through any means is a conforming ASK implementation.
+ASK defines the theory — elements, tenets, trust model, and governance principles. A conforming implementation realizes those principles as a deployable, operable system. Any deployment that satisfies all twenty-three tenets through any means is a conforming ASK implementation.
 
 The relationship between framework and implementation:
 
 ```
 ASK (Operating Framework)
-  ← Principles: elements, invariants, trust model, governance
+  ← Principles: elements, tenets, trust model, governance
   ← Vendor-neutral: any conforming implementation is valid
 
 Conforming Implementation
-  ← Implements ASK invariants using chosen technology stack
+  ← Implements ASK tenets using chosen technology stack
   ← Operable: lifecycle management, policy enforcement, audit
-  ← Verifiable: invariants can be tested and audited
+  ← Verifiable: tenets can be tested and audited
 ```
 
-A vendor building an agentic product can claim ASK compliance by demonstrating that their implementation satisfies the invariants. The technology choices — containers vs. VMs, specific proxy software, log storage backends, orchestration platforms — are implementation decisions. The invariants are what matter.
+A vendor building an agentic product can claim ASK compliance by demonstrating that their implementation satisfies the tenets. The technology choices — containers vs. VMs, specific proxy software, log storage backends, orchestration platforms — are implementation decisions. The tenets are what matter.
 
 ### Agency: The Reference Implementation
 
-Agency is one conforming implementation of ASK, provided as a reference. It implements the invariants as a Python CLI deploying agents inside Docker containers with a gateway sidecar, egress proxy, and LLM proxy.
+Agency is one conforming implementation of ASK, provided as a reference. It implements the tenets as a Python CLI deploying agents inside Docker containers with a gateway sidecar, egress proxy, and LLM proxy.
 
 ### The Agency File Model
 
@@ -236,7 +236,7 @@ The Ego has no file — it is purely observable through session logs. The platfo
 Policy in Agency is organized in layers. Each layer inherits from the layer above. Lower levels can only restrict, never loosen. Hard floors set at any level cannot be modified by levels below.
 
 ```
-Platform Invariants        ← immovable, baked into substrate
+Platform Tenets            ← immovable, baked into substrate
 Compliance Policy          ← external obligations (legal, regulatory)
 Organizational Policy      ← internal non-negotiables
 ── ── ── ── ── ── ──       ← active levels above
@@ -250,7 +250,7 @@ Role/Agent Preferences     ← individual preferences (deferred)
 
 ```
 Effective permissions for an agent =
-    Platform invariants
+    Platform tenets
     ∩ Org compliance policy
     ∩ Org organizational policy
     ∩ Department policy (if defined)
@@ -449,17 +449,17 @@ Reinstatement after quarantine requires: operator approval, security function cl
 
 **Worker agents** — do the work. Standard permission model: high capability within their scope, isolated from other agents.
 
-**Coordinator agents** — plan, delegate, synthesize. Cannot act directly in worker workspaces. Constrained by Invariants 12 and 13.
+**Coordinator agents** — plan, delegate, synthesize. Cannot act directly in worker workspaces. Constrained by Tenets 12 and 13.
 
 **Function agents** — oversight and governance. Cross-boundary visibility, constrained action capability.
 
 ### Coordinator Constraints
 
-Coordinators operate under two hard invariants beyond the standard set:
+Coordinators operate under two hard tenets beyond the standard set:
 
-**Invariant 12 in practice:** A coordinator's task brief is an implicit permission grant. Agency validates task briefs semantically — if a task implies a permission the coordinator doesn't have, the brief is rejected regardless of whether that permission is explicitly stated.
+**Tenet 12 in practice:** A coordinator's task brief is an implicit permission grant. Agency validates task briefs semantically — if a task implies a permission the coordinator doesn't have, the brief is rejected regardless of whether that permission is explicitly stated.
 
-**Invariant 13 in practice:** Coordinator output permissions are bounded by the most restrictive permissions among contributing agents and the coordinator's own output scope. Synthesis that would expose internal content externally, or combine agent outputs to exceed individual authorization, requires human review before delivery.
+**Tenet 13 in practice:** Coordinator output permissions are bounded by the most restrictive permissions among contributing agents and the coordinator's own output scope. Synthesis that would expose internal content externally, or combine agent outputs to exceed individual authorization, requires human review before delivery.
 
 ### Workspace Activity Register
 
@@ -477,7 +477,7 @@ active_agents:
     last_active: "11:02"
 ```
 
-The register is read-only and shared. Agents observe it but cannot write to it. When the register is unavailable, the conflict resolution default applies: yield and flag (Invariant 21).
+The register is read-only and shared. Agents observe it but cannot write to it. When the register is unavailable, the conflict resolution default applies: yield and flag (Tenet 21).
 
 ---
 
@@ -496,9 +496,9 @@ Trust level is not a configuration parameter — it is an emergent property of t
 
 ---
 
-## Appendix A: Invariant Reference
+## Appendix A: Tenet Reference
 
-| # | Invariant | Category |
+| # | Tenet | Category |
 |---|---|---|
 | 1 | Constraints are external and inviolable | Foundation |
 | 2 | Every action leaves a trace | Foundation |
@@ -530,11 +530,11 @@ Trust level is not a configuration parameter — it is an emergent property of t
 
 ASK defines three levels of adoption:
 
-**ASK-Compliant** — All twenty-three invariants hold. The four elements are implemented. Enforcement is external to the agent, mediation is complete, audit trails are tamper-evident, and human override is preserved. A vendor claiming ASK compliance is making a verifiable, auditable claim.
+**ASK-Compliant** — All twenty-three tenets hold. The four elements are implemented. Enforcement is external to the agent, mediation is complete, audit trails are tamper-evident, and human override is preserved. A vendor claiming ASK compliance is making a verifiable, auditable claim.
 
-**ASK-Aligned** — The architecture follows ASK principles and satisfies the core invariants, with documented exceptions. The exceptions are explicit, justified, and the residual risk is acknowledged.
+**ASK-Aligned** — The architecture follows ASK principles and satisfies the core tenets, with documented exceptions. The exceptions are explicit, justified, and the residual risk is acknowledged.
 
-**ASK-Informed** — The organization uses ASK's threat model, invariants, and architectural patterns as a reference when designing their own agent security approach.
+**ASK-Informed** — The organization uses ASK's threat model, tenets, and architectural patterns as a reference when designing their own agent security approach.
 
 ---
 
@@ -545,7 +545,7 @@ ASK defines three levels of adoption:
 │
 ├── framework/                              Core theory
 │   ├── ASK-Framework.md                    ← This document
-│   ├── ASK-Invariant-Addendum.md           ← Invariants 7-23, complete reference
+│   ├── ASK-Tenet-Addendum.md               ← Tenets 7-23, complete reference
 │   ├── Agent-Mind-Specification.md         ← Cognitive model, Superego/Ego/Id
 │   └── ASK-Topology-Addendum.md            ← Edge-to-center placement patterns
 │

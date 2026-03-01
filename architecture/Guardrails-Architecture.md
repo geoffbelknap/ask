@@ -94,7 +94,7 @@ Enforces per-server, per-tool allowlists on MCP (Model Context Protocol) tool ca
 
 **Why this is separate from Layer 5:** Layer 5 (Tool Permission Guard) runs in the LLM proxy and mediates tool calls that appear in the LLM's response. Layer 5b runs in the gateway sidecar and mediates MCP tool calls that the agent makes directly to MCP server subprocesses — these never pass through the LLM proxy. A compromised agent could invoke MCP tools without going through the LLM at all, bypassing Layer 5 entirely. Layer 5b catches this.
 
-**Policy lives in the gateway, not in OpenClaw.** OpenClaw has its own `tools.allow`/`tools.deny` config, but this runs inside the agent process and can be modified by a compromised agent. The gateway's MCP policy is in a separate filesystem namespace the agent cannot access — satisfying framework invariant 1 (constraints are external and inviolable).
+**Policy lives in the gateway, not in OpenClaw.** OpenClaw has its own `tools.allow`/`tools.deny` config, but this runs inside the agent process and can be modified by a compromised agent. The gateway's MCP policy is in a separate filesystem namespace the agent cannot access — satisfying framework tenet 1 (constraints are external and inviolable).
 
 ## Layer 6: Built-in Prompt Injection Detector
 

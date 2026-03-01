@@ -339,7 +339,7 @@ OpenClaw has its own `tools.allow` / `tools.deny` and `security` configuration w
 | **Survives agent compromise** | No | Yes |
 | **Enforcement mechanism** | Application-level (agent's own code) | OS-level (PID namespace, seccomp) |
 
-OpenClaw's tool policy is a good first layer — it prevents accidental misuse by a well-behaved agent. The gateway's MCP policy is the safety net — it prevents intentional misuse by a compromised agent. Both should be configured, but only the gateway's policy satisfies invariant 1 (constraints are external and inviolable).
+OpenClaw's tool policy is a good first layer — it prevents accidental misuse by a well-behaved agent. The gateway's MCP policy is the safety net — it prevents intentional misuse by a compromised agent. Both should be configured, but only the gateway's policy satisfies tenet 1 (constraints are external and inviolable).
 
 ## 8. Audit Events and Log Integration
 

@@ -2,7 +2,7 @@
 
 An operating framework for running AI agents safely. ASK defines what must be true — architecturally, operationally, and organizationally — for AI agents to operate securely at any scale.
 
-ASK is agent-agnostic, platform-agnostic, and vendor-neutral. It works for any agent framework, any cloud provider, any deployment model. It defines principles and invariants, not implementations. Any conforming system that satisfies the invariants is a valid ASK deployment.
+ASK is agent-agnostic, platform-agnostic, and vendor-neutral. It works for any agent framework, any cloud provider, any deployment model. It defines principles and tenets, not implementations. Any conforming system that satisfies the tenets is a valid ASK deployment.
 
 ## Why an Operating Framework
 
@@ -12,11 +12,11 @@ The dominant approach today is to trust the agent to follow instructions and hop
 
 ASK borrows from enterprise endpoint security. An AI agent has the same fundamental security profile as a human employee on a managed device. The framework applies the same structural controls — managed environment, mediated access, continuous monitoring, human override — adapted for the specific threat model of AI agents.
 
-The word "operating" is deliberate. This is not a governance checklist or a set of aspirational principles. It is an architectural framework that tells you how to *operate* agents securely — with concrete invariants you can build against, test for, and verify.
+The word "operating" is deliberate. This is not a governance checklist or a set of aspirational principles. It is an architectural framework that tells you how to *operate* agents securely — with concrete tenets you can build against, test for, and verify.
 
-## The Core: Four Elements and Twenty-Three Invariants
+## The Core: Four Elements and Twenty-Three Tenets
 
-The framework is built on **four elements** and **twenty-three invariants**. The elements define the structural components every deployment needs. The invariants define the properties that must hold — they are binary conditions, not goals.
+The framework is built on **four elements** and **twenty-three tenets**. The elements define the structural components every deployment needs. The tenets define the properties that must hold — they are binary conditions, not goals.
 
 ### Four Elements
 
@@ -25,7 +25,7 @@ The framework is built on **four elements** and **twenty-three invariants**. The
 3. **Audit Log** — A complete, tamper-evident record written by the mediation layer, not by the agent.
 4. **Human Override** — The irrevocable ability of a human to observe, intervene, override, and terminate any agent.
 
-### Six Core Invariants
+### Six Core Tenets
 
 1. **Constraints are external and inviolable.** Enforcement machinery must never run inside the agent's isolation boundary.
 2. **Every action leaves a trace.** Logs are written by the mediation layer, not by the agent.
@@ -34,7 +34,7 @@ The framework is built on **four elements** and **twenty-three invariants**. The
 5. **Superego is operator-owned and read-only.** Policy and guardrail rules belong in the Superego layer.
 6. **Each enforcement layer has its own isolation boundary.** Don't collapse enforcement layers.
 
-The framework defines [17 additional invariants](framework/ASK-Invariant-Addendum.md) covering constraint lifecycle, halt governance, delegation, multi-agent coordination, and principal management.
+The framework defines [17 additional tenets](framework/ASK-Tenet-Addendum.md) covering constraint lifecycle, halt governance, delegation, multi-agent coordination, and principal management.
 
 ## Adoption Model
 
@@ -42,34 +42,34 @@ ASK is designed to be adopted incrementally by any organization building or oper
 
 ### ASK-Compliant
 
-All twenty-three invariants hold. The four elements are implemented. Enforcement is external to the agent, mediation is complete, audit trails are tamper-evident, and human override is preserved. The implementation can use any technology stack — containers, VMs, serverless, service mesh — as long as the invariants are satisfied.
+All twenty-three tenets hold. The four elements are implemented. Enforcement is external to the agent, mediation is complete, audit trails are tamper-evident, and human override is preserved. The implementation can use any technology stack — containers, VMs, serverless, service mesh — as long as the tenets are satisfied.
 
 A vendor claiming ASK compliance is making a verifiable, auditable claim: *our agentic product enforces external constraints, produces tamper-proof audit trails, mediates all external access, follows least privilege, keeps policy operator-owned, and maintains isolation between enforcement layers.*
 
 ### ASK-Aligned
 
-The architecture follows ASK principles and satisfies the core invariants, with documented exceptions. For example, a multi-tenant SaaS product might share a mediation layer across tenants rather than running one per agent. The exceptions are explicit, justified, and the residual risk is acknowledged.
+The architecture follows ASK principles and satisfies the core tenets, with documented exceptions. For example, a multi-tenant SaaS product might share a mediation layer across tenants rather than running one per agent. The exceptions are explicit, justified, and the residual risk is acknowledged.
 
 ### ASK-Informed
 
-The organization uses ASK's threat model, invariants, and architectural patterns as a reference when designing their own agent security approach. They may not implement every invariant but they've evaluated each one and made deliberate decisions.
+The organization uses ASK's threat model, tenets, and architectural patterns as a reference when designing their own agent security approach. They may not implement every tenet but they've evaluated each one and made deliberate decisions.
 
 ## What Makes ASK Different
 
 **Architecturally concrete.** ASK doesn't say "ensure appropriate oversight." It says "the mediation layer runs in a separate isolation boundary, the agent cannot reach the audit log, policy is a read-only mount." That's something an engineer can build against and an auditor can verify.
 
-**Principle-based, not implementation-prescriptive.** The invariants say *what must be true*, not *how to build it*. "Every action leaves a trace" doesn't mandate a specific logging stack. "Mediation is complete" doesn't mandate Docker. Each vendor implements with their own technology stack. The invariant holds regardless.
+**Principle-based, not implementation-prescriptive.** The tenets say *what must be true*, not *how to build it*. "Every action leaves a trace" doesn't mandate a specific logging stack. "Mediation is complete" doesn't mandate Docker. Each vendor implements with their own technology stack. The tenet holds regardless.
 
-**Scale-independent.** The same invariants apply whether you're running one agent or ten thousand. The framework scales from a single container on a laptop to an enterprise fleet — the principles don't change, only the implementation machinery.
+**Scale-independent.** The same tenets apply whether you're running one agent or ten thousand. The framework scales from a single container on a laptop to an enterprise fleet — the principles don't change, only the implementation machinery.
 
-**Auditable.** The invariants produce verifiable claims. "Does the agent have write access to audit logs? No? Then invariant 2 holds." Compliance can be tested, not just asserted.
+**Auditable.** The tenets produce verifiable claims. "Does the agent have write access to audit logs? No? Then tenet 2 holds." Compliance can be tested, not just asserted.
 
 ## Reading Guide
 
 ### New to ASK? Start here:
 
-1. **[ASK-Framework.md](framework/ASK-Framework.md)** — The foundation. Four elements, twenty-three invariants, trust spectrum, policy model, principal model, agent lifecycle.
-2. **[ASK-Invariant-Addendum.md](framework/ASK-Invariant-Addendum.md)** — Deep dive on invariants 7-23. Complete invariant reference table.
+1. **[ASK-Framework.md](framework/ASK-Framework.md)** — The foundation. Four elements, twenty-three tenets, trust spectrum, policy model, principal model, agent lifecycle.
+2. **[ASK-Tenet-Addendum.md](framework/ASK-Tenet-Addendum.md)** — Deep dive on tenets 7-23. Complete tenet reference table.
 3. **[Agent-Mind-Specification.md](framework/Agent-Mind-Specification.md)** — What an agent is made of: Mind/Body/Workspace decomposition and the Superego/Ego/Id cognitive layer model.
 4. **[Threat-Model.md](architecture/Threat-Model.md)** — What we're defending against and why each control exists.
 
@@ -92,8 +92,8 @@ The organization uses ASK's threat model, invariants, and architectural patterns
 ├── README.md                               ← You are here
 │
 ├── framework/                              Core theory
-│   ├── ASK-Framework.md                    Four elements, 23 invariants, trust spectrum
-│   ├── ASK-Invariant-Addendum.md           Invariants 7-23, complete reference
+│   ├── ASK-Framework.md                    Four elements, 23 tenets, trust spectrum
+│   ├── ASK-Tenet-Addendum.md               Tenets 7-23, complete reference
 │   ├── Agent-Mind-Specification.md         Mind/Body/Workspace + Superego/Ego/Id
 │   └── ASK-Topology-Addendum.md            Edge-to-center placement patterns
 │
@@ -121,7 +121,7 @@ The organization uses ASK's threat model, invariants, and architectural patterns
 
 ## Status
 
-This is a working framework — complete enough to build against, open enough for community input. The invariants are stable. The architecture documents describe concrete enforcement mechanisms. Known gaps are documented in [Limitations.md](reference/Limitations.md).
+This is a working framework — complete enough to build against, open enough for community input. The tenets are stable. The architecture documents describe concrete enforcement mechanisms. Known gaps are documented in [Limitations.md](reference/Limitations.md).
 
 ## Contributing
 
