@@ -12,17 +12,17 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 **Principle-based, not implementation-prescriptive.** The tenets say *what must be true*, not *how to build it*. Any technology stack that satisfies the tenets is a valid ASK deployment.
 
-**Scale-independent.** The same 23 tenets apply whether you're running one agent or ten thousand — from a single container on a laptop to an enterprise fleet.
+**Scale-independent.** The same tenets apply whether you're running one agent or ten thousand — from a single container on a laptop to an enterprise fleet.
 
 ---
 
 ## Reading paths
 
 **Understand the framework theory**
-→ [FRAMEWORK.md](FRAMEWORK.md) — Four elements, cognitive model, all 23 tenets, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
+→ [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, tenets, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
 
 **Understand the technical architecture**
-→ [ARCHITECTURE.md](ARCHITECTURE.md) — Threat model, XPIA kill chain, six enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
+→ [ARCHITECTURE.md](ARCHITECTURE.md) — Threat model, XPIA kill chain, enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
 
 **Feed context to an agent building ASK systems**
 → [AGENT-CONTEXT.md](AGENT-CONTEXT.md) — Structured for system prompt injection. Gives an AI agent the operational knowledge to design and review ASK-compliant architectures.
@@ -54,7 +54,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ## Adoption levels
 
-**ASK-Compliant** — All 23 tenets hold. A verifiable, auditable claim.
+**ASK-Compliant** — All tenets hold. A verifiable, auditable claim.
 
 **ASK-Aligned** — Follows ASK principles with documented exceptions. Exceptions are explicit, justified, and residual risk acknowledged.
 

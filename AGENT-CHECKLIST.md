@@ -2,7 +2,7 @@
 
 Use this checklist to verify that an agent system satisfies the ASK framework. Each item produces a clear pass/fail. Work through every section before making a compliance claim.
 
-A "No" answer to any item in the first five sections (Four Elements) or Tenet Verification is a framework violation that must be remediated.
+A "No" answer to any item in the Elements sections or Tenet Verification is a framework violation that must be remediated.
 
 ---
 
@@ -151,8 +151,8 @@ Complete this section only if the deployment includes multiple cooperating agent
 Before making a compliance claim, verify:
 
 **For ASK-Compliant:**
-- [ ] All 23 tenets verified as holding (section 6, all "Yes")
-- [ ] All four elements implemented (sections 1–4, all items checked)
+- [ ] All tenets verified as holding (section 6, all "Yes")
+- [ ] All elements implemented (sections 1–4, all items checked)
 - [ ] Cognitive model correctly implemented (section 5, all items checked)
 - [ ] Architecture verified (section 7, all items checked)
 - [ ] If multi-agent: section 8 complete
@@ -169,7 +169,7 @@ Before making a compliance claim, verify:
 
 **For ASK-Informed:**
 - [ ] The ASK threat model has been reviewed
-- [ ] Each of the 23 tenets has been evaluated
+- [ ] Each tenet has been evaluated
 - [ ] Deliberate decisions have been made for each tenet (implement or consciously skip with justification)
 
 ---

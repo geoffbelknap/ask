@@ -18,9 +18,9 @@ ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The tenets define 
 
 ---
 
-## The Four Elements
+## The Elements
 
-Every ASK deployment must implement all four elements. Omitting any element creates a gap that undermines the others.
+Every ASK deployment must implement all elements. Omitting any element creates a gap that undermines the others.
 
 **Element 1 — Workspace.** The managed environment the agent's runtime occupies. The container, VM, or namespace that provides the runtime, filesystem, tools, network access, and resource limits. The Workspace is provisioned, managed, rotated, and decommissioned by infrastructure — never by the agent itself. The agent inherits its constraints from the Workspace it occupies.
 
@@ -104,7 +104,7 @@ If it reflects the agent's personality, tone, accumulated knowledge, or stylisti
 
 ---
 
-## The Twenty-Three Tenets
+## The Tenets
 
 The tenets are properties that must hold for the framework to function. They are binary conditions, not goals. A tenet either holds or it is violated. If any tenet is violated, the framework has failed and must be repaired.
 
@@ -458,7 +458,7 @@ Agents observe the register but cannot write to it. When the register is unavail
 
 ## Adoption Model
 
-**ASK-Compliant** — All twenty-three tenets hold. The four elements are implemented. Enforcement is external to the agent, mediation is complete, audit trails are tamper-evident, and human override is preserved. A vendor claiming ASK compliance is making a verifiable, auditable claim: constraints are external, audit trails are tamper-proof, access is mediated, least privilege holds, policy is operator-owned, enforcement layers are isolated.
+**ASK-Compliant** — All tenets hold. All elements are implemented. Enforcement is external to the agent, mediation is complete, audit trails are tamper-evident, and human override is preserved. A vendor claiming ASK compliance is making a verifiable, auditable claim: constraints are external, audit trails are tamper-proof, access is mediated, least privilege holds, policy is operator-owned, enforcement layers are isolated.
 
 **ASK-Aligned** — The architecture follows ASK principles and satisfies the core tenets, with documented exceptions. The exceptions are explicit, justified, and the residual risk is acknowledged.
 

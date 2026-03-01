@@ -28,7 +28,7 @@ The irrevocable ability of a human to observe, intervene, override, and terminat
 
 ---
 
-## The 23 Tenets
+## The Tenets
 
 These are binary conditions. Each one either holds or it is violated. Design and review every decision against this list.
 
@@ -234,7 +234,7 @@ These patterns always indicate a framework violation. If you see them in a desig
 
 ## Quick Reference: ASK Compliance Claims
 
-**ASK-Compliant** — All 23 tenets hold. Four elements implemented. Enforcement is external, mediation is complete, audit trails are tamper-evident, human override is preserved. This is a verifiable, auditable claim.
+**ASK-Compliant** — All tenets hold. All elements implemented. Enforcement is external, mediation is complete, audit trails are tamper-evident, human override is preserved. This is a verifiable, auditable claim.
 
 **ASK-Aligned** — Follows ASK principles, satisfies core tenets, with documented exceptions. Exceptions are explicit, justified, and residual risk acknowledged.
 
