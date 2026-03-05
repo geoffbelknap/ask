@@ -231,6 +231,14 @@ Layer 7: Continuous Monitoring
 
 **Boundary 3 — Credential isolation.** Each component holds only the credentials it needs. The agent holds a scoped token (not real API keys) for its granted services and a proxy auth token for the enforcer. The enforcer holds the LLM proxy key and real service credentials for this agent's grants. The LLM proxy holds all provider API keys, the database credential, and the guardrail configuration. Real service API keys are stored in infrastructure secrets on the host — not in any container the agent can reach.
 
+### Mediation Network Security
+
+The mediation network — connecting the egress proxy, LLM proxy, enforcer, and database — is a trusted network in the single-host topology. On a single Docker host, this is a Docker bridge network with no external exposure, and the trust assumption is reasonable.
+
+At enterprise scale (Scale 3), where enforcement components may span hosts or clusters, this assumption must be revisited. The mediation network should be treated as an internal service mesh requiring: mutual TLS between enforcement components, network policy restricting traffic to known component-to-component paths, and component authentication (each enforcement component verifies the identity of peers it communicates with). A compromised component on the mediation network could impersonate another component — mTLS prevents this.
+
+The framework does not currently mandate specific mediation network security mechanisms because the appropriate mechanism depends on deployment topology. Single-host deployments can rely on Docker network isolation. Multi-host deployments should use a service mesh or equivalent. The requirement is that enforcement components authenticate each other — the mechanism is deployment-specific.
+
 ### The Scoped API Key
 
 Each agent gets a scoped key — not the master key. This limits blast radius if a key is compromised:

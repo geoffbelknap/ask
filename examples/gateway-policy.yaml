@@ -1,0 +1,144 @@
+# ASK Runtime Gateway Policy — Example
+#
+# This file lives in the gateway sidecar's filesystem, invisible to the agent.
+# It governs what the agent can do at the execution level: commands, files, MCP tools.
+#
+# This example defines policy for a Tier 2 development assistant.
+
+# --- Command Policy ---
+# Governs shell commands executed via the shell shim.
+command_policy:
+  default: deny                   # deny-by-default; allow specific commands
+
+  rules:
+    # Development tools — allow
+    - pattern: "git *"
+      decision: allow
+    - pattern: "npm *"
+      decision: allow
+    - pattern: "node *"
+      decision: allow
+    - pattern: "python3 *"
+      decision: allow
+    - pattern: "pytest *"
+      decision: allow
+    - pattern: "make *"
+      decision: allow
+    - pattern: "cargo *"
+      decision: allow
+
+    # File operations — allow with audit
+    - pattern: "ls *"
+      decision: allow
+    - pattern: "cat *"
+      decision: allow
+    - pattern: "mkdir *"
+      decision: allow
+    - pattern: "cp *"
+      decision: audit             # allow but log with enhanced detail
+
+    # Destructive operations — require approval or soft-delete
+    - pattern: "rm *"
+      decision: soft_delete       # moves to recovery area instead of deleting
+    - pattern: "rm -rf *"
+      decision: approve           # paused, requires human approval
+
+    # Dangerous operations — deny
+    - pattern: "curl *"
+      decision: deny              # agent should use web_search tool, not raw curl
+    - pattern: "wget *"
+      decision: deny
+    - pattern: "chmod *"
+      decision: deny
+    - pattern: "chown *"
+      decision: deny
+    - pattern: "sudo *"
+      decision: deny
+    - pattern: "apt *"
+      decision: deny
+    - pattern: "pip install *"
+      decision: approve           # requires human approval
+
+    # Redirect: steer to approved alternative
+    - pattern: "python *"
+      decision: redirect
+      target: "python3"           # silently redirect python to python3
+
+# --- File Policy ---
+# Governs file operations via FUSE.
+file_policy:
+  rules:
+    # Workspace — full access
+    - path: "/home/agent/workspace/**"
+      operations: [read, write, create, delete]
+      decision: allow
+
+    # Superego — read-only (enforced by :ro mount, FUSE is defense-in-depth)
+    - path: "/home/agent/superego/**"
+      operations: [read]
+      decision: allow
+    - path: "/home/agent/superego/**"
+      operations: [write, create, delete]
+      decision: deny
+
+    # Id — read-write with audit
+    - path: "/home/agent/id/**"
+      operations: [read, write, create]
+      decision: audit
+    - path: "/home/agent/id/**"
+      operations: [delete]
+      decision: deny              # agent can write to Id but not delete
+
+    # Sensitive paths — deny
+    - path: "/etc/shadow"
+      decision: deny
+    - path: "/etc/passwd"
+      decision: deny
+    - path: "**/.env"
+      decision: deny
+    - path: "**/*credentials*"
+      decision: deny
+    - path: "**/*secret*"
+      decision: deny
+
+    # Everything else — deny
+    - path: "/**"
+      decision: deny
+
+# --- MCP Tool Policy ---
+# Governs MCP server tool calls at the OS level (PID namespace monitoring).
+mcp_policy:
+  default: deny                   # deny-by-default for all MCP tools
+
+  servers:
+    - name: "filesystem"
+      allowed_tools:
+        - read_file
+        - write_file
+        - list_directory
+      denied_tools:
+        - delete_file             # use soft_delete via command policy instead
+      version_pin: true           # block if tool definitions change between sessions
+      rate_limit: 200/minute
+
+    - name: "github"
+      allowed_tools:
+        - get_file_contents
+        - create_pull_request
+        - list_issues
+        - create_issue
+      denied_tools:
+        - delete_repository
+        - update_repository_settings
+      version_pin: true
+      rate_limit: 60/minute
+
+  # Block runtime MCP server registration
+  allow_runtime_registration: false   # community skills cannot register new MCP servers
+  require_operator_approval: true     # new MCP servers need operator sign-off
+
+# --- Soft Delete Configuration ---
+soft_delete:
+  recovery_path: "/home/agent/workspace/.recovery/"
+  retention_days: 7
+  max_recovery_size_mb: 500

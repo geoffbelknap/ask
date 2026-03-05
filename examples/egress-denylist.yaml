@@ -1,0 +1,86 @@
+# ASK Egress Proxy Denylist — Example
+#
+# This file lives in the egress proxy container, invisible to the agent.
+# It defines domains the agent cannot reach. The agent cannot see or modify this list.
+#
+# Maintain this list actively — an incomplete denylist allows access to malicious
+# destinations. Consider supplementing with automated blocklist feeds.
+
+# --- Data Exfiltration Sites ---
+# Paste sites, file transfer, and data sharing services commonly used for exfiltration.
+denied_domains:
+  # Paste sites
+  - domain: "pastebin.com"
+    reason: "paste site — data exfiltration risk"
+  - domain: "paste.ee"
+    reason: "paste site — data exfiltration risk"
+  - domain: "dpaste.org"
+    reason: "paste site — data exfiltration risk"
+  - domain: "hastebin.com"
+    reason: "paste site — data exfiltration risk"
+  - domain: "ghostbin.com"
+    reason: "paste site — data exfiltration risk"
+  - domain: "rentry.co"
+    reason: "paste site — data exfiltration risk"
+
+  # File transfer services
+  - domain: "transfer.sh"
+    reason: "file transfer — data exfiltration risk"
+  - domain: "file.io"
+    reason: "file transfer — data exfiltration risk"
+  - domain: "0x0.st"
+    reason: "file transfer — data exfiltration risk"
+  - domain: "*.uploadfiles.io"
+    reason: "file transfer — data exfiltration risk"
+
+  # Tunneling and reverse proxy (C2 risk)
+  - domain: "ngrok.io"
+    reason: "tunneling — C2 risk"
+  - domain: "*.ngrok-free.app"
+    reason: "tunneling — C2 risk"
+  - domain: "*.trycloudflare.com"
+    reason: "tunneling — C2 risk"
+  - domain: "*.serveo.net"
+    reason: "tunneling — C2 risk"
+  - domain: "*.localhost.run"
+    reason: "tunneling — C2 risk"
+  - domain: "*.loca.lt"
+    reason: "tunneling — C2 risk"
+
+  # Webhook receivers (can be used for exfiltration)
+  - domain: "webhook.site"
+    reason: "webhook receiver — exfiltration risk"
+  - domain: "*.requestbin.com"
+    reason: "webhook receiver — exfiltration risk"
+  - domain: "*.pipedream.net"
+    reason: "webhook receiver — exfiltration risk"
+  - domain: "hookbin.com"
+    reason: "webhook receiver — exfiltration risk"
+
+  # URL shorteners (obscure destination)
+  - domain: "bit.ly"
+    reason: "URL shortener — destination obscured"
+  - domain: "tinyurl.com"
+    reason: "URL shortener — destination obscured"
+  - domain: "t.co"
+    reason: "URL shortener — destination obscured"
+
+  # DNS-over-HTTPS providers (bypass DNS controls)
+  - domain: "dns.google"
+    reason: "DoH — bypasses DNS controls"
+  - domain: "cloudflare-dns.com"
+    reason: "DoH — bypasses DNS controls"
+  - domain: "dns.quad9.net"
+    reason: "DoH — bypasses DNS controls"
+
+# --- Rate Limits ---
+rate_limits:
+  global: 500/minute              # all outbound requests combined
+  per_domain: 60/minute           # per individual domain
+
+# --- Size Limits ---
+max_response_body: 10MB           # prevents large data downloads
+
+# --- DNS Controls ---
+dns_resolver: "internal"          # blocks DNS tunneling exfiltration
+block_dns_over_https: true        # prevents DoH bypass of DNS controls

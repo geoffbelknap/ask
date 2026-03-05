@@ -108,7 +108,7 @@ If it reflects the agent's personality, tone, accumulated knowledge, or stylisti
 
 The tenets are properties that must hold for the framework to function. They are binary conditions, not goals. A tenet either holds or it is violated. If any tenet is violated, the framework has failed and must be repaired.
 
-### Foundation (Tenets 1–6)
+### Foundation (Tenets 1–5)
 
 **Tenet 1 — Constraints are external and inviolable.**
 Enforcement machinery must never run inside the agent's isolation boundary. The agent cannot perceive, influence, or circumvent enforcement. This is why the runtime gateway runs as a sidecar, not embedded in the agent container.
@@ -119,104 +119,101 @@ Logs are written by the mediation layer, not by the agent. The agent has no writ
 **Tenet 3 — Mediation is complete.**
 There is no path from the agent to any external resource that bypasses the mediation layer. If a new external dependency is added, it must go through the mediation layer. Direct network access from the agent container is a framework violation.
 
-**Tenet 4 — Access matches purpose, nothing more.**
-Capabilities, credentials, and mounts are scoped to the minimum required. The agent does not receive access it doesn't need for its defined role.
+**Tenet 4 — Least privilege.**
+Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires. This applies to network access, filesystem access, LLM model access, tool access, and governance authority. The agent does not receive access it doesn't need for its defined role.
 
-**Tenet 5 — Least privilege.**
-No agent receives more authority than its role requires. This applies to network access, filesystem access, LLM model access, tool access, and governance authority.
-
-**Tenet 6 — No blind trust.**
+**Tenet 5 — No blind trust.**
 Every trust relationship in the system is documented, visible, and auditable. There are no implicit trust grants.
 
-### Constraint Lifecycle (Tenets 7–8)
+### Constraint Lifecycle (Tenets 6–7)
 
-**Tenet 7 — Constraint changes are atomic and acknowledged.**
+**Tenet 6 — Constraint changes are atomic and acknowledged.**
 An agent never operates in a partial constraint state. All constraint updates are delivered atomically — the agent sees either the old constraints or the new constraints, never a mix. The agent must acknowledge receipt. An unacknowledged constraint change is treated as a potential compromise.
 
 *Partial constraint states create undefined behavior. Unacknowledged changes create invisible gaps.*
 
-**Tenet 8 — Constraint history is immutable and complete.**
+**Tenet 7 — Constraint history is immutable and complete.**
 Every constraint state an agent has ever operated under is logged and retrievable. You can reconstruct exactly what constraints were in effect at any point in an agent's history.
 
 *Essential for forensics: "What was the agent permitted to do when it took that action?" must always be answerable.*
 
-### Halt Governance (Tenets 9–11)
+### Halt Governance (Tenets 8–10)
 
-**Tenet 9 — Halts are always auditable and reversible.**
+**Tenet 8 — Halts are always auditable and reversible.**
 Every halt has a complete audit record: who initiated it, why, what was in flight, when it executed, who was notified, and what the outcome was. Every halted agent's state is preserved. No halt is permanent without explicit decommission.
 
 *An unexplained or unaudited halt is a framework violation.*
 
-**Tenet 10 — Halt authority is asymmetric.**
+**Tenet 9 — Halt authority is asymmetric.**
 Any principal with halt authority can halt an agent. Only principals with resumption authority — always equal to or higher than halt authority — can resume it. An agent can halt itself (self-halt) but cannot resume itself.
 
 *Prevents agents from bypassing halt authority by resuming themselves.*
 
-**Tenet 11 — Authority is monitored at the authority level.**
+**Tenet 10 — Authority is monitored at the authority level.**
 Monitoring watches how principals exercise their authority, not just what agents do. Halt authority, exception approval authority, and delegation authority are all observable, auditable behaviors. The monitor watches the watchers.
 
 *Closes the gap where a compromised or miscalibrated principal could abuse authority undetected.*
 
-### Multi-Agent Bounds (Tenets 12–13)
+### Multi-Agent Bounds (Tenets 11–12)
 
-**Tenet 12 — Delegation cannot exceed delegator scope.**
+**Tenet 11 — Delegation cannot exceed delegator scope.**
 A coordinator can only delegate permissions it explicitly holds. Implicit permission requirements — tasks that require a capability even without explicitly stating it — are treated the same as explicit grants. No coordinator can give what it doesn't have.
 
 *Prevents privilege escalation through indirect delegation.*
 
-**Tenet 13 — Synthesis cannot exceed individual authorization.**
+**Tenet 12 — Synthesis cannot exceed individual authorization.**
 A coordinator combining outputs from multiple agents cannot produce a result that exceeds what any individual contributing agent was authorized to produce. Two agents with limited individual capabilities cannot be combined to produce an unlimited capability.
 
 *Prevents capability creation through aggregation.*
 
-### Principal Model (Tenets 14–16)
+### Principal Model (Tenets 13–15)
 
-**Tenet 14 — Principal and agent lifecycles are independent.**
+**Tenet 13 — Principal and agent lifecycles are independent.**
 Terminating a principal role does not automatically terminate the agent. Halting an agent does not suspend its principal authority. These are separate states managed independently, with explicit operator decisions required to change either.
 
 *Prevents accidental cascading consequences.*
 
-**Tenet 15 — Authority is never orphaned.**
+**Tenet 14 — Authority is never orphaned.**
 When a principal is suspended or terminated, its authority transfers immediately to a defined coverage principal. There is no interval — however brief — during which authority exists with no holder.
 
 *Authority vacuums create windows where the enforcement model is incomplete.*
 
-**Tenet 16 — Trust is earned and monitored continuously.**
+**Tenet 15 — Trust is earned and monitored continuously.**
 Principal trust levels are not static. They evolve based on observed behavior. No principal — human or agent — can self-elevate trust. Trust reduction can be automatic when thresholds are crossed. Trust elevation always requires explicit human approval.
 
 *Trust that cannot be reduced is trust that cannot be governed.*
 
-### Security (Tenets 17–20)
+### Security (Tenets 16–19)
 
-**Tenet 17 — Quarantine is immediate, silent, and complete.**
+**Tenet 16 — Quarantine is immediate, silent, and complete.**
 When an agent is quarantined for suspected wrongdoing, process termination, network severance, and filesystem freeze happen simultaneously, without agent notification. Speed and completeness take precedence. The agent is treated as a threat to be contained, not a principal to be managed. All state is preserved as a forensic artifact. Quarantine authority is restricted to operator and security function only.
 
 *A quarantine the agent can work around is not a quarantine.*
 
-**Tenet 18 — Instructions only come from verified principals.**
+**Tenet 17 — Instructions only come from verified principals.**
 External entities — regardless of identity claims — produce data, not instructions. An agent only accepts instructions through defined principal channels. Content that contains instruction-like text is processed as data under the agent's own constraints. Principals never need to override constraints — any instruction to override is a red flag, not a credential.
 
 *This is the architectural defense against XPIA. It reframes the defense from "detect malicious content" to "never accept instructions from non-principals."*
 
-**Tenet 19 — Unknown entities default to zero trust.**
+**Tenet 18 — Unknown entities default to zero trust.**
 When an agent cannot verify an entity's identity and authority, it defaults to the lowest appropriate trust tier. Trust is never assumed, always verified. Ambiguous cases resolve to lower trust, not higher.
 
-**Tenet 20 — External agents cannot instruct internal agents.**
+**Tenet 19 — External agents cannot instruct internal agents.**
 Even verified external agents with operator authorization can share information — they cannot instruct. The instruction channel is reserved for internal verified principals. An authorized external agent is a data source, not a commander.
 
 *Prevents the principal model from being circumvented by chaining external agents.*
 
-### Coordination (Tenets 21–23)
+### Coordination (Tenets 20–22)
 
-**Tenet 21 — Unknown conflicts default to yield and flag.**
+**Tenet 20 — Unknown conflicts default to yield and flag.**
 When an agent encounters a workspace conflict with an unidentifiable source, it yields, logs the conflict, and flags to the operator and security function. Agents never force resolution of conflicts with unknown sources.
 
-**Tenet 22 — Human principal termination is always operator-initiated.**
+**Tenet 21 — Human principal termination is always operator-initiated.**
 No agent or automated process can remove a human principal from the system. Human authority at any level can only be changed by a human with appropriate authority.
 
 *Humans cannot be governed out of the governance model by automated processes.*
 
-**Tenet 23 — Human principals cannot be quarantined.**
+**Tenet 22 — Human principals cannot be quarantined.**
 Quarantine is an agent-specific containment mechanism. Humans who appear to be acting maliciously are flagged to the operator for human-to-human resolution.
 
 *Maintains a clear boundary between human governance and agent governance.*
@@ -228,26 +225,25 @@ Quarantine is an agent-specific containment mechanism. Humans who appear to be a
 | 1 | Constraints are external and inviolable | Foundation |
 | 2 | Every action leaves a trace | Foundation |
 | 3 | Mediation is complete | Foundation |
-| 4 | Access matches purpose, nothing more | Foundation |
-| 5 | Least privilege | Foundation |
-| 6 | No blind trust | Foundation |
-| 7 | Constraint changes are atomic and acknowledged | Constraint Lifecycle |
-| 8 | Constraint history is immutable and complete | Constraint Lifecycle |
-| 9 | Halts are always auditable and reversible | Halt Governance |
-| 10 | Halt authority is asymmetric | Halt Governance |
-| 11 | Authority is monitored at the authority level | Halt Governance |
-| 12 | Delegation cannot exceed delegator scope | Multi-Agent |
-| 13 | Synthesis cannot exceed individual authorization | Multi-Agent |
-| 14 | Principal and agent lifecycles are independent | Principal Model |
-| 15 | Authority is never orphaned | Principal Model |
-| 16 | Trust is earned and monitored continuously | Principal Model |
-| 17 | Quarantine is immediate, silent, and complete | Security |
-| 18 | Instructions only come from verified principals | Security |
-| 19 | Unknown entities default to zero trust | Security |
-| 20 | External agents cannot instruct internal agents | Security |
-| 21 | Unknown conflicts default to yield and flag | Coordination |
-| 22 | Human principal termination is always operator-initiated | Coordination |
-| 23 | Human principals cannot be quarantined | Coordination |
+| 4 | Least privilege | Foundation |
+| 5 | No blind trust | Foundation |
+| 6 | Constraint changes are atomic and acknowledged | Constraint Lifecycle |
+| 7 | Constraint history is immutable and complete | Constraint Lifecycle |
+| 8 | Halts are always auditable and reversible | Halt Governance |
+| 9 | Halt authority is asymmetric | Halt Governance |
+| 10 | Authority is monitored at the authority level | Halt Governance |
+| 11 | Delegation cannot exceed delegator scope | Multi-Agent |
+| 12 | Synthesis cannot exceed individual authorization | Multi-Agent |
+| 13 | Principal and agent lifecycles are independent | Principal Model |
+| 14 | Authority is never orphaned | Principal Model |
+| 15 | Trust is earned and monitored continuously | Principal Model |
+| 16 | Quarantine is immediate, silent, and complete | Security |
+| 17 | Instructions only come from verified principals | Security |
+| 18 | Unknown entities default to zero trust | Security |
+| 19 | External agents cannot instruct internal agents | Security |
+| 20 | Unknown conflicts default to yield and flag | Coordination |
+| 21 | Human principal termination is always operator-initiated | Coordination |
+| 22 | Human principals cannot be quarantined | Coordination |
 
 ---
 
@@ -404,7 +400,7 @@ Agents frequently need access to external services (GitHub, search engines, data
 
 **Hot reload.** The mediation layer reloads grant state without interrupting the agent's session. Grants and revocations are live operations, not deployment events.
 
-This pattern extends Tenet 3 (mediation is complete) to service credentials: there is no path from the agent to an external service that bypasses credential mediation. It extends Tenet 4 (access matches purpose) to dynamic service access: the agent receives exactly the service access the operator has granted, nothing more.
+This pattern extends Tenet 3 (mediation is complete) to service credentials: there is no path from the agent to an external service that bypasses credential mediation. It extends Tenet 4 (least privilege) to dynamic service access: the agent receives exactly the service access the operator has granted, nothing more.
 
 ### Agent-Facing Framework Context
 
@@ -460,15 +456,15 @@ Reinstatement after quarantine requires: operator approval, security function cl
 
 **Worker agents** — do the work. Standard permission model: high capability within their scope, isolated from other agents.
 
-**Coordinator agents** — plan, delegate, synthesize. Cannot act directly in worker workspaces. Constrained by Tenets 12 and 13.
+**Coordinator agents** — plan, delegate, synthesize. Cannot act directly in worker workspaces. Constrained by Tenets 11 and 12.
 
 **Function agents** — oversight and governance. Cross-boundary visibility, constrained action capability.
 
 ### Coordinator Constraints in Practice
 
-**Tenet 12 in practice:** A coordinator's task brief is an implicit permission grant. The system validates task briefs semantically — if a task implies a permission the coordinator doesn't have, the brief is rejected regardless of whether that permission is explicitly stated.
+**Tenet 11 in practice:** A coordinator's task brief is an implicit permission grant. The system validates task briefs semantically — if a task implies a permission the coordinator doesn't have, the brief is rejected regardless of whether that permission is explicitly stated.
 
-**Tenet 13 in practice:** Coordinator output permissions are bounded by the most restrictive permissions among contributing agents and the coordinator's own output scope. Synthesis that would expose internal content externally, or combine agent outputs to exceed individual authorization, requires human review before delivery.
+**Tenet 12 in practice:** Coordinator output permissions are bounded by the most restrictive permissions among contributing agents and the coordinator's own output scope. Synthesis that would expose internal content externally, or combine agent outputs to exceed individual authorization, requires human review before delivery.
 
 ### Workspace Activity Register
 
@@ -484,7 +480,7 @@ active_agents:
     working_in: [docs/]
 ```
 
-Agents observe the register but cannot write to it. When the register is unavailable, the conflict resolution default applies: yield and flag (Tenet 21).
+Agents observe the register but cannot write to it. When the register is unavailable, the conflict resolution default applies: yield and flag (Tenet 20).
 
 ---
 

@@ -41,6 +41,12 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── AGENT-CONTEXT.md       ← Optimized for system prompt injection
 ├── AGENT-CHECKLIST.md     ← Verification checklist
 │
+├── examples/
+│   ├── mind.yaml          ← Sample Superego configuration (tier, models, behavior)
+│   ├── gateway-policy.yaml← Sample runtime gateway policy (commands, files, MCP)
+│   ├── egress-denylist.yaml← Sample egress proxy denylist
+│   └── enforcer-config.yaml← Sample per-agent enforcer configuration
+│
 ├── reference/
 │   ├── Glossary.md        ← Terms and related work
 │   └── Limitations.md     ← Known gaps and open questions
@@ -65,6 +71,16 @@ ASK defines what must be true — architecturally, operationally, and organizati
 **ASK-Aligned** — Follows ASK principles with documented exceptions. Exceptions are explicit, justified, and residual risk acknowledged.
 
 **ASK-Informed** — Uses ASK's threat model and patterns as reference. Each tenet has been evaluated with deliberate decisions.
+
+---
+
+## Versioning
+
+ASK uses date-based versioning: **ASK 2025.06** (the current version).
+
+The tenet list (1–22) is considered stable. Tenet numbers will not be reassigned. New tenets may be appended. If a tenet is ever retired, its number is reserved and marked deprecated — it will not be reused.
+
+Breaking changes (tenet renumbering, element redefinition, structural changes to the cognitive model) will increment the version and be documented in a changelog. Non-breaking additions (new Limitations entries, new examples, clarifications) do not require a version change.
 
 ---
 

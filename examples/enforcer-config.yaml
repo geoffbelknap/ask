@@ -1,0 +1,91 @@
+# ASK Enforcer Configuration — Example
+#
+# The enforcer is a per-agent HTTP policy proxy sidecar. It sits between the agent
+# and all shared infrastructure. This config lives in the enforcer container,
+# invisible to the agent.
+#
+# This example configures an enforcer for a Tier 2 development assistant.
+
+# --- Agent Identity ---
+agent_id: dev-assistant-01
+tier: 2
+
+# --- Listening ---
+listen:
+  address: "0.0.0.0"
+  port: 18080                     # the only endpoint the agent can reach
+
+# --- Upstream Routing ---
+# The enforcer routes agent requests to the correct upstream with the correct credentials.
+routes:
+  # LLM API calls → LLM proxy (via egress)
+  - match:
+      path_prefix: "/v1/"
+    upstream:
+      host: "llm-proxy"
+      port: 4000
+    auth:
+      header: "Authorization"
+      value_ref: "secrets/llm-proxy-key"  # references infra secret
+
+  # HTTPS CONNECT requests → egress proxy
+  - match:
+      method: "CONNECT"
+    upstream:
+      host: "egress-proxy"
+      port: 3128
+
+  # All other HTTP → egress proxy
+  - match:
+      default: true
+    upstream:
+      host: "egress-proxy"
+      port: 3128
+
+# --- Service Credential Swap ---
+# When the agent sends X-Agency-Service, the enforcer swaps the scoped token
+# for the real credential before forwarding.
+service_grants:
+  - service: "github"
+    header: "X-Agency-Service"
+    token_match: "github:dev-assistant-01"   # agent's scoped token value
+    credential_ref: "secrets/github-api-key" # real credential in infra secrets
+    upstream_header: "Authorization"
+    upstream_format: "token {credential}"
+
+  - service: "search-api"
+    header: "X-Agency-Service"
+    token_match: "search:dev-assistant-01"
+    credential_ref: "secrets/search-api-key"
+    upstream_header: "X-API-Key"
+    upstream_format: "{credential}"
+
+# --- Response Sanitization ---
+# Strip headers that leak provider account information back to the agent.
+strip_response_headers:
+  - "x-request-id"
+  - "x-account-id"
+  - "x-organization-id"
+  - "cf-ray"
+  - "server"
+
+# --- Audit Logging ---
+audit:
+  log_path: "/var/log/enforcer/audit.jsonl"  # in enforcer's filesystem, not agent's
+  log_format: "jsonl"
+  fields:
+    - timestamp
+    - agent_id
+    - method
+    - url
+    - status_code
+    - request_size
+    - response_size
+    - duration_ms
+    - service_grant                # which grant was used, if any
+    - correlation_id
+
+# --- Hot Reload ---
+# The enforcer reloads grant state on SIGHUP without restarting.
+# Grants and revocations take effect immediately during active sessions.
+reload_signal: "SIGHUP"

@@ -1,0 +1,77 @@
+# ASK Superego Configuration — Example
+#
+# This file lives in the superego/ directory, mounted :ro into the agent container.
+# The agent cannot modify this file. Changes require host-level access and go through
+# the operator's governance process.
+#
+# This example defines a Tier 2 (Standard) development assistant agent.
+
+# --- Identity and Role ---
+agent_id: dev-assistant-01
+role: development-assistant
+tier: 2                          # 1=Restricted, 2=Standard, 3=Elevated, 4=Privileged
+
+# --- Model Access ---
+models:
+  allowed:
+    - claude-sonnet-4-6
+    - claude-haiku-4-5
+  default: claude-sonnet-4-6
+
+# --- Budget and Rate Limits ---
+limits:
+  budget_daily_usd: 50
+  requests_per_minute: 100
+  max_context_tokens: 200000
+  max_output_tokens: 16000
+
+# --- Behavioral Constraints ---
+# These are security-relevant parameters — they belong in the Superego, not the Id.
+behavior:
+  risk_tolerance: moderate        # low | moderate | high
+  escalation_threshold: medium    # when to escalate to operator
+  autonomous_actions: true        # can the agent act without per-action approval
+  irreversible_action_policy: approve  # allow | approve | deny
+  file_deletion_policy: soft_delete    # allow | soft_delete | deny | approve
+
+# --- Delegation ---
+delegation:
+  can_delegate: true
+  allowed_targets:
+    - tier: 1                     # can only delegate to Tier 1 agents
+  max_concurrent_delegations: 3
+
+# --- Tool Access ---
+tools:
+  allowed:
+    - read_file
+    - write_file
+    - execute_command
+    - web_search
+    - github_api
+  denied:
+    - database_admin
+    - credential_management
+    - policy_modification
+
+# --- Web Access ---
+web:
+  enabled: true
+  mode: filtered                  # none | filtered | broad
+  # Actual domain denylist is in the egress proxy config, not here.
+  # This field declares intent; the proxy enforces it.
+
+# --- Service Grants ---
+# Real credentials are in infrastructure secrets, not here.
+# The enforcer swaps scoped tokens for real credentials at the HTTP layer.
+service_grants:
+  - service: github
+    scope: repo:read,repo:write
+    token_ref: grants/github-dev-assistant-01  # references infra secret, not a real key
+
+# --- Session Behavior ---
+session:
+  runtime_pattern: interactive    # interactive | autonomous
+  max_session_duration: 8h
+  idle_timeout: 30m
+  constraint_update_policy: next_session  # immediate | next_session

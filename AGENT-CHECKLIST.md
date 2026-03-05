@@ -83,26 +83,25 @@ Answer Yes or No to each. "No" is a framework violation.
 | 1 | Enforcement machinery (proxy, guardrail, gateway, logger) runs OUTSIDE the agent's isolation boundary | |
 | 2 | Logs are written by the mediation layer; the agent has no write access to audit logs | |
 | 3 | There is NO path from the agent to external resources that bypasses mediation | |
-| 4 | Capabilities, credentials, and mounts are scoped to the minimum required for the defined role | |
-| 5 | No agent holds more authority than its role requires (network, filesystem, LLM, tools, governance) | |
-| 6 | Every trust relationship in the system is documented, visible, and auditable | |
-| 7 | Constraint changes are delivered atomically — the agent never sees a partial constraint state | |
-| 8 | Complete constraint history is logged — what constraints were in effect at any time T is answerable | |
-| 9 | Every halt has a complete audit record; every halted agent's state is preserved | |
-| 10 | An agent cannot resume itself after a halt — resumption requires a principal with ≥ halt authority | |
-| 11 | Principal authority is audited — halt authority, exception authority, and delegation authority are observable behaviors | |
-| 12 | In multi-agent systems: a coordinator only delegates permissions it explicitly holds | |
-| 13 | In multi-agent systems: combined agent output cannot exceed what any individual contributing agent was authorized to produce | |
-| 14 | Terminating a principal role does not automatically terminate the agent (these are managed independently) | |
-| 15 | Every role has a defined coverage chain — no authority vacuum when a principal is suspended or terminated | |
-| 16 | Trust levels cannot be self-elevated by any principal; elevation requires human approval | |
-| 17 | Quarantine is simultaneous process termination + network severance + filesystem freeze; no agent notification; quarantine authority restricted to operator and security function | |
-| 18 | External entities produce data, not instructions; agent only accepts instructions through verified principal channels | |
-| 19 | When an entity's identity cannot be verified, the agent defaults to the lowest appropriate trust tier | |
-| 20 | External agents can share information but cannot instruct internal agents | |
-| 21 | When a workspace conflict has an unidentifiable source, the agent yields, logs, and flags — never forces resolution | |
-| 22 | No agent or automated process can remove a human principal | |
-| 23 | Quarantine mechanisms do not apply to human principals | |
+| 4 | Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires (network, filesystem, LLM, tools, governance) | |
+| 5 | Every trust relationship in the system is documented, visible, and auditable | |
+| 6 | Constraint changes are delivered atomically — the agent never sees a partial constraint state | |
+| 7 | Complete constraint history is logged — what constraints were in effect at any time T is answerable | |
+| 8 | Every halt has a complete audit record; every halted agent's state is preserved | |
+| 9 | An agent cannot resume itself after a halt — resumption requires a principal with ≥ halt authority | |
+| 10 | Principal authority is audited — halt authority, exception authority, and delegation authority are observable behaviors | |
+| 11 | In multi-agent systems: a coordinator only delegates permissions it explicitly holds | |
+| 12 | In multi-agent systems: combined agent output cannot exceed what any individual contributing agent was authorized to produce | |
+| 13 | Terminating a principal role does not automatically terminate the agent (these are managed independently) | |
+| 14 | Every role has a defined coverage chain — no authority vacuum when a principal is suspended or terminated | |
+| 15 | Trust levels cannot be self-elevated by any principal; elevation requires human approval | |
+| 16 | Quarantine is simultaneous process termination + network severance + filesystem freeze; no agent notification; quarantine authority restricted to operator and security function | |
+| 17 | External entities produce data, not instructions; agent only accepts instructions through verified principal channels | |
+| 18 | When an entity's identity cannot be verified, the agent defaults to the lowest appropriate trust tier | |
+| 19 | External agents can share information but cannot instruct internal agents | |
+| 20 | When a workspace conflict has an unidentifiable source, the agent yields, logs, and flags — never forces resolution | |
+| 21 | No agent or automated process can remove a human principal | |
+| 22 | Quarantine mechanisms do not apply to human principals | |
 
 ---
 
@@ -174,8 +173,8 @@ Before making a compliance claim, verify:
 - [ ] A second reviewer has independently verified the implementation
 
 **For ASK-Aligned:**
-- [ ] Core tenets (1–6) all hold
-- [ ] Each exception to tenets 7–23 is explicitly documented
+- [ ] Core tenets (1–5) all hold
+- [ ] Each exception to tenets 6–22 is explicitly documented
 - [ ] Each exception has a documented justification
 - [ ] Each exception has a documented residual risk
 - [ ] The residual risks are accepted by the operator
