@@ -124,6 +124,7 @@ Answer Yes or No to each. "No" is a framework violation.
 - [ ] A runtime gateway runs in a separate container sharing only the PID namespace with the agent
 - [ ] Shell commands are mediated via a shell shim (the agent's `/bin/bash` routes through the gateway)
 - [ ] File operations are mediated via FUSE (the agent accesses workspace through a FUSE mount)
+- [ ] Filesystem access is restricted via Landlock or equivalent kernel-level sandboxing
 - [ ] The gateway's policy files, configuration, and audit logs are in a filesystem the agent cannot access
 - [ ] Per-command allow/deny/approve policies are defined and tested
 

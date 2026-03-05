@@ -268,9 +268,9 @@ Trust level is not a configuration parameter — it is an emergent property of t
 
 The trust spectrum has a concrete architectural dimension: the agent's runtime pattern. Two distinct patterns exist, each with different trust implications:
 
-**Interactive runtime.** A human is present in the loop. The agent operates through a session where a human provides input, reviews output, and can intervene at each step. The human's presence is a live enforcement mechanism — not just architectural, but operational. Interactive runtimes naturally operate at the Assisted or Supervised trust levels.
+**Interactive runtime.** A human is present in the loop. The agent operates through a session — typically a shell or TUI — where a human provides input, reviews output, and can intervene at each step. The human's presence is a live enforcement mechanism — not just architectural, but operational. Interactive runtimes naturally operate at the Assisted or Supervised trust levels.
 
-**Autonomous runtime.** The agent operates a self-directed loop: receive a task brief, reason, act, observe results, repeat. No human is present in the operational loop. All enforcement comes from the mediation layer, the runtime gateway, and the policy engine. Autonomous runtimes operate at the Autonomous or Delegated trust levels.
+**Autonomous runtime.** The agent operates a self-directed loop: receive a task brief, reason, act, observe results, repeat. No human is present in the operational loop. The agent has access to built-in tools (file operations, command execution, search) and optionally MCP servers and skills, executing through the same mediated infrastructure as an interactive agent. All enforcement comes from the mediation layer, the runtime gateway, and the policy engine. Autonomous runtimes operate at the Autonomous or Delegated trust levels.
 
 The same agent — same Mind, same Superego, same constraints — can run in either pattern. The enforcement architecture is identical. What changes is the operational trust model: interactive runtimes benefit from human review as an additional enforcement layer; autonomous runtimes depend entirely on architectural enforcement. This distinction matters for policy: an autonomous agent should have tighter constraints than an interactive one performing the same role, because it lacks the human review safety net.
 

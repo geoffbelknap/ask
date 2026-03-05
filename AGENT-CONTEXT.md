@@ -111,7 +111,7 @@ id/             ← :rw mount, agent-owned, Sentinel-audited
 
 ---
 
-## Architectural Invariants
+## Architectural Rules
 
 Non-negotiable implementation rules. Every design decision MUST comply with all of these.
 

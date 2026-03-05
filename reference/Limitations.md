@@ -1,12 +1,12 @@
 # ASK — Limitations and Open Questions
 
-This architecture significantly raises the cost and complexity of attacking an AI agent, but it does not make attacks impossible. Honest accounting of limitations, updated with findings from reference implementation work.
+This architecture significantly raises the cost and complexity of attacking an AI agent, but it does not make attacks impossible. Honest accounting of limitations, updated with findings from the Agency reference implementation.
 
 *Part of the ASK operating framework.*
 
 ---
 
-**The scoped key still grants LLM access.** A compromised agent with a scoped key can still make LLM calls within its allowed models and budget. The guardrails will screen those calls, but guardrails are probabilistic — sophisticated attacks may evade detection. The spend cap limits the damage but doesn't eliminate it. Per-agent scoped keys with model restrictions and budget caps are implementable — the pattern is proven. Key rotation policy (TTLs, automated rotation) remains a future enhancement.
+**The scoped key still grants LLM access.** A compromised agent with a scoped key can still make LLM calls within its allowed models and budget. The guardrails will screen those calls, but guardrails are probabilistic — sophisticated attacks may evade detection. The spend cap limits the damage but doesn't eliminate it. Per-agent scoped keys with model restrictions and budget caps are proven in the reference implementation. Key rotation policy (TTLs, automated rotation) remains a future enhancement.
 
 **Same-host container isolation is not VM-level isolation.** Containers share the host kernel. A kernel exploit could break out of the container boundary. For the highest-security deployments, consider running agent containers in lightweight VMs (Firecracker, gVisor) instead of standard containers.
 
@@ -20,25 +20,25 @@ This architecture significantly raises the cost and complexity of attacking an A
 
 **Monitoring depends on the LLM proxy.** When the LLM proxy is down, monitoring agents cannot perform LLM-assisted analysis of logs. Basic compliance checks (which don't use the LLM) continue, but deeper analysis capability is lost during outages.
 
-**Correlation IDs across enforcement layers are difficult.** Tying egress proxy events to LLM proxy events to enforcer events to runtime gateway events requires shared correlation IDs. Without them, kill chain reconstruction relies on timestamp and domain matching — less precise than explicit correlation.
+**Correlation IDs across enforcement layers are difficult.** Tying egress proxy events to LLM proxy events to enforcer events to runtime gateway events requires shared correlation IDs. Without them, kill chain reconstruction relies on timestamp and domain matching — less precise than explicit correlation. The reference implementation uses per-agent log namespacing which helps, but true end-to-end correlation across all layers remains an open problem.
 
 **Multi-agent delegation is not proven at scale.** The delegation bus described in the multi-agent architecture is a design pattern. The security model for inter-agent communication (authorization validation, response scanning, privilege scoping) is sound in theory but lacks large-scale validation.
 
 **Skill trust remains an open problem.** The architecture constrains malicious skill behavior through network and tool controls, but it cannot prevent a skill from subtly manipulating the agent's context within the container. Full skill sandboxing (running each skill in its own sub-container) is the long-term answer but adds significant operational complexity.
 
-**FUSE workspace mediation has a monitor/enforce gap.** FUSE-based file mediation can intercept all file operations, but switching from monitoring (log-only) to enforcement (block/redirect) requires careful verification that legitimate file operations are not disrupted. Mount propagation between sidecar and agent containers adds complexity. Fallback options include seccomp-based file monitoring or deferred FUSE activation.
+**Execution-layer enforcement is optional in early deployments.** The runtime gateway sidecar (FUSE, seccomp, Landlock) provides deep execution-layer enforcement, but it adds operational complexity. In the reference implementation, the gateway is started as an optional dependency — if it fails, the agent proceeds with network-level enforcement only (enforcer, egress proxy, LLM proxy). This is an intentional trade-off for early deployments: all network-level tenets still hold, but execution-layer visibility (file policy, command policy) is degraded. Production deployments should require the gateway.
 
-**MCP tool policy enforcement depends on runtime support.** Gateway-level MCP policy (tool allowlists, version pinning, rate limits, skill registration controls) requires the runtime gateway to intercept MCP JSON-RPC messages at the process level. The policy can be written declaratively, but enforcement requires the gateway runtime to support MCP protocol interception.
+**MCP tool policy enforcement depends on runtime support.** Gateway-level MCP policy (tool allowlists, version pinning, rate limits, skill registration controls) requires the runtime gateway to intercept MCP JSON-RPC messages at the process level. The policy can be written declaratively, but enforcement requires the gateway runtime to support MCP protocol interception. The reference implementation includes MCP mediation in the gateway sidecar, but this is only active when the gateway is running.
 
 **MCP version pinning is a best-effort defense.** Version pinning detects tool definition changes between sessions, but it cannot detect behavioral changes within unchanged tool definitions. An MCP server could change its internal behavior without modifying its advertised tool schemas. This is the same limitation as application allowlisting — you can verify what's installed, but not what it does at runtime.
 
 **Large MCP tool surfaces are hard to govern.** MCP hub skills that expose hundreds or thousands of tools create governance challenges. Even with gateway MCP policy, the operator must manually enumerate which servers and tools to allow. A permissive MCP policy with a large tool surface effectively negates the tool allowlist.
 
-**Service credential rotation is not automated.** The enforcer hot-reload pattern (grant/revoke with live reload) handles credential lifecycle at the access level, but automated rotation of the underlying service API keys (TTL-based expiry, scheduled rotation) is an operational enhancement not yet addressed by the framework.
+**Service credential rotation is not automated.** The enforcer hot-reload pattern (grant/revoke with live reload) is proven in the reference implementation — grants and revocations take effect immediately via SIGHUP without agent restart. However, automated rotation of the underlying service API keys (TTL-based expiry, scheduled rotation) is an operational enhancement not yet addressed by the framework.
 
 **This architecture does not address model-level attacks.** If the LLM itself is compromised or adversarially fine-tuned, the guardrails may not detect the manipulation because it originates from the model rather than from injected content. This is a different threat class that requires model supply chain security, not runtime controls.
 
-**Interactive and autonomous runtimes have different risk profiles.** The same enforcement architecture applies to both, but autonomous runtimes lack the human review safety net that interactive runtimes provide. The framework describes this distinction but does not yet define concrete policy differences (e.g., tighter default constraints for autonomous agents).
+**Interactive and autonomous runtimes have different risk profiles.** The same enforcement architecture applies to both, but autonomous runtimes lack the human review safety net that interactive runtimes provide. The reference implementation supports both patterns — an interactive shell-based runtime and an autonomous task-loop runtime — selected per agent at configuration time. The framework describes this distinction and recommends tighter constraints for autonomous agents, but concrete policy differences (e.g., mandatory approval thresholds, reduced tool allowlists) are left to the operator.
 
 ---
 

@@ -52,6 +52,12 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ---
 
+## Reference implementation
+
+[Agency](https://github.com/geoffbelknap/agency) is the reference implementation of ASK. It implements the single-agent architecture with all core enforcement layers: network isolation, egress proxy, LLM proxy with XPIA guardrails, per-agent enforcer sidecar, container hardening, runtime gateway, and continuous monitoring. Multi-agent coordination, the principal model, and trust evolution are designed but not yet implemented.
+
+---
+
 ## Adoption levels
 
 **ASK-Compliant** — All tenets hold. A verifiable, auditable claim.

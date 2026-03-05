@@ -114,7 +114,7 @@ Layer 5: Container Hardening
   Read-only root filesystem, dropped capabilities, non-root user, resource limits
          ↓
 Layer 6: Runtime Gateway (sidecar)
-  Command policy, file policy, MCP tool policy, audit via FUSE/seccomp/shell shim
+  Command policy, file policy, MCP tool policy, audit via FUSE/seccomp/Landlock/shell shim
   Runs in separate container sharing only PID namespace with agent
          ↓
 Layer 7: Continuous Monitoring (Sentinel)
@@ -179,6 +179,7 @@ Layer 7: Continuous Monitoring (Sentinel)
 │  │  │  │ agentsh (PID 1)     │  │ Read-only root FS       │ │    │  │
 │  │  │  │ Policy engine       │  │ No caps, non-root       │ │    │  │
 │  │  │  │ FUSE provider       │  │ 2GB / 1 CPU             │ │    │  │
+│  │  │  │ Landlock sandbox    │  │                         │ │    │  │
 │  │  │  │ Seccomp supervisor  │  │                         │ │    │  │
 │  │  │  │                     │  │ Commands → shell shim   │ │    │  │
 │  │  │  │ Shell policy    ◄───┼──┤ Files → FUSE mount      │ │    │  │
@@ -320,7 +321,8 @@ The gateway runs as a **separate container** from the agent, sharing only the PI
 │  │ agentsh server (PID 1) │   │ Runtime (child of gateway)   │   │
 │  │ Policy engine          │   │                              │   │
 │  │ FUSE provider          │   │ Shell: /bin/bash → shim      │   │
-│  │ Seccomp supervisor     │   │ Files: workspace via FUSE    │   │
+│  │ Landlock sandbox       │   │ Files: workspace via FUSE    │   │
+│  │ Seccomp supervisor     │   │                              │   │
 │  │                        │   │ Net: via seccomp mediation   │   │
 │  │ Owns (agent can't see):│   │                              │   │
 │  │  • Policy YAML files   │   │ Cannot see:                  │   │
@@ -336,15 +338,16 @@ The gateway runs as a **separate container** from the agent, sharing only the PI
 
 **Why sidecar, not embedded:** The framework's core design principle is that the agent is compromisable at any time. Enforcement machinery must not share an isolation boundary with what it enforces. If the gateway ran inside the agent's container, the agent could potentially discover gateway binaries, read policy files, or find writable paths that affect gateway behavior. In the sidecar model, the gateway's filesystem is as inaccessible to the agent as the egress proxy's configuration.
 
-### Three Enforcement Mechanisms
+### Enforcement Mechanisms
 
 | Mechanism | What It Mediates | How |
 |---|---|---|
 | **Shell shim** | Command execution | `/bin/bash` replaced with shim binary; policy evaluation runs in gateway container |
 | **FUSE filesystem** | All file operations (open, read, write, create, delete) | FUSE provider runs in gateway; agent sees FUSE mount |
 | **Seccomp user-notify** | Network connections, signals, process control | Filters set by gateway (parent) on agent (child); agent cannot remove them |
+| **Landlock** | Filesystem access restriction | Kernel-level filesystem sandboxing as a defense-in-depth complement to FUSE |
 
-All three mechanisms provide **enforced** mediation — the agent cannot bypass them without a kernel exploit, which is the same trust boundary the container runtime itself relies on.
+All four mechanisms provide **enforced** mediation — the agent cannot bypass them without a kernel exploit, which is the same trust boundary the container runtime itself relies on.
 
 ### Six Policy Decisions
 
@@ -378,6 +381,7 @@ MCP servers are child processes that communicate via JSON-RPC 2.0 over stdio. Th
 | Access workspace without FUSE | Underlying storage in gateway's mount namespace |
 | Read audit logs | Audit log volume mounted only in gateway and Sentinel |
 | Disable seccomp filters | Set by parent process; `no-new-privileges` prevents modification |
+| Access files outside Landlock scope | Kernel-level filesystem restrictions enforced independently of FUSE |
 
 ---
 
