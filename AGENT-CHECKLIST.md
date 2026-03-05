@@ -31,6 +31,10 @@ A "No" answer to any item in the Elements sections or Tenet Verification is a fr
 - [ ] The mediation layer runs pre_call scanning on input before it reaches the LLM
 - [ ] The mediation layer runs post_call scanning on LLM responses before they return to the agent
 - [ ] DNS resolution is controlled — the agent cannot reach arbitrary DNS resolvers or use DNS-over-HTTPS to bypass controls
+- [ ] A per-agent enforcer sidecar mediates all HTTP traffic from the agent — the agent's only HTTP endpoint is the enforcer
+- [ ] Service credential grants are mediated by the enforcer — the agent holds scoped tokens, not real API keys
+- [ ] Service grant/revoke takes effect immediately via live reload — no agent restart required
+- [ ] The enforcer strips provider-identifying response headers before returning responses to the agent
 
 ---
 
@@ -106,8 +110,15 @@ Answer Yes or No to each. "No" is a framework violation.
 
 **Network isolation:**
 - [ ] The agent container is on an internal network with no direct internet access
-- [ ] The only endpoints reachable from the agent are the LLM proxy and egress proxy
+- [ ] The only endpoint reachable from the agent is the enforcer sidecar — the agent cannot reach the LLM proxy, egress proxy, or mediation network directly
 - [ ] All other traffic from the agent container is dropped at the network layer
+
+**Enforcer (per-agent HTTP proxy sidecar):**
+- [ ] Each agent has a dedicated enforcer sidecar on the agent-internal network
+- [ ] The enforcer routes LLM requests to providers (via egress) with credential swap
+- [ ] The enforcer routes non-LLM HTTP through the egress proxy
+- [ ] The enforcer logs every request to an audit log the agent cannot access
+- [ ] Service credential swap is tested — the agent's scoped token is replaced with the real credential at the enforcer, not at the agent
 
 **Runtime gateway (sidecar):**
 - [ ] A runtime gateway runs in a separate container sharing only the PID namespace with the agent

@@ -15,6 +15,8 @@
 | **Defense in depth** | Layering multiple independent security controls so that failure of one layer doesn't compromise the whole system. |
 | **Delegation bus** | A mediated channel for inter-agent communication that enforces authorization, scans content, scopes resources, and logs all interactions. |
 | **Egress proxy** | A forward proxy that mediates all non-LLM HTTP/HTTPS traffic from the agent container, enforcing a domain denylist. |
+| **Enforcer** | A per-agent HTTP policy proxy sidecar that sits between the agent and shared infrastructure. Routes LLM and service requests, swaps scoped tokens for real credentials, strips provider-identifying response headers, and logs every request. The agent's only HTTP endpoint. |
+| **Hot reload** | The ability to change enforcement state (service grants, policy updates) without restarting the agent's session. Typically implemented via OS signals (SIGHUP) to the enforcer sidecar. |
 | **IPI** | Indirect Prompt Injection. Synonymous with XPIA in most contexts. |
 | **JSON-RPC** | The wire protocol used by MCP for communication between agent and MCP servers. Messages are JSON objects with `method`, `params`, and `id` fields, transported over stdio or HTTP. |
 | **Kill chain** | The sequence of steps in a successful attack — from content poisoning through exfiltration or damage. Used for threat modeling and control placement. |
@@ -27,6 +29,8 @@
 | **Rug pull (MCP)** | An attack where an MCP server or ClawHub skill changes its tool definitions after initial trust was established — analogous to a supply chain attack. The version pinning mechanism in the gateway's MCP policy detects this by comparing current tool definitions against pinned versions. |
 | **Runtime enforcement gateway** | A process-level policy engine that runs in its own container as a sidecar to the agent, mediating file, network, process, signal, and MCP tool activity at the operating system level via shared PID namespace, FUSE, and seccomp. The gateway's policy and configuration are in a separate filesystem namespace the agent cannot access. The intra-workstation complement to the external mediation layer. |
 | **Scoped API key** | An LLM proxy API key with restrictions on which models, budgets, and rate limits are available — issued to a specific agent rather than sharing the master key. |
+| **Scoped token** | A credential issued to an agent that identifies a service grant but cannot authenticate directly against the external service. The enforcer swaps it for the real credential at the network layer. Extends the scoped API key pattern to external service access. |
+| **Service grant** | Operator-initiated authorization for an agent to access a named external service. The grant is mediated by the enforcer — the agent receives a scoped token, and real credentials are swapped at the HTTP level. Grants and revocations are live operations (hot reload). |
 | **Trust spectrum** | The range of human involvement from direct operation to delegated governance. |
 | **Trust tier** | A predefined security profile governing an agent's access, models, budget, delegation authority, and network reach. |
 | **Workstation** | The agent's managed working environment — the bounded space where the agent operates, containing its tools, workspace, and runtime. |

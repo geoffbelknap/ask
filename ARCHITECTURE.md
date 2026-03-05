@@ -91,7 +91,7 @@ Each tier maps to a concrete configuration: a scoped API key, a proxy policy fil
 
 ## Defense Architecture
 
-The architecture uses six independent enforcement layers. **Each layer runs in its own isolation boundary. No layer shares a trust boundary with the agent it enforces.** If one layer is misconfigured or bypassed, the others still hold.
+The architecture uses seven independent enforcement layers. **Each layer runs in its own isolation boundary. No layer shares a trust boundary with the agent it enforces.** If one layer is misconfigured or bypassed, the others still hold.
 
 ```
 Layer 1: Network Isolation
@@ -105,14 +105,19 @@ Layer 3: LLM Proxy (LiteLLM)
   XPIA guardrails, scoped API keys, spend caps, model routing
   All agent LLM calls flow through here
          ↓
-Layer 4: Container Hardening
+Layer 4: Enforcer (HTTP policy proxy)
+  Per-agent HTTP sidecar on the agent-internal network
+  Credential swap for granted services, LLM routing, request audit
+  Bridges agent to infrastructure — agent's only HTTP endpoint
+         ↓
+Layer 5: Container Hardening
   Read-only root filesystem, dropped capabilities, non-root user, resource limits
          ↓
-Layer 5: Runtime Gateway (sidecar)
+Layer 6: Runtime Gateway (sidecar)
   Command policy, file policy, MCP tool policy, audit via FUSE/seccomp/shell shim
   Runs in separate container sharing only PID namespace with agent
          ↓
-Layer 6: Continuous Monitoring (Sentinel)
+Layer 7: Continuous Monitoring (Sentinel)
   Anomaly detection, compliance checking, log analysis across all layers
   Infrastructure agent with read-only access to all audit logs
 ```
@@ -141,45 +146,57 @@ Layer 6: Continuous Monitoring (Sentinel)
 ┌──────────────────────────────────────────────────────────────────┐
 │  Host                                                            │
 │                                                                  │
-│  ┌─── proxy-egress network (internet access) ──────────────────┐ │
-│  │                                                              │ │
-│  │   ask-egress (mitmproxy)    ask-litellm          ask-postgres│ │
-│  │   Domain denylist           Scoped API keys      (agents     │ │
-│  │   Rate limits               XPIA guardrails       cannot     │ │
-│  │   Size limits               Spend caps             reach)    │ │
-│  │   TLS passthrough           Model routing                    │ │
-│  │   :3128                     :4000                            │ │
-│  └───────────────────────────────────────────────────────────── ┘ │
-│        │ :3128               │ :4000                               │
-│  ┌─────┼─────────────────────┼──── agent-bridge (no internet) ─┐  │
-│  │     │                     │                                  │  │
-│  │  ┌──┴──────────────────── ┴──────────────────────────────┐   │  │
-│  │  │  Shared PID Namespace                                  │   │  │
-│  │  │                                                        │   │  │
-│  │  │  ┌─────────────────────┐  ┌──────────────────────────┐ │   │  │
-│  │  │  │ ask-gateway (sidecar)│  │ ask-assistant (agent)    │ │   │  │
-│  │  │  │                     │  │                           │ │   │  │
-│  │  │  │ agentsh (PID 1)     │  │ Read-only root FS         │ │   │  │
-│  │  │  │ Policy engine       │  │ No caps, non-root         │ │   │  │
-│  │  │  │ FUSE provider       │  │ 2GB / 1 CPU               │ │   │  │
-│  │  │  │ Seccomp supervisor  │  │                           │ │   │  │
-│  │  │  │                     │  │ Commands → shell shim     │ │   │  │
-│  │  │  │ Shell policy    ◄───┼──┤ Files → FUSE mount        │ │   │  │
-│  │  │  │ File policy     ◄───┼──┤ MCP calls → intercepted   │ │   │  │
-│  │  │  │ MCP policy      ◄───┘  │                           │ │   │  │
-│  │  │  │ Audit logging          │ Web → egress:3128         │ │   │  │
-│  │  │  │                        │ LLM → litellm:4000        │ │   │  │
-│  │  │  │ Agent cannot see:      │ Cannot see:               │ │   │  │
-│  │  │  │  policy, config, logs  │  gateway FS, policy, logs │ │   │  │
-│  │  │  └─────────────────────┘  └──────────────────────────┘ │   │  │
-│  │  └────────────────────────────────────────────────────────┘    │  │
-│  │                                                                 │  │
-│  │  ┌──────────────────────┐                                       │  │
-│  │  │ ask-sentinel          │  Reads (RO): all audit logs          │  │
-│  │  │ (security monitor)    │  Writes: findings/                   │  │
-│  │  │ Tier: Elevated        │  Reaches: litellm:4000              │  │
-│  │  └──────────────────────┘                                       │  │
-│  └─────────────────────────────────────────────────────────────────┘  │
+│  ┌─── mediation network (internet access via egress) ────────┐   │
+│  │                                                            │   │
+│  │   ask-egress (mitmproxy)    ask-litellm       ask-postgres │   │
+│  │   Domain denylist           Scoped API keys   (agents      │   │
+│  │   Rate limits               XPIA guardrails    cannot      │   │
+│  │   Size limits               Spend caps          reach)     │   │
+│  │   TLS passthrough           Model routing                  │   │
+│  │   :3128                     :4000                          │   │
+│  └──────────┬─────────────────────┬──────────────────────────┘   │
+│             │ :3128               │ :4000                         │
+│  ┌──────────┼─────────────────────┼──── agent-internal ───────┐  │
+│  │          │                     │     (no internet)          │  │
+│  │  ┌───────┴─────────────────────┴──────────────────────┐    │  │
+│  │  │ ask-enforcer (per-agent HTTP policy proxy)          │    │  │
+│  │  │                                                     │    │  │
+│  │  │  Routes: /v1/* → LLM provider (via egress)          │    │  │
+│  │  │          CONNECT → egress:3128 (HTTPS)              │    │  │
+│  │  │          Other → egress:3128 (HTTP)                 │    │  │
+│  │  │  Swaps: X-Agency-Service → real credential          │    │  │
+│  │  │  Strips: provider-identifying response headers      │    │  │
+│  │  │  Logs: every request (agent cannot access logs)     │    │  │
+│  │  │  :18080                                             │    │  │
+│  │  └────────────────────────┬────────────────────────────┘    │  │
+│  │                           │ :18080                          │  │
+│  │  ┌────────────────────────┴────────────────────────────┐    │  │
+│  │  │  Shared PID Namespace                                │    │  │
+│  │  │                                                      │    │  │
+│  │  │  ┌─────────────────────┐  ┌────────────────────────┐ │    │  │
+│  │  │  │ ask-gateway (sidecar)│  │ ask-assistant (agent)  │ │    │  │
+│  │  │  │                     │  │                         │ │    │  │
+│  │  │  │ agentsh (PID 1)     │  │ Read-only root FS       │ │    │  │
+│  │  │  │ Policy engine       │  │ No caps, non-root       │ │    │  │
+│  │  │  │ FUSE provider       │  │ 2GB / 1 CPU             │ │    │  │
+│  │  │  │ Seccomp supervisor  │  │                         │ │    │  │
+│  │  │  │                     │  │ Commands → shell shim   │ │    │  │
+│  │  │  │ Shell policy    ◄───┼──┤ Files → FUSE mount      │ │    │  │
+│  │  │  │ File policy     ◄───┼──┤ MCP calls → intercepted │ │    │  │
+│  │  │  │ MCP policy      ◄───┘  │                         │ │    │  │
+│  │  │  │ Audit logging          │ All HTTP → enforcer     │ │    │  │
+│  │  │  │                        │ Cannot see: gateway FS, │ │    │  │
+│  │  │  │ Agent cannot see:      │  enforcer FS, policy,   │ │    │  │
+│  │  │  │  policy, config, logs  │  config, audit logs     │ │    │  │
+│  │  │  └─────────────────────┘  └────────────────────────┘ │    │  │
+│  │  └──────────────────────────────────────────────────────┘    │  │
+│  │                                                               │  │
+│  │  ┌──────────────────────┐                                     │  │
+│  │  │ ask-sentinel          │  Reads (RO): all audit logs        │  │
+│  │  │ (security monitor)    │  Writes: findings/                 │  │
+│  │  │ Tier: Elevated        │  Reaches: litellm:4000             │  │
+│  │  └──────────────────────┘                                     │  │
+│  └───────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -187,9 +204,9 @@ Layer 6: Continuous Monitoring (Sentinel)
 
 **Boundary 1 — Filesystem isolation.** The agent container has no volume mounts to the host filesystem, the LLM proxy container, or the egress proxy container. It cannot read API keys, guardrail configurations, proxy policies, or any other container's data.
 
-**Boundary 2 — Network isolation.** The agent container is attached only to an internal bridge network with no direct internet access. The only endpoints reachable from the agent container are the LLM proxy (port 4000) and the egress proxy (port 3128). All other traffic is dropped.
+**Boundary 2 — Network isolation.** The agent container is attached only to an agent-internal network with no direct internet access. The only endpoint reachable from the agent container is the enforcer (port 18080). The enforcer bridges the agent-internal network and the mediation network — the agent cannot reach the mediation network directly. All other traffic is dropped.
 
-**Boundary 3 — Credential isolation.** Each component holds only the credentials it needs. The agent holds a scoped LiteLLM API key (not the master key), a web proxy auth token, and its own integration tokens. The LLM proxy holds all provider API keys, the database credential, and the guardrail configuration.
+**Boundary 3 — Credential isolation.** Each component holds only the credentials it needs. The agent holds a scoped token (not real API keys) for its granted services and a proxy auth token for the enforcer. The enforcer holds the LLM proxy key and real service credentials for this agent's grants. The LLM proxy holds all provider API keys, the database credential, and the guardrail configuration. Real service API keys are stored in infrastructure secrets on the host — not in any container the agent can reach.
 
 ### The Scoped API Key
 
@@ -221,6 +238,65 @@ max_response_body: 10MB
 dns_resolver: "internal"       # blocks DNS tunneling exfiltration
 block_dns_over_https: true
 ```
+
+---
+
+## The Enforcer
+
+The egress proxy and LLM proxy are shared infrastructure — they serve all agents on the host. But each agent needs per-agent policy enforcement at the HTTP level: credential swap for granted services, LLM request routing, request-level audit logging, and response header stripping. The **enforcer** is a per-agent HTTP proxy sidecar that sits between the agent and all shared infrastructure.
+
+### Why a Separate Layer
+
+The enforcer addresses a gap between the agent and the shared proxies: the agent needs to make HTTP requests to both LLM providers and external services, but it should never hold real credentials for either. The enforcer solves this by being the agent's only HTTP endpoint — the agent sends all requests to the enforcer, and the enforcer routes them to the correct upstream (LLM provider, egress proxy) with the correct credentials.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Agent-internal network (no internet)                            │
+│                                                                  │
+│  ┌──────────────────┐     ┌──────────────────────────────────┐  │
+│  │ Agent workspace   │     │ Enforcer (per-agent sidecar)      │  │
+│  │                   │     │                                    │  │
+│  │ Sees only:        │────►│ Routes:                            │  │
+│  │  enforcer:18080   │     │  /v1/* → LLM provider (via egress) │  │
+│  │                   │     │  CONNECT → egress:3128 (HTTPS)     │  │
+│  │ Holds:            │     │  Other → egress:3128 (HTTP)        │  │
+│  │  scoped token     │     │                                    │  │
+│  │  (not real keys)  │     │ Swaps:                              │  │
+│  │                   │     │  X-Agency-Service header            │  │
+│  └──────────────────┘     │  → real credential from infra       │  │
+│                            │                                    │  │
+│                            │ Strips:                             │  │
+│                            │  response headers that leak         │  │
+│                            │  provider account info              │  │
+│                            │                                    │  │
+│                            │ Logs:                               │  │
+│                            │  every request to audit log         │  │
+│                            │  (agent cannot access)              │  │
+│                            └──────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
+       │                              │
+       │                         ┌────▼─────────────────────┐
+       │                         │  Mediation network        │
+       │                         │  (egress + LLM proxy)     │
+       │                         └──────────────────────────┘
+```
+
+### Service Credential Swap
+
+When an operator grants an agent access to an external service (GitHub API, search engine, database), the enforcer handles credential mediation:
+
+1. The operator stores the real API key in infrastructure secrets (outside the agent's reach)
+2. The agent receives a scoped token that identifies the grant but cannot authenticate directly
+3. When the agent sends a request with an `X-Agency-Service` header, the enforcer validates the grant, replaces the agent's scoped token with the real credential, and forwards the request through the egress proxy
+4. The response is returned to the agent with provider-identifying headers stripped
+
+The enforcer reloads grant state on signal (SIGHUP) without restarting — grants and revocations take effect immediately during an active session. The agent never handles, stores, or sees real service credentials.
+
+### Isolation Properties
+
+The enforcer runs in its own container on both the agent-internal network and the mediation network. The agent can reach the enforcer; the agent cannot reach the mediation network directly. The enforcer's configuration, policy files, and audit logs are in a filesystem the agent cannot access.
+
+This is a distinct enforcement layer from the egress proxy (which enforces domain-level policy) and the runtime gateway (which enforces execution-level policy). The enforcer enforces HTTP-level policy: credential mediation, request routing, per-request audit, and response sanitization. Collapsing it into either the egress proxy or the runtime gateway would violate the principle that each enforcement layer has its own isolation boundary.
 
 ---
 
@@ -302,6 +378,24 @@ MCP servers are child processes that communicate via JSON-RPC 2.0 over stdio. Th
 | Access workspace without FUSE | Underlying storage in gateway's mount namespace |
 | Read audit logs | Audit log volume mounted only in gateway and Sentinel |
 | Disable seccomp filters | Set by parent process; `no-new-privileges` prevents modification |
+
+---
+
+## Read-Only Tool Delivery
+
+The agent's workspace needs tools (runtime binaries, shell shims, skill libraries), but these tools must be delivered read-only — the agent cannot modify its own tooling. The pattern: build tools into a container image, then extract them into a named volume that is mounted read-only into the agent's workspace.
+
+```
+Builder image (e.g., openclaw-builder)
+  → docker create → copy /opt/openclaw to named volume
+  → named volume mounted :ro into agent workspace at /opt/openclaw
+
+Builder image (e.g., agentsh-shim-builder)
+  → docker create → copy /opt/shim to named volume
+  → named volume mounted :ro into agent workspace at /usr/local/bin
+```
+
+This satisfies Tenet 1 (constraints are external and inviolable — the agent cannot modify the tools it uses) and provides a clean deployment pattern: tool updates are image rebuilds, not in-place modifications. The agent inherits its tools from the workspace it occupies, just as it inherits its constraints.
 
 ---
 
@@ -490,7 +584,7 @@ The agent doesn't notice the difference. The stub handles connection management,
 
 For the architecture to scale from single-endpoint to enterprise without redesign:
 
-- **Stable interfaces** — the agent always talks to `http://mediation:4000` and `http://mediation:3128`, regardless of where those resolve
+- **Stable interfaces** — the agent always talks to `http://enforcer:18080`, regardless of where the upstream services resolve
 - **Externalized state** — agent identity and persistent state are never stored inside the workstation's ephemeral filesystem
 - **Policy-as-data** — mediation policies are declarative data files, not code; readable from local file, config server, or policy engine
 - **Log-as-stream** — logs are structured events that can be consumed locally, shipped, or streamed — the event format is the same regardless of destination
@@ -510,7 +604,8 @@ The architecture maps established enterprise endpoint security controls to AI ag
 | DLP (Data Loss Prevention) | Prevent sensitive data exfiltration | LLM guardrails + egress content rules |
 | EDR (Endpoint Detection & Response) | Detect and respond to threats | Unified logging + anomaly detection (Sentinel) |
 | Application allowlisting | Control which software can run | Tool permission guard + skill validation + MCP tool policy |
-| Credential vault | Secure storage, rotation, access control | Encrypted secrets, container isolation, scoped keys |
-| Conditional Access / Zero Trust | Verify before granting access | Scoped API keys, per-agent policies |
+| Credential vault | Secure storage, rotation, access control | Infrastructure secrets + enforcer credential swap + scoped tokens |
+| Conditional Access / Zero Trust | Verify before granting access | Scoped API keys, per-agent enforcer policies, service grants |
+| API Gateway | Authenticate, route, rate-limit API calls | Enforcer sidecar (per-agent HTTP policy proxy) |
 | Network Access Control | Segment network, control lateral movement | Container network isolation |
 | UBA (User Behavior Analytics) | Baseline normal behavior, detect anomalies | Agent behavior baseline + drift detection |

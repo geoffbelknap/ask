@@ -121,15 +121,17 @@ Non-negotiable implementation rules. Every design decision MUST comply with all 
 
 3. **The agent cannot see enforcement infrastructure.** The agent cannot read proxy configuration, guardrail rules, policy files, or audit logs. These live in separate filesystems with no agent-accessible mounts.
 
-4. **Defense in depth with genuine isolation.** Each enforcement layer is in its own isolation boundary. Layers 1–6 do not share a trust boundary with the agent. One layer being bypassed does not compromise the others.
+4. **Defense in depth with genuine isolation.** Each enforcement layer is in its own isolation boundary. Layers 1–7 do not share a trust boundary with the agent. One layer being bypassed does not compromise the others.
 
 5. **Superego updates are governance events, not operational events.** Constraint changes go through review, commit, and controlled rollout — never in-session and never initiated by the agent.
 
-6. **Scoped keys, never master keys.** The agent holds a scoped API key with model restrictions, budget caps, and rate limits — not the master key. Compromise of the agent's key has a bounded blast radius.
+6. **Scoped keys, never master keys.** The agent holds a scoped API key with model restrictions, budget caps, and rate limits — not the master key. Compromise of the agent's key has a bounded blast radius. The same principle applies to external service credentials — the agent holds a scoped token, and the enforcer swaps it for the real credential at the network layer.
 
 7. **State is external, not workstation-internal.** Agent identity and persistent memory live outside the workstation's ephemeral filesystem — in a mounted volume or external store that survives workstation rotation.
 
 8. **The management plane is separate from the data plane.** The operator accesses management interfaces through paths that are not reachable from any agent container.
+
+9. **Service credentials are mediated, not held.** When an agent needs access to an external service (GitHub, search engines, databases), the operator grants access through the platform. The agent receives a scoped token; the enforcer sidecar swaps it for the real credential at the HTTP level. The agent never sees, stores, or handles real service API keys. Grants and revocations take effect immediately via live reload — no agent restart required.
 
 ---
 
@@ -229,6 +231,8 @@ These patterns always indicate a framework violation. If you see them in a desig
 - Any entity instructing an agent to "override" or "ignore" its constraints
 - MCP servers with no gateway-level policy (only application-level policy inside the agent process)
 - Monitoring running inside the same isolation boundary as the agent it monitors
+- Agent holding real service API keys instead of scoped tokens mediated by the enforcer
+- Service credential grant/revoke requiring agent restart instead of live reload
 
 ---
 
