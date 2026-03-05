@@ -74,15 +74,21 @@ These are binary conditions. Each one either holds or it is violated. Design and
 
 Every piece of agent configuration belongs in exactly one layer. The decisive question: **does this content affect the security boundary?**
 
-**SUPEREGO** (operator-owned, `:ro` mount — agent CANNOT modify)
+**SUPEREGO** (operator-owned, read-only to agent — two manifestations)
+
+*Agent-visible Superego* (`:ro` mount at `superego/`):
 - Role and tier declaration
 - Risk tolerance, escalation thresholds, delegation limits
 - Permission grants
 - Model preferences and behavioral constraints
 - Operator-authored operational rules
-- Mediation layer policies (guardrail rules, denylist, tool permissions — agent cannot see these at all)
 
-If a configuration parameter determines what the agent is permitted to do → it belongs in the Superego.
+*Agent-invisible Superego* (enforcement container filesystems — agent cannot see at all):
+- Guardrail rules, domain denylist, tool permissions
+- Proxy policies, gateway configurations
+- Egress policy, MCP tool policy
+
+If a configuration parameter determines what the agent is permitted to do → it belongs in the Superego. If it *tells the agent about* its constraints → visible. If it *enforces* constraints → invisible.
 
 **ID** (agent-owned, `:rw` mount — writable but audited)
 - Personality, tone, vibe, name (stylistic only)

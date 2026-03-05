@@ -1,0 +1,93 @@
+# ASK Delegation Bus — Message Format Example
+#
+# This shows the structure of messages exchanged through the delegation bus.
+# The bus validates, scopes, scans, and logs every delegation.
+
+# --- Delegation Request (coordinator → bus → sub-agent) ---
+delegation_request:
+  request_id: "del-20250601-a3b2c1"
+  correlation_id: "session-dev-assistant-01-20250601-142300"
+
+  # Who is delegating
+  delegator:
+    agent_id: dev-assistant-01
+    tier: 2
+    role: development-assistant
+
+  # Who is being delegated to
+  target:
+    agent_id: test-runner-01
+    tier: 1
+    role: test-runner
+
+  # What is being delegated
+  task:
+    description: "Run the unit test suite for src/api/ and report results"
+    permitted_tools:
+      - execute_command
+      - read_file
+    permitted_paths:
+      - "src/api/"
+      - "tests/"
+    # Context scoping — sub-agent receives only what it needs, not the
+    # coordinator's full context
+    context: |
+      The API module has been refactored. Run all tests in tests/api/
+      and report pass/fail counts with any failure details.
+
+  # Resource bounds
+  limits:
+    timeout: 300                 # seconds
+    budget_usd: 2.00             # max spend for this delegation
+    max_llm_calls: 50
+
+  # Timestamp
+  requested_at: "2025-06-01T14:23:00Z"
+
+# --- Bus Validation (internal — logged but not sent to agents) ---
+bus_validation:
+  request_id: "del-20250601-a3b2c1"
+  checks:
+    - check: delegator_tier_allows_target
+      result: pass               # Tier 2 can delegate to Tier 1
+    - check: delegator_holds_permissions
+      result: pass               # delegator has execute_command and read_file
+    - check: target_agent_available
+      result: pass               # test-runner-01 is RUNNING
+    - check: concurrent_delegation_limit
+      result: pass               # delegator has 1 of 3 max concurrent
+  decision: approved
+  validated_at: "2025-06-01T14:23:00Z"
+
+# --- Delegation Response (sub-agent → bus → coordinator) ---
+delegation_response:
+  request_id: "del-20250601-a3b2c1"
+  correlation_id: "session-dev-assistant-01-20250601-142300"
+
+  # Sub-agent's result
+  result:
+    status: completed            # completed | failed | timeout | halted
+    output: |
+      Test suite results for src/api/:
+      Total: 47 tests
+      Passed: 45
+      Failed: 2
+
+      Failures:
+      - tests/api/test_auth.py::test_token_refresh — AssertionError
+      - tests/api/test_rate_limit.py::test_burst — TimeoutError
+    artifacts: []                # file paths, if any, accessible to coordinator
+
+  # Resource consumption
+  usage:
+    elapsed_seconds: 42
+    spend_usd: 0.35
+    llm_calls: 8
+
+  completed_at: "2025-06-01T14:23:42Z"
+
+  # Bus post-scan result (logged, transparent to coordinator)
+  response_scan:
+    xpia_detected: false
+    injection_patterns: []
+    scan_engine: "xpia-regex-v1"

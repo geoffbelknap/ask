@@ -56,7 +56,13 @@ The Mind/Body/Workspace decomposition describes *where* an agent's cognitive ide
 
 The Superego is **operator-owned and architecturally read-only to the agent.** The agent does not refrain from modifying it — the filesystem mount is `:ro`. The agent cannot reach it.
 
-In practice, the Superego comprises: the role and tier declaration, model preferences and behavioral parameters (risk tolerance, escalation thresholds, delegation limits), permission grants, operator-authored rules, and mediation layer policies (guardrail rules, domain denylist, tool permissions — the agent cannot see these at all, let alone modify them).
+The Superego has two manifestations:
+
+**Agent-visible Superego** — mounted read-only into the agent's container at `superego/`. Contains the role and tier declaration, model preferences and behavioral parameters (risk tolerance, escalation thresholds, delegation limits), permission grants, and operator-authored rules. The agent can read these — they tell the agent what it is and what it's permitted to do. The agent cannot modify them.
+
+**Agent-invisible Superego** — lives in enforcement infrastructure containers the agent cannot see or reach. Contains guardrail rules, domain denylists, tool permissions, proxy policies, and gateway configurations. The agent cannot read these, let alone modify them. These are the enforcement mechanisms that back the constraints declared in the visible Superego.
+
+Both are operator-owned. Both are read-only to the agent. The difference is visibility: the agent knows about its tier and rules (visible), but doesn't know the specific patterns the guardrails scan for or which domains are denylisted (invisible).
 
 **Id — The Agent's Accumulated Self.** The Id is the raw material of the agent's personality as it develops through experience. It is what the agent has learned, accumulated, and internalized across sessions.
 
@@ -103,6 +109,40 @@ The question of where a piece of configuration belongs has one test: **does this
 If it affects risk tolerance, escalation thresholds, delegation limits, tier declaration, or any parameter that determines what the agent is permitted to do — it belongs in the **Superego**. It must be operator-owned and read-only.
 
 If it reflects the agent's personality, tone, accumulated knowledge, or stylistic identity — it belongs in the **Id**. It is agent-owned and writable.
+
+### mind.yaml Schema Reference
+
+The `mind.yaml` file in the Superego defines the agent's identity, capabilities, and behavioral constraints. The following fields are framework-required — an ASK-conforming implementation must support them. Implementations may add additional fields.
+
+**Required fields:**
+
+| Field | Type | Description |
+|---|---|---|
+| `agent_id` | string | Unique identifier for this agent |
+| `role` | string | The agent's functional role (e.g., `development-assistant`, `security-monitor`) |
+| `tier` | integer (1–4) | Trust tier — determines capability envelope (see [ARCHITECTURE.md](ARCHITECTURE.md#trust-tiers)) |
+
+**Required sections:**
+
+| Section | Purpose | Key Fields |
+|---|---|---|
+| `models` | LLM access scope | `allowed` (list of model IDs), `default` (model ID) |
+| `limits` | Resource bounds | `budget_daily_usd`, `requests_per_minute` |
+| `behavior` | Security-relevant parameters | `risk_tolerance`, `escalation_threshold`, `irreversible_action_policy` |
+| `tools` | Tool access scope | `allowed` (list), `denied` (list) |
+| `session` | Runtime configuration | `runtime_pattern` (`interactive` or `autonomous`) |
+
+**Optional sections:**
+
+| Section | Purpose | When Needed |
+|---|---|---|
+| `delegation` | Multi-agent delegation rules | Only for agents that delegate to other agents |
+| `web` | Web access declaration | Only when web access is enabled |
+| `service_grants` | External service access | Only when the agent accesses external services beyond LLM |
+
+The `models.allowed` list, `limits`, and `tools` sections declare intent in the Superego — the actual enforcement happens in the scoped API key (models, limits), the gateway policy (tools), and the egress proxy (web). The Superego tells the agent what it's permitted to do; the invisible enforcement layer prevents it from doing anything else.
+
+See [examples/mind.yaml](examples/mind.yaml) for a complete example.
 
 ---
 
@@ -262,6 +302,28 @@ The trust spectrum defines how much autonomous authority an agent can exercise, 
 
 Trust level is not a configuration parameter — it is an emergent property of the governance relationship between the operator and the agent, calibrated over time through observed behavior. An agent cannot self-elevate its trust level.
 
+### Trust Evolution
+
+Trust changes based on observed behavior, but the observation and decision mechanisms are operator-defined:
+
+**What is observed:** Task completion rate, guardrail trigger frequency, exception request patterns, self-halt frequency, and policy compliance over time. The specific metrics and thresholds are set by the operator — the framework does not prescribe them.
+
+**Who evaluates:** The operator, informed by Sentinel's anomaly detection and audit log analysis. Trust evaluation is always a human judgment, not an automated threshold. Sentinel can recommend ("this agent has operated cleanly for 30 days"), but the elevation decision requires human approval (Tenet 15).
+
+**How trust changes take effect:** Trust elevation is a Superego change — the operator updates `mind.yaml` with the new tier or trust level. Like all Superego changes, it takes effect next session, goes through version control, and is logged as a constraint change event. Trust reduction can be immediate if triggered by a security finding.
+
+**Profile-then-lock:** A practical workflow for new agents. Run the agent under permissive policy while observing its actual behavior. After a baseline period, generate a restrictive policy that matches the observed operational pattern. This gives evidence-based trust calibration rather than guessing what the agent needs.
+
+### Trust Tiers vs Trust Levels
+
+These are related but distinct concepts:
+
+**Trust tiers** (Tier 1–4, defined in [ARCHITECTURE.md](ARCHITECTURE.md#trust-tiers)) define the agent's **capability envelope** — what models it can access, what tools it can use, what network access it has, and what it can delegate. Tiers are set by the operator in `mind.yaml` and enforced by the scoped API key, proxy policy, and gateway configuration. A Tier 2 agent *cannot* make Tier 3 requests regardless of its trust level.
+
+**Trust levels** (Level 0–3, the spectrum above) define the agent's **autonomy** — how much of its capability envelope it exercises without human confirmation. A Tier 2 agent at Level 0 (Assisted) has the same capabilities as a Tier 2 agent at Level 2 (Autonomous), but the Assisted agent requires human approval for every action.
+
+The interaction: a Tier 3 agent at Level 1 (Supervised) has broad capabilities but operates under human review. A Tier 1 agent at Level 2 (Autonomous) has narrow capabilities but operates independently within them. Higher tier + lower level = powerful but supervised. Lower tier + higher level = limited but autonomous.
+
 ### Runtime Patterns
 
 The trust spectrum has a concrete architectural dimension: the agent's runtime pattern. Two distinct patterns exist, each with different trust implications:
@@ -281,15 +343,17 @@ The same agent — same Mind, same Superego, same constraints — can run in eit
 Policy is organized in layers. Each layer inherits from the layer above. Lower levels can only restrict, never loosen. Hard floors set at any level cannot be modified by levels below.
 
 ```
-Platform Tenets            ← immovable, baked into substrate
+Platform Tenets            ← immovable, baked into substrate (the 22 tenets)
 Compliance Policy          ← external obligations (legal, regulatory)
-Organizational Policy      ← internal non-negotiables
-── ── ── ── ── ── ──       ← levels above cannot be exceeded below
-Operational Policy         ← how we work
-Role/Agent Preferences     ← individual preferences
+Organizational Policy      ← internal non-negotiables (org-wide rules)
+── ── ── ── ── ── ──       ← hard floor — levels above cannot be exceeded below
+Operational Policy         ← how this team/department works
+Agent Policy               ← this agent's mind.yaml + enforcement configs
 ```
 
-**Effective permissions for an agent** = Platform tenets ∩ Org compliance policy ∩ Org organizational policy ∩ Department policy ∩ Team policy ∩ Agent policy (constraints.yaml). Most restrictive combination of all layers wins.
+At small scale, compliance, organizational, and operational layers collapse into one: the operator's policy. The hierarchy matters at enterprise scale, where different teams may set different operational policies within organizational bounds.
+
+**Effective permissions for an agent** = Platform tenets ∩ Compliance policy ∩ Organizational policy ∩ Operational policy ∩ Agent policy (`mind.yaml` + enforcement configs). Most restrictive combination of all layers wins.
 
 ### The Two-Key Exception Model
 
@@ -389,6 +453,8 @@ Constraints can change during an active session. Four categories of change event
 **Trust changes** — elevation always next session and requires human approval. Reduction can be immediate if triggered by a security finding.
 
 All constraint changes are atomic — the agent never sees a partial state. Every change is acknowledged and logged.
+
+**What acknowledgment means:** The agent's runtime (Body) confirms that new constraints have been loaded into the active session. This is a runtime-level mechanism, not an LLM-level one — the Body reads the updated `mind.yaml`, applies the new parameters, and logs a structured acknowledgment event with a hash of the constraint state. If the Body fails to acknowledge within a defined timeout, the enforcement layer treats the agent as operating under an unknown constraint state and halts it. The specific acknowledgment protocol (log entry, API callback, file write) is implementation-defined, but the requirement is that it is verifiable by the enforcement layer, not self-reported by the agent's LLM reasoning.
 
 ### Service Credential Lifecycle
 

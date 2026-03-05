@@ -233,6 +233,32 @@ Layer 7: Continuous Monitoring
 
 **Boundary 3 — Credential isolation.** Each component holds only the credentials it needs. The agent holds a scoped token (not real API keys) for its granted services and a proxy auth token for the enforcer. The enforcer holds the LLM proxy key and real service credentials for this agent's grants. The LLM proxy holds all provider API keys, the database credential, and the guardrail configuration. Real service API keys are stored in infrastructure secrets on the host — not in any container the agent can reach.
 
+### The Database
+
+The database on the mediation network stores operational state for the mediation layer itself. It is not agent-facing — agents cannot reach it.
+
+**What it stores:**
+- **Spend tracking** — per-agent token counts and budget consumption, used by the LLM proxy to enforce spend caps
+- **Scoped key metadata** — which keys are active, their model restrictions, rate limits, and budget assignments
+- **Guardrail state** — guardrail trigger counts, flagged events awaiting review
+- **Session metadata** — active sessions, agent states (running/paused/halted), correlation IDs
+
+**What it does not store:** audit logs (those go to persistent log storage, not a database the agent or its proxies can write to selectively), agent identity or memory (those live in mounted volumes), or enforcement policy (that lives in config files within each enforcement container).
+
+The database is a shared service on the mediation network. It requires authentication from its clients (LLM proxy, enforcer) and should use encrypted connections in multi-host deployments. Its compromise would expose spend tracking and session metadata but not audit logs, agent identity, or enforcement policy.
+
+### User Authentication
+
+The framework defines human principals but does not prescribe a specific authentication mechanism. An implementation must address:
+
+**How users authenticate to agents.** In the interactive runtime, users connect via SSH, TUI, or API. The authentication mechanism is deployment-specific — SSH keys, OAuth tokens, API keys, or SSO. The requirement is that the agent's runtime (Body) can identify which authenticated human principal is issuing instructions.
+
+**How user identity flows through the mediation layer.** The enforcer should include the authenticated user's identity in audit log entries so that actions can be attributed to the human who initiated them, not just to the agent that executed them. This is essential for Tenet 2 (every action leaves a trace) in multi-user deployments.
+
+**How user authorization maps to agent capability.** A user interacting with a Tier 2 agent operates within that agent's capability envelope. The user cannot escalate the agent's tier. Different users may have different authorization levels for the same agent — for example, an admin user may be able to trigger `approve`-gated operations that a regular user cannot.
+
+At single-user scale (Scale 1), user authentication collapses to "whoever has SSH access to the host." At enterprise scale (Scale 3), it integrates with the organization's identity provider.
+
 ### Mediation Network Security
 
 The mediation network — connecting the egress proxy, LLM proxy, enforcer, and database — is a trusted network in the single-host topology. On a single Docker host, this is a Docker bridge network with no external exposure, and the trust assumption is reasonable.
@@ -483,6 +509,90 @@ The shipped guardrails (XPIA patterns + tool permission + MCP policy) catch know
 
 ---
 
+## Sentinel Specification
+
+Sentinel is the framework's monitoring and anomaly detection agent. It is a function agent (high cross-boundary visibility, constrained capability) that provides continuous oversight of all other agents in the deployment.
+
+### Inputs
+
+Sentinel reads audit logs from all enforcement layers. It does not receive data from agents directly — it reads the same structured log events that the enforcement infrastructure writes.
+
+| Source | What Sentinel Reads |
+|---|---|
+| Egress proxy logs | Domain access patterns, blocked requests, rate limit events |
+| LLM proxy logs | Token consumption, model usage, guardrail triggers, spend tracking |
+| Enforcer logs | Per-agent HTTP requests, credential swap events, routing decisions |
+| Gateway logs | Command executions, file operations, MCP tool calls, policy decisions |
+| Constraint change logs | Superego updates, acknowledgment events, trust changes |
+
+### Analysis
+
+Sentinel performs three categories of analysis:
+
+**Baseline comparison.** Establishes a behavioral baseline for each agent over a configurable observation period. Flags deviations: unusual tool usage patterns, sudden changes in request volume, new domains accessed, changes in LLM interaction patterns (prompt length, model selection, token consumption).
+
+**Guardrail trigger correlation.** Correlates guardrail events across layers. A single guardrail trigger may be noise; correlated triggers across multiple layers (e.g., XPIA pattern detected in pre_call + unusual egress request + MCP tool call outside normal pattern) indicate an active attack chain.
+
+**Id write pattern analysis.** Monitors writes to agent Id files (memory, personality) for patterns that resemble behavioral self-modification rather than normal memory accumulation — for example, writes that contain instruction-like content, constraint-override language, or references to security parameters.
+
+### Outputs
+
+| Output | Description |
+|---|---|
+| **Findings** | Structured reports of detected anomalies with severity, evidence, and affected agent |
+| **Alerts** | Real-time notifications to the operator for events above a configured severity threshold |
+| **Recommendations** | Suggested actions (halt, investigate, reduce trust, quarantine) — Sentinel recommends but does not act unilaterally except for self-halt |
+| **Compliance reports** | Periodic summaries of agent behavior against policy (guardrail trigger rates, policy compliance, trust evolution) |
+
+### Constraints
+
+Sentinel is itself an agent subject to the framework. It has elevated cross-boundary visibility (reads all audit logs) but constrained capability:
+
+- **Read-only access** to all audit logs and agent workspaces — cannot modify agent state, configuration, or identity
+- **Cannot act in other agents' workspaces** — cannot execute commands, write files, or modify configurations
+- **Can recommend halt** — the operator or an automated policy threshold executes the halt
+- **Own LLM calls go through the same guardrails stack** — Sentinel is an XPIA target (see [LIMITATIONS.md](LIMITATIONS.md)) and its calls are scanned like any other agent's
+- **Findings are written to a separate findings store** — not to agent audit logs, preventing circular contamination
+
+At Scale 1, Sentinel can be a simple log analysis script that runs periodically. At Scale 3, it is a fleet of function agents with specialized roles (one per analysis category or per agent group).
+
+---
+
+## Failure Modes
+
+Enforcement components can fail. The framework's position is **fail-closed**: when an enforcement component fails, the agent loses capability — it never gains unmediated access.
+
+### Per-Component Failure Behavior
+
+| Component | Failure Effect | Agent Impact | Recovery |
+|---|---|---|---|
+| **Network isolation** | Container network misconfiguration | Agent has direct internet access — **critical violation** (Tenet 3) | Cannot fail dynamically; misconfiguration is a deployment error. Verify at startup. |
+| **Egress proxy** | Proxy process crashes or becomes unreachable | Agent loses all web access (HTTP_PROXY target unreachable) | Restart proxy. Agent regains web access automatically. No data loss. |
+| **LLM proxy** | Proxy process crashes or becomes unreachable | Agent loses all LLM access (API calls fail) | Restart proxy. Spend tracking and guardrail state persist in database. |
+| **Enforcer** | Sidecar crashes or becomes unreachable | Agent loses all HTTP access (its only HTTP endpoint is gone) | Restart enforcer. Agent regains HTTP access automatically. |
+| **Gateway** | Sidecar crashes | Agent loses shell, file, and MCP mediation | See below — deployment-dependent response. |
+| **Database** | Database unreachable | LLM proxy cannot track spend or enforce budget caps | LLM proxy should fail-closed: deny requests when spend tracking is unavailable. |
+| **Sentinel** | Monitor crashes | No anomaly detection or compliance monitoring | Restart Sentinel. Gap in monitoring is logged. Agent operation continues — monitoring is observational, not enforcement. |
+
+### Gateway Failure Policy
+
+The gateway sidecar is the most operationally complex enforcement component. Its failure policy should be deployment-dependent:
+
+**Development/early deployments:** Gateway failure is non-fatal. The agent proceeds with network-level enforcement only (enforcer, egress proxy, LLM proxy). Execution-layer visibility (file policy, command policy) is degraded. This is the reference implementation's current behavior.
+
+**Production deployments:** Gateway failure should halt the agent. Without the gateway, the agent can execute arbitrary commands and access files without policy mediation. The operator should require the gateway and treat its failure as a halt condition.
+
+### Design Requirements
+
+Implementations should:
+
+1. **Health-check enforcement components at startup** — the agent process must not start until all required enforcement components are verified healthy (FRAMEWORK.md Phase 2: "enforcement is active before the agent exists")
+2. **Monitor enforcement component health during operation** — a sidecar watchdog or the orchestrator's health check mechanism
+3. **Log enforcement component failures** — failures are logged to persistent storage (not through the failed component) so the gap in enforcement is auditable
+4. **Never fall back to direct access** — if the enforcer is down, the agent's HTTP requests fail; they do not bypass the enforcer and go direct
+
+---
+
 ## Multi-Agent Architecture
 
 ### The Problem with Flat Trust
@@ -563,6 +673,24 @@ The operator interacts with the system through a management interface completely
 
 ---
 
+## Container Runtime Portability
+
+The architecture examples use Docker terminology (Docker bridge networks, `docker exec`, named volumes, `docker create`). The concepts are not Docker-specific. Here is how they map to other runtimes:
+
+| Docker Concept | Kubernetes Equivalent | Podman Equivalent | Firecracker/VM Equivalent |
+|---|---|---|---|
+| Docker bridge network | NetworkPolicy + Pod networking | Podman network (CNI/netavark) | Virtual network interface |
+| `docker exec` | `kubectl exec` | `podman exec` | SSH / vsock |
+| Named volume (`:ro`) | PersistentVolumeClaim + `readOnly: true` | Named volume (`:ro`) | Virtio-fs / block device mount |
+| Container (isolation boundary) | Pod (with one container per pod for agent isolation) | Container | MicroVM |
+| Sidecar container (shared PID ns) | Sidecar container in same Pod | Pod with `--share=pid` | Co-located process in same VM |
+| `cap_drop: ALL` | SecurityContext `capabilities.drop: ["ALL"]` | `--cap-drop=all` | Not applicable (stronger isolation) |
+| `no-new-privileges` | SecurityContext `allowPrivilegeEscalation: false` | `--security-opt=no-new-privileges` | Default (process isolation) |
+
+The key requirement is that each enforcement layer runs in its own isolation boundary and the agent cannot reach enforcement infrastructure. Any runtime that provides process isolation, filesystem namespacing, and network segmentation can implement the architecture. Kubernetes users should note that a "Pod" in ASK terms is one agent + its sidecars — agents should not share Pods.
+
+---
+
 ## Scaling: Edge to Center
 
 ### Placement Principles
@@ -620,4 +748,36 @@ For the architecture to scale from single-endpoint to enterprise without redesig
 - **Policy-as-data** — mediation policies are declarative data files, not code; readable from local file, config server, or policy engine
 - **Log-as-stream** — logs are structured events that can be consumed locally, shipped, or streamed — the event format is the same regardless of destination
 - **Workstation-as-template** — a workstation definition is a declarative specification that can be instantiated on a local Docker host, remote server, or cloud orchestrator
+
+---
+
+## Operator Interface
+
+The framework requires human override (Element 4) and operator observability, but does not prescribe specific tooling. An implementation must provide:
+
+### Minimum Operator Capabilities
+
+**Observe:** View agent states (running/paused/halted/quarantined), active sessions, current trust tier and level, resource consumption (token spend, request rates), and recent guardrail triggers.
+
+**Act:** Halt, resume, pause, and quarantine agents. Grant and revoke service credentials. Rotate scoped API keys. Approve operations gated by `approve` policy decisions. Manage Superego updates (edit `mind.yaml`, update enforcement configs).
+
+**Review:** Access audit logs from all enforcement layers. Reconstruct action chains via correlation IDs. Review Sentinel findings. Inspect quarantined agent state.
+
+**Alert:** Receive notifications for guardrail triggers above a threshold, quarantine events, self-halts, budget exhaustion, and Sentinel anomaly findings.
+
+### Implementation at Scale
+
+At Scale 1 (single agent), the operator interface can be CLI commands: `docker exec`, log file reads, and direct config file edits. At Scale 3 (enterprise), it requires a management dashboard, centralized log viewer, alerting integration, and role-based access for multiple operators.
+
+The management interface must be on a separate network path from agent containers (AGENT-CONTEXT.md Architectural Rule 8). No agent can reach the operator's management tools.
+
+### Sidecar Resource Overhead
+
+Each agent requires a per-agent enforcer sidecar and (in production) a per-agent gateway sidecar. At scale, this means:
+
+- **Enforcer:** Lightweight HTTP proxy. Typical overhead: 50–100MB RAM, minimal CPU. Scales linearly with agent count.
+- **Gateway:** Heavier — runs FUSE provider, seccomp supervisor, Landlock, policy engine. Typical overhead: 100–300MB RAM, moderate CPU. Scales linearly with agent count.
+- **Shared infrastructure** (LLM proxy, egress proxy, database, Sentinel) is amortized across agents and does not scale linearly.
+
+For 100 agents, expect ~200 sidecar containers consuming 15–40GB RAM total for enforcement overhead. This is the cost of per-agent isolation — it cannot be reduced by sharing sidecars without violating Tenet 1 (enforcement in its own boundary per agent). Capacity planning should account for this overhead alongside agent workload.
 
