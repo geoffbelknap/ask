@@ -129,10 +129,11 @@ Answer Yes or No to each. "No" is a framework violation.
 - [ ] Per-command allow/deny/approve policies are defined and tested
 
 **Guardrails stack:**
-- [ ] Pre-call scanning is configured (content filter, injection detection, PII masking)
-- [ ] Post-call scanning is configured (scans LLM responses before returning to agent)
+- [ ] Pre-call XPIA scanning is configured (pattern detection on input before it reaches the LLM)
+- [ ] Post-call scanning is configured (scans LLM responses before returning to agent — streaming-aware)
 - [ ] Tool permission guard is configured with an explicit allowlist (default-deny)
 - [ ] MCP tool policy is configured at the gateway level (not just application level inside the agent)
+- [ ] Optional: PII masking, ML-based injection detection, or malicious URL scanning added if threat model requires
 
 **Credential management:**
 - [ ] The agent holds a scoped API key with model restrictions, budget cap, and rate limits

