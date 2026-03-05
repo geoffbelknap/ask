@@ -1,5 +1,7 @@
 # ASK — Framework
 
+**Version: ASK 2025.06**
+
 The complete theory for the ASK operating framework. Read this document to understand what ASK is, why it's built the way it is, and what properties every conforming implementation must have.
 
 ---

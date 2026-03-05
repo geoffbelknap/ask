@@ -36,8 +36,8 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ```
 ├── README.md              ← You are here
-├── FRAMEWORK.md           ← Complete theory (replaces framework/ directory)
-├── ARCHITECTURE.md        ← Complete technical guide (replaces architecture/ directory)
+├── FRAMEWORK.md           ← Complete theory: elements, tenets, cognitive model, lifecycle
+├── ARCHITECTURE.md        ← Complete technical guide: threat model, enforcement, topology
 ├── AGENT-CONTEXT.md       ← Optimized for system prompt injection
 ├── AGENT-CHECKLIST.md     ← Verification checklist
 │
@@ -46,14 +46,10 @@ ASK defines what must be true — architecturally, operationally, and organizati
 │   ├── gateway-policy.yaml← Sample runtime gateway policy (commands, files, MCP)
 │   ├── egress-denylist.yaml← Sample egress proxy denylist
 │   └── enforcer-config.yaml← Sample per-agent enforcer configuration
-│
-├── reference/
-│   ├── Glossary.md        ← Terms and related work
-│   └── Limitations.md     ← Known gaps and open questions
-│
-└── archive/               ← Original documents preserved here
-    ├── framework/
-    └── architecture/
+├── GLOSSARY.md            ← Terms and related work
+├── LIMITATIONS.md         ← Known gaps and open questions
+├── CHANGELOG.md           ← Version history
+└── SECURITY.md            ← Vulnerability reporting policy
 ```
 
 ---

@@ -32,7 +32,7 @@ For changes to the framework documents:
 
 - **Respects the tenets.** The tenets are the foundation. If a proposed change would violate a tenet, the change is wrong — not the tenet. If you believe a tenet should be modified, make the case explicitly.
 - **Is concrete.** Specific architectural proposals with clear threat model justification are more useful than general suggestions.
-- **Acknowledges limitations.** ASK is honest about its gaps (see [Limitations.md](reference/Limitations.md)). Contributions should be equally honest.
+- **Acknowledges limitations.** ASK is honest about its gaps (see [LIMITATIONS.md](LIMITATIONS.md)). Contributions should be equally honest.
 
 ## What We're Not Looking For
 
