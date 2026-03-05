@@ -10,7 +10,7 @@ This architecture significantly raises the cost and complexity of attacking an A
 
 **Same-host container isolation is not VM-level isolation.** Containers share the host kernel. A kernel exploit could break out of the container boundary. For the highest-security deployments, consider running agent containers in lightweight VMs (Firecracker, gVisor) instead of standard containers.
 
-**Regex guardrails catch known patterns, not novel attacks.** Static regex patterns target specific attack categories and block known techniques effectively with zero external dependencies, making them suitable for network-isolated deployments where ML guardrails can't reach external APIs. But a sufficiently novel attack pattern will evade regex detection. Commercial ML-based guardrails (Cygnal, Pangea) add coverage for zero-day patterns.
+**Regex guardrails catch known patterns, not novel attacks.** Static regex patterns target specific attack categories and block known techniques effectively with zero external dependencies, making them suitable for network-isolated deployments where ML guardrails can't reach external APIs. But a sufficiently novel attack pattern will evade regex detection. Commercial ML-based guardrails add coverage for zero-day patterns.
 
 **Some guardrail modes don't work in isolated containers.** Guardrail layers that require internet access at startup (downloading datasets, reaching external classification APIs) fail in network-isolated environments. Only guardrails that operate fully locally (heuristic checks, regex, local NLP models) work reliably. This is a real constraint of defense-in-depth: some guardrail layers assume internet access that the isolation architecture deliberately removes.
 
