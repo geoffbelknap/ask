@@ -10,8 +10,6 @@ ASK is a documentation framework, not software. But logical flaws in the tenets,
 - The attack scenario or logical flaw
 - Suggested remediation, if you have one
 
-If the finding is sensitive enough that public disclosure before remediation would put existing implementations at risk, email geoffbelknap@users.noreply.github.com instead.
-
 ## Scope
 
 In scope:
