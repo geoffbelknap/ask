@@ -6,7 +6,7 @@ Pure documentation repository. Contains the ASK agent security framework: tenets
 
 These apply to all work on this repository. Before proposing or implementing any change, verify it does not break these tenets. If a proposed design requires violating any of them, stop and flag it — the design is wrong, not the tenet. See `FRAMEWORK.md` for full context.
 
-1. **Constraints are external and inviolable.** Enforcement machinery (policy engine, audit logger, mediation proxies) must never run inside the agent's isolation boundary. The agent cannot perceive, influence, or circumvent enforcement.
+1. **Constraints are external and inviolable.** Enforcement machinery (policy engine, audit logger, mediation proxies) must never run inside the agent's isolation boundary. The agent cannot influence or circumvent enforcement.
 2. **Every action leaves a trace.** Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.
 3. **Mediation is complete.** There is no path from the agent to any external resource that bypasses the mediation layer. If you add a new external dependency, it must go through the egress proxy or LLM proxy.
 4. **Least privilege.** Capabilities, credentials, mounts, and authority are scoped to the minimum required. Don't add capabilities to the assistant container. Don't mount host paths into the assistant that it doesn't need.

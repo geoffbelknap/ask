@@ -73,7 +73,7 @@ The architecture places controls at every stage:
 | 5. Action execution | Runtime gateway command policy | Block/approve/redirect per command |
 | 5. Action execution | Runtime gateway file policy | Per-operation file access control |
 | 5. Action execution | Runtime gateway MCP tool policy | Per-tool allowlist for MCP servers |
-| 6. Exfiltration / damage | Egress proxy domain denylist | Network-level exfiltration prevention |
+| 6. Exfiltration / damage | Egress proxy domain denylist | Blocks known exfiltration destinations (partial — denylist coverage is inherently incomplete; allowlist is stronger for high-security deployments) |
 | 6. Exfiltration / damage | Runtime gateway network audit | Per-process network attribution |
 
 ### Trust Tiers

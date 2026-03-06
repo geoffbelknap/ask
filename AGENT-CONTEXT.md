@@ -18,7 +18,7 @@ Every ASK deployment MUST implement all four. Omitting any element creates a gap
 The managed environment (container, VM, namespace) the agent occupies. MUST be provisioned by infrastructure, never by the agent itself. The agent inherits its constraints from the workspace.
 
 **ELEMENT 2 — MEDIATION LAYER**
-ALL communication between agent and external systems MUST pass through proxies the agent cannot bypass, perceive, or disable. No path from agent to any external resource may bypass mediation. This is a binary condition — mediation is either complete or the framework has failed.
+ALL communication between agent and external systems MUST pass through proxies the agent cannot bypass or disable. No path from agent to any external resource may bypass mediation. This is a binary condition — mediation is either complete or the framework has failed.
 
 **ELEMENT 3 — AUDIT LOG**
 A complete, tamper-evident record written by the mediation layer, NOT by the agent. The agent MUST have no write access to audit logs. The agent cannot suppress, alter, or delete them.

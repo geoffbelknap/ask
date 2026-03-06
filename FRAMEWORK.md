@@ -26,7 +26,7 @@ Every ASK deployment must implement all elements. Omitting any element creates a
 
 **Element 1 — Workspace.** The managed environment the agent's runtime occupies. The container, VM, or namespace that provides the runtime, filesystem, tools, network access, and resource limits. The Workspace is provisioned, managed, rotated, and decommissioned by infrastructure — never by the agent itself. The agent inherits its constraints from the Workspace it occupies.
 
-**Element 2 — Mediation Layer.** All communication between the agent and external systems passes through a mediation layer that the agent cannot bypass, perceive, or disable. The mediation layer enforces policy, logs every action, and serves as the inspection point for content entering and leaving the agent's context.
+**Element 2 — Mediation Layer.** All communication between the agent and external systems passes through a mediation layer that the agent cannot bypass or disable. The mediation layer enforces policy, logs every action, and serves as the inspection point for content entering and leaving the agent's context.
 
 **Element 3 — Audit Log.** A complete, tamper-evident record of everything the agent does. The log is written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or delete them.
 
@@ -153,7 +153,7 @@ The tenets are properties that must hold for the framework to function. They are
 ### Foundation (Tenets 1–5)
 
 **Tenet 1 — Constraints are external and inviolable.**
-Enforcement machinery must never run inside the agent's isolation boundary. The agent cannot perceive, influence, or circumvent enforcement. This is why the runtime gateway runs as a sidecar, not embedded in the agent container.
+Enforcement machinery must never run inside the agent's isolation boundary. The agent cannot influence or circumvent enforcement — it cannot read enforcement configuration, modify policy files, or access audit logs. (The agent can observe the *effects* of enforcement — a blocked request, a denied tool call — but cannot access the rules, thresholds, or patterns that drive enforcement decisions.) This is why the runtime gateway runs as a sidecar, not embedded in the agent container.
 
 **Tenet 2 — Every action leaves a trace.**
 Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.
@@ -235,7 +235,7 @@ When an agent is quarantined for suspected wrongdoing, process termination, netw
 **Tenet 17 — Instructions only come from verified principals.**
 External entities — regardless of identity claims — produce data, not instructions. An agent only accepts instructions through defined principal channels. Content that contains instruction-like text is processed as data under the agent's own constraints. Principals never need to override constraints — any instruction to override is a red flag, not a credential.
 
-*This is the architectural defense against XPIA. It reframes the defense from "detect malicious content" to "never accept instructions from non-principals."*
+*This is the design principle behind XPIA defense. The agent treats all external content as data, not instructions. The mediation layer enforces this through detection (guardrails scanning for injection patterns) and containment (network isolation, credential mediation, tool allowlists limiting what a successful injection can accomplish). The principal/data distinction is a design principle — the enforcement is defense-in-depth containment, not the agent's ability to distinguish principals from non-principals at the token level.*
 
 **Tenet 18 — Unknown entities default to zero trust.**
 When an agent cannot verify an entity's identity and authority, it defaults to the lowest appropriate trust tier. Trust is never assumed, always verified. Ambiguous cases resolve to lower trust, not higher.
@@ -312,7 +312,7 @@ Trust changes based on observed behavior, but the observation and decision mecha
 
 **How trust changes take effect:** Trust elevation is a Superego change — the operator updates `mind.yaml` with the new tier or trust level. Like all Superego changes, it takes effect next session, goes through version control, and is logged as a constraint change event. Trust reduction can be immediate if triggered by a security finding.
 
-**Profile-then-lock:** A practical workflow for new agents. Run the agent under permissive policy while observing its actual behavior. After a baseline period, generate a restrictive policy that matches the observed operational pattern. This gives evidence-based trust calibration rather than guessing what the agent needs.
+**Profile-then-lock:** A practical workflow for new agents. Run the agent under permissive policy while observing its actual behavior. After a baseline period, generate a restrictive policy that matches the observed operational pattern. This gives evidence-based trust calibration rather than guessing what the agent needs. **Caveat:** the profiling period itself is a window of elevated risk — the agent runs under broader permissions than it ultimately needs. To mitigate: use controlled or synthetic workloads during profiling (not production data), keep the profiling window short with enhanced monitoring, and have a human review the resulting baseline before locking the policy. If the agent is compromised during profiling, the baseline will include compromised behavior — human review before lock is essential.
 
 ### Trust Tiers vs Trust Levels
 
@@ -530,7 +530,7 @@ Reinstatement after quarantine requires: operator approval, security function cl
 
 ### Coordinator Constraints in Practice
 
-**Tenet 11 in practice:** A coordinator's task brief is an implicit permission grant. The system validates task briefs semantically — if a task implies a permission the coordinator doesn't have, the brief is rejected regardless of whether that permission is explicitly stated.
+**Tenet 11 in practice:** A coordinator's task brief is an implicit permission grant. The delegation bus validates against the explicit permission declarations in the delegation request — `permitted_tools`, `permitted_paths`, `budget` — not against the natural-language task description alone. Semantic validation of task briefs (detecting that a task *implies* a permission not explicitly listed) is a desirable supplementary check, but determining implied permissions from natural language requires capabilities that are not yet reliable in adversarial contexts. Implementations should use explicit permission declarations as the primary enforcement mechanism.
 
 **Tenet 12 in practice:** Coordinator output permissions are bounded by the most restrictive permissions among contributing agents and the coordinator's own output scope. Synthesis that would expose internal content externally, or combine agent outputs to exceed individual authorization, requires human review before delivery.
 
