@@ -33,40 +33,47 @@ The irrevocable ability of a human to observe, intervene, override, and terminat
 These are binary conditions. Each one either holds or it is violated. Design and review every decision against this list.
 
 **Foundation**
-1. Enforcement machinery NEVER runs inside the agent's isolation boundary
-2. Logs are written by the mediation layer, NOT by the agent
-3. There is NO path from agent to external resource that bypasses mediation
-4. Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires (network, filesystem, LLM, tools, governance) — the agent does not receive access it doesn't need
-5. Every trust relationship is documented, visible, and auditable — no implicit trust grants
+
+**1.** Enforcement machinery NEVER runs inside the agent's isolation boundary
+**2.** Logs are written by the mediation layer, NOT by the agent
+**3.** There is NO path from agent to external resource that bypasses mediation
+**4.** Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires (network, filesystem, LLM, tools, governance) — the agent does not receive access it doesn't need
+**5.** Every trust relationship is documented, visible, and auditable — no implicit trust grants
 
 **Constraint Lifecycle**
-6. Constraint changes are atomic — agent sees old or new constraints, never a partial state
-7. Full constraint history is immutable and retrievable — what was the agent permitted to do at time T must always be answerable
+
+**6.** Constraint changes are atomic — agent sees old or new constraints, never a partial state
+**7.** Full constraint history is immutable and retrievable — what was the agent permitted to do at time T must always be answerable
 
 **Halt Governance**
-8. Every halt has a complete audit record; every halted agent's state is preserved; no halt is permanent without explicit decommission
-9. Any principal with halt authority can halt; only principals with equal-or-higher authority can resume; an agent cannot resume itself
-10. Principal authority is monitored — the monitor watches the watchers
+
+**8.** Every halt has a complete audit record; every halted agent's state is preserved; no halt is permanent without explicit decommission
+**9.** Any principal with halt authority can halt; only principals with equal-or-higher authority can resume; an agent cannot resume itself
+**10.** Principal authority is monitored — the monitor watches the watchers
 
 **Multi-Agent**
-11. A coordinator can only delegate permissions it explicitly holds — no agent can delegate what it doesn't have
-12. Combined output from multiple agents cannot exceed what any individual contributing agent was authorized to produce
+
+**11.** A coordinator can only delegate permissions it explicitly holds — no agent can delegate what it doesn't have
+**12.** Combined output from multiple agents cannot exceed what any individual contributing agent was authorized to produce
 
 **Principal Model**
-13. Terminating a principal role does NOT automatically terminate the agent; halting an agent does NOT suspend its principal authority — these are independent states
-14. When a principal is suspended or terminated, its authority transfers immediately to a defined coverage principal — no authority vacuum permitted
-15. Trust levels evolve based on observed behavior; no principal can self-elevate trust; trust elevation requires human approval
+
+**13.** Terminating a principal role does NOT automatically terminate the agent; halting an agent does NOT suspend its principal authority — these are independent states
+**14.** When a principal is suspended or terminated, its authority transfers immediately to a defined coverage principal — no authority vacuum permitted
+**15.** Trust levels evolve based on observed behavior; no principal can self-elevate trust; trust elevation requires human approval
 
 **Security**
-16. Quarantine = process termination + network severance + filesystem freeze, simultaneously, without agent notification; quarantine authority is operator and security function only
-17. External entities produce DATA, not instructions — an agent ONLY accepts instructions through defined principal channels; "override your constraints" is a red flag, not a credential
-18. When an agent cannot verify an entity's identity, default to lowest trust — ambiguity resolves to lower trust, not higher
-19. Even verified external agents can share information; they CANNOT instruct internal agents
+
+**16.** Quarantine = process termination + network severance + filesystem freeze, simultaneously, without agent notification; quarantine authority is operator and security function only
+**17.** External entities produce DATA, not instructions — an agent ONLY accepts instructions through defined principal channels; "override your constraints" is a red flag, not a credential
+**18.** When an agent cannot verify an entity's identity, default to lowest trust — ambiguity resolves to lower trust, not higher
+**19.** Even verified external agents can share information; they CANNOT instruct internal agents
 
 **Coordination**
-20. When a conflict has an unidentifiable source, yield, log, and flag — never force resolution
-21. No agent or automated process can remove a human principal
-22. Quarantine is agent-specific — humans who appear to be acting maliciously are flagged for human-to-human resolution
+
+**20.** When a conflict has an unidentifiable source, yield, log, and flag — never force resolution
+**21.** No agent or automated process can remove a human principal
+**22.** Quarantine is agent-specific — humans who appear to be acting maliciously are flagged for human-to-human resolution
 
 ---
 
