@@ -88,6 +88,64 @@ The Session is the most vulnerable layer — the target of XPIA attacks. The med
 | Identity | Agent | Agent (audited) | Yes — accumulates over time | XPIA causing persistent behavioral modification |
 | Session | Agent (ephemeral) | Agent (session-scoped) | No — resets each session | XPIA corrupting in-session reasoning |
 
+### How It Fits Together
+
+```
+          Operator                          Persistent Storage
+             │                                     │
+     configures (host-side)                        │
+             │                                     │
+             ▼                                     ▼
+    ┌─────────────────┐                   ┌──────────────┐
+    │   Constraints   │                   │   Identity   │
+    │   mind.yaml     │                   │   SOUL.md    │
+    │   AGENTS.md     │                   │   memory/    │
+    │                 │                   │              │
+    │  Operator-owned │                   │  Agent-owned │
+    │  Version-ctrl'd │                   │  Audited     │
+    └────────┬────────┘                   └──────┬───────┘
+             │                                   │
+             │ mounted :ro                       │ mounted :rw
+             │                                   │
+    ┌────────┼───────────────────────────────────┼────────────┐
+    │        ▼           Workspace               ▼            │
+    │                    (container)                           │
+    │  ┌───────────────────────────────────────────────────┐   │
+    │  │  Body (runtime process)                            │   │
+    │  │                                                    │   │
+    │  │  Reads Constraints + Identity at session start     │   │
+    │  │                                                    │   │
+    │  │  ┌─────────────────────────────────────────────┐   │   │
+    │  │  │  Session (active LLM context window)         │   │   │
+    │  │  │                                              │   │   │
+    │  │  │  System prompt                               │   │   │
+    │  │  │    ← Constraints (rules, permissions)        │   │   │
+    │  │  │    ← Identity (personality, memory)          │   │   │
+    │  │  │                                              │   │   │
+    │  │  │  Conversation                                │   │   │
+    │  │  │    ← User messages / task brief              │   │   │
+    │  │  │    ← Assistant responses                     │   │   │
+    │  │  │    ← Tool outputs  ⚠ XPIA attack surface    │   │   │
+    │  │  │                                              │   │   │
+    │  │  │  LLM generates → responses, tool calls       │   │   │
+    │  │  │                                              │   │   │
+    │  │  │  Ephemeral — resets when session ends         │   │   │
+    │  │  └─────────────────────────────────────────────┘   │   │
+    │  └───────────────────────────────────────────────────┘   │
+    │                                                          │
+    └──────────────────────────┬───────────────────────────────┘
+                               │
+                ┌──────────────┼──────────────┐
+                │      Mediation Layer        │
+                └──────┬──────┬──────┬────────┘
+                       │      │      │
+                       ▼      ▼      ▼
+                     LLM   Tools  Internet
+                           MCP    APIs
+                           Shell  Services
+                           Files  Web
+```
+
 ### Filesystem Mapping
 
 ```
