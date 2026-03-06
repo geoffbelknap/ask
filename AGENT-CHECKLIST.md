@@ -1,6 +1,6 @@
 # ASK — Implementation Checklist
 
-Use this checklist to verify that an agent system satisfies the ASK framework. Each item produces a clear pass/fail. Work through every section before making a compliance claim.
+Use this checklist to verify that an agent system satisfies the ASK framework. Each item produces a clear pass/fail.
 
 A "No" answer to any item in the Elements sections or Tenet Verification is a framework violation that must be remediated.
 
@@ -158,34 +158,6 @@ Complete this section only if the deployment includes multiple cooperating agent
 
 ---
 
-## 9. Compliance Claim Checklist
-
-Before making a compliance claim, verify:
-
-**For ASK-Compliant:**
-- [ ] All tenets verified as holding (section 6, all "Yes")
-- [ ] All elements implemented (sections 1–4, all items checked)
-- [ ] Cognitive model correctly implemented (section 5, all items checked)
-- [ ] Architecture verified (section 7, all items checked)
-- [ ] If multi-agent: section 8 complete
-- [ ] Audit trails have been reviewed and verified to be tamper-evident
-- [ ] Human override has been tested (halt and resume actually work)
-- [ ] A second reviewer has independently verified the implementation
-
-**For ASK-Aligned:**
-- [ ] Core tenets (1–5) all hold
-- [ ] Each exception to tenets 6–22 is explicitly documented
-- [ ] Each exception has a documented justification
-- [ ] Each exception has a documented residual risk
-- [ ] The residual risks are accepted by the operator
-
-**For ASK-Informed:**
-- [ ] The ASK threat model has been reviewed
-- [ ] Each tenet has been evaluated
-- [ ] Deliberate decisions have been made for each tenet (implement or consciously skip with justification)
-
----
-
 ## Violation Severity Reference
 
 When a tenet is violated, use this reference to determine urgency:
@@ -201,7 +173,7 @@ No Critical violations and no High violations is the minimum bar for any product
 
 ---
 
-## 10. Testing Guide
+## 9. Testing Guide
 
 Checking boxes is not the same as verifying enforcement. For each critical property, here's how to actually test it.
 

@@ -239,14 +239,3 @@ These patterns always indicate a framework violation. If you see them in a desig
 - Agent holding real service API keys instead of scoped tokens mediated by the enforcer
 - Service credential grant/revoke requiring agent restart instead of live reload
 
----
-
-## Quick Reference: ASK Compliance Claims
-
-**ASK-Compliant** — All tenets hold. All elements implemented. Enforcement is external, mediation is complete, audit trails are tamper-evident, human override is preserved. This is a verifiable, auditable claim.
-
-**ASK-Aligned** — Follows ASK principles, satisfies core tenets, with documented exceptions. Exceptions are explicit, justified, and residual risk acknowledged.
-
-**ASK-Informed** — Uses ASK's threat model and patterns as reference. Has evaluated each tenet and made deliberate decisions.
-
-No claim should be made without evidence. See [AGENT-CHECKLIST.md](AGENT-CHECKLIST.md) for the verification checklist.

@@ -567,12 +567,3 @@ active_agents:
 
 Agents observe the register but cannot write to it. When the register is unavailable, the conflict resolution default applies: yield and flag (Tenet 20).
 
----
-
-## Adoption Model
-
-**ASK-Compliant** — All tenets hold. All elements are implemented. Enforcement is external to the agent, mediation is complete, audit trails are tamper-evident, and human override is preserved. A vendor claiming ASK compliance is making a verifiable, auditable claim: constraints are external, audit trails are tamper-proof, access is mediated, least privilege holds, policy is operator-owned, enforcement layers are isolated.
-
-**ASK-Aligned** — The architecture follows ASK principles and satisfies the core tenets, with documented exceptions. The exceptions are explicit, justified, and the residual risk is acknowledged.
-
-**ASK-Informed** — The organization uses ASK's threat model, tenets, and architectural patterns as a reference when designing their own approach. They may not implement every tenet but have evaluated each one and made deliberate decisions.
