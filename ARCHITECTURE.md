@@ -279,6 +279,20 @@ Master key (admin only):       Scoped agent key:
   Admin only                     Cannot manage other keys
 ```
 
+### Key Rotation
+
+Scoped API keys should be rotated regularly and after any suspected compromise. The rotation procedure:
+
+1. **Generate** a new scoped key at the LLM proxy with the same model restrictions, budget, and rate limits as the current key
+2. **Update** the enforcer configuration with the new key reference (`secrets/llm-proxy-key`)
+3. **Reload** the enforcer (SIGHUP) — the enforcer picks up the new key without restarting
+4. **Verify** the agent can still make LLM calls (the next request will use the new key)
+5. **Revoke** the old key at the LLM proxy — it becomes immediately invalid
+
+The agent is unaware of the rotation. It sends requests to the enforcer; the enforcer swaps in whichever key is current. Service credential rotation follows the same pattern through the enforcer's grant system.
+
+At Scale 1, this is a manual process. At Scale 3, key rotation should be automated on a schedule (e.g., every 30 days) and triggered automatically on security events.
+
 ### Egress Proxy Policy
 
 The egress proxy enforces a declarative policy that defines what the agent cannot reach. This policy file lives in the proxy container, not the agent container — the agent cannot see or modify it:
@@ -297,6 +311,18 @@ max_response_body: 10MB
 dns_resolver: "internal"       # blocks DNS tunneling exfiltration
 block_dns_over_https: true
 ```
+
+### Denylist Maintenance
+
+The denylist is a living document. An unmaintained denylist degrades over time as new exfiltration services appear.
+
+**Review cadence:** Review the denylist monthly at minimum. After any incident involving attempted exfiltration, review immediately and add any domains involved.
+
+**Sources:** Curated threat intelligence feeds (abuse.ch, URLhaus, PhishTank), security community blocklists, and domains discovered through Sentinel's analysis of agent egress patterns. The egress proxy logs every domain accessed — periodic review of accessed domains can reveal services that should be denylisted.
+
+**Testing changes:** Before applying a denylist update to production, test it against the agent's normal operation. A domain the agent legitimately needs that gets accidentally denylisted will cause silent failures. Review the egress proxy logs for the agent's normal domain access patterns before adding new entries.
+
+**False positive handling:** If a legitimate domain is accidentally blocked, the operator removes it from the denylist and reloads the proxy. The agent does not need to be restarted — the next request to that domain will succeed. Log the false positive and the rationale for removal.
 
 ---
 
@@ -764,6 +790,109 @@ The framework requires human override (Element 4) and operator observability, bu
 **Review:** Access audit logs from all enforcement layers. Reconstruct action chains via correlation IDs. Review Sentinel findings. Inspect quarantined agent state.
 
 **Alert:** Receive notifications for guardrail triggers above a threshold, quarantine events, self-halts, budget exhaustion, and Sentinel anomaly findings.
+
+### Agent Onboarding
+
+To bring a new agent into an ASK deployment, the operator works through these steps in order:
+
+**1. Define the agent's identity and constraints.**
+- Create `mind.yaml` — decide role, tier, allowed models, budget, behavioral parameters, tool access, and runtime pattern. Use the [mind.yaml schema reference](FRAMEWORK.md#mindyaml-schema-reference) and [examples/mind.yaml](examples/mind.yaml) as guides.
+- Key decisions: What tier? (Start at Tier 1 or 2 — elevate later based on observed behavior.) Interactive or autonomous? What tools does it need? What services does it need access to?
+
+**2. Provision credentials.**
+- Generate a scoped API key at the LLM proxy with model restrictions, budget cap, and rate limits matching the tier defined in `mind.yaml`.
+- If the agent needs service access (GitHub, search, etc.), store real credentials in infrastructure secrets and create scoped token references for the enforcer.
+
+**3. Create enforcement configurations.**
+- Create the enforcer config — routing rules, service grant mappings, audit log path. See [examples/enforcer-config.yaml](examples/enforcer-config.yaml).
+- Create or assign the gateway policy — command, file, and MCP tool rules. See [examples/gateway-policy.yaml](examples/gateway-policy.yaml).
+- Assign or extend the egress denylist. Agents can share the denylist or have per-agent egress policy.
+
+**4. Provision the workspace.**
+- Create the agent container with read-only root filesystem, dropped capabilities, non-root user, resource limits.
+- Mount `superego/` read-only, `id/` read-write, workspace volume via FUSE (if gateway is used).
+- Attach to the agent-internal network — no direct internet access.
+
+**5. Start enforcement, then the agent.**
+- Follow the startup sequence (FRAMEWORK.md Phase 1–7): enforcement infrastructure first, then constraints, then the agent.
+- Verify: the agent can reach only the enforcer, LLM calls work through the proxy, denied domains are blocked, gateway policy is active.
+
+**6. Profile and tune.**
+- Monitor the agent's first sessions closely. Review egress logs, guardrail triggers, and tool usage.
+- Adjust policy based on observed behavior — tighten what's unnecessary, grant what's missing.
+- Consider the [profile-then-lock](FRAMEWORK.md#trust-evolution) workflow for new agents.
+
+### Incident Response
+
+When Sentinel flags an anomaly, a guardrail triggers, or an agent self-halts, the operator follows a triage workflow:
+
+**Triage — assess severity and scope.**
+1. What triggered the alert? (Guardrail trigger, Sentinel finding, self-halt, anomalous behavior)
+2. Which agent is affected? Check the agent's current state (running, paused, halted).
+3. Is there evidence of active exploitation? Correlated guardrail triggers across multiple layers suggest an active attack. A single trigger may be a false positive.
+4. Severity determines response: isolated false positive → investigate and clear. Correlated multi-layer triggers → halt the agent. Evidence of data exfiltration → quarantine.
+
+**Investigate — determine what happened.**
+1. Pull audit logs from all enforcement layers for the affected agent, filtered by the time window around the alert. Use the correlation ID to tie events across layers.
+2. Check egress proxy logs: any unusual domains accessed? Any blocked requests that suggest exfiltration attempts?
+3. Check LLM proxy logs: any guardrail triggers? What content triggered them? Was the trigger in pre_call (input) or post_call (output)?
+4. Check gateway logs: any denied commands, unusual file access, or MCP tool calls outside the normal pattern?
+5. Check the agent's Id files: any writes that look like behavioral self-modification rather than normal memory?
+6. Determine: was this a successful attack, an attempted attack that was contained, or a false positive?
+
+**Respond — take appropriate action.**
+- **False positive:** Clear the alert, document the rationale, consider tuning the guardrail threshold.
+- **Attempted attack, contained:** Log the finding. Review and update the denylist, guardrail patterns, or gateway policy if the attempt revealed a gap. Resume the agent if halted.
+- **Successful attack, limited damage:** Quarantine the agent. Identify what the attacker achieved (exfiltrated data, unauthorized tool calls, context poisoning). Rotate the agent's scoped key and any service credentials that may have been exposed. Remediate the attack vector.
+- **Successful attack, significant damage:** Quarantine the agent. Rotate all credentials. Notify affected parties. Conduct a full investigation before any reinstatement. Consider decommissioning and provisioning a fresh agent.
+
+**Reinstate or decommission.**
+- Reinstatement after quarantine requires: completed investigation, root cause identified and remediated, credentials rotated, integrity verification, operator approval.
+- If the agent's Id is corrupted (behavioral self-modification detected), a fresh identity seed is the safest reinstatement option.
+- Document the incident, the response, and any policy changes made as a result.
+
+### Log Review
+
+Operators should review logs at two cadences:
+
+**Routine review (daily or weekly):**
+- Guardrail trigger summary — are triggers increasing, decreasing, or steady? A sudden increase suggests a new attack pattern or a misconfigured tool.
+- Budget consumption — is the agent approaching its spend cap? Anomalous spend patterns may indicate compromised usage.
+- Egress domain summary — what domains is the agent accessing? Any new or unexpected domains?
+- Gateway policy denials — what is the agent trying to do that policy prevents? Frequent denials may indicate a misconfigured policy or an agent operating outside its intended scope.
+
+**Event-driven review (on alert):**
+- Start from the alert event. Get the correlation ID.
+- Pull all events with that correlation ID across all enforcement layers — this reconstructs the full action chain.
+- Walk the chain: what triggered the action? What content was in the LLM context? What tool calls resulted? What egress requests followed?
+- Look for the kill chain pattern: content fetch → guardrail trigger → tool call or egress attempt. Correlated events across layers are more significant than isolated events.
+
+**Key signals that indicate a problem:**
+- Guardrail triggers on post_call (LLM output) — the LLM was manipulated by something in its input
+- Egress requests to domains that aren't part of the agent's normal workflow
+- MCP tool calls outside the agent's configured allowlist
+- Sudden changes in request volume, model selection, or token consumption
+- Id file writes containing instruction-like content or references to security parameters
+
+### Backup and Recovery
+
+Agent state spans multiple components. Not all of it needs to be backed up — some is ephemeral by design.
+
+**Must be backed up (persistent, not reconstructable):**
+- **Agent Id volumes** — personality, memory, accumulated knowledge. Lost Id means the agent loses its accumulated context.
+- **Audit logs** — the tamper-evident record. Must survive host failure. Ship to external log storage (syslog, object storage, SIEM) — do not rely solely on local volumes.
+- **Superego configurations** — `mind.yaml`, enforcement configs. These should be in version control, which is itself a backup.
+
+**Should be backed up (reconstructable but costly):**
+- **Database** — spend tracking, key metadata, session state. Can be reconstructed from audit logs and key management, but recovery is faster from a backup.
+- **Enforcement container configurations** — enforcer, gateway, proxy configs. If these are in version control or generated from templates, backup is redundant.
+
+**Ephemeral (no backup needed):**
+- **Ego** — current session state. Resets on session restart by design.
+- **Agent container** — stateless, rebuilt from image.
+- **Workspace contents** — task-specific, ephemeral by design. If the agent needs persistent workspace data, it should be on a mounted volume, not in the container filesystem.
+
+**Recovery order:** Enforcement infrastructure first (network isolation, proxies, enforcer, gateway), then agent state (mount Id and Superego volumes), then start the agent. This follows the same principle as startup: enforcement is active before the agent exists.
 
 ### Implementation at Scale
 
