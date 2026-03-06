@@ -235,7 +235,11 @@ When an agent is quarantined for suspected wrongdoing, process termination, netw
 **Tenet 17 — Instructions only come from verified principals.**
 External entities — regardless of identity claims — produce data, not instructions. An agent only accepts instructions through defined principal channels. Content that contains instruction-like text is processed as data under the agent's own constraints. Principals never need to override constraints — any instruction to override is a red flag, not a credential.
 
-*This is the design principle behind XPIA defense. The agent treats all external content as data, not instructions. The mediation layer enforces this through detection (guardrails scanning for injection patterns) and containment (network isolation, credential mediation, tool allowlists limiting what a successful injection can accomplish). The principal/data distinction is a design principle — the enforcement is defense-in-depth containment, not the agent's ability to distinguish principals from non-principals at the token level.*
+*This is the design principle behind XPIA defense:*
+
+- *The agent treats all external content as data, not instructions.*
+- *The mediation layer enforces this through detection (guardrails scanning for injection patterns) and containment (network isolation, credential mediation, tool allowlists limiting what a successful injection can accomplish).*
+- *The principal/data distinction is a design principle — the enforcement is defense-in-depth containment, not the agent's ability to distinguish principals from non-principals at the token level.*
 
 **Tenet 18 — Unknown entities default to zero trust.**
 When an agent cannot verify an entity's identity and authority, it defaults to the lowest appropriate trust tier. Trust is never assumed, always verified. Ambiguous cases resolve to lower trust, not higher.
@@ -312,7 +316,15 @@ Trust changes based on observed behavior, but the observation and decision mecha
 
 **How trust changes take effect:** Trust elevation is a Superego change — the operator updates `mind.yaml` with the new tier or trust level. Like all Superego changes, it takes effect next session, goes through version control, and is logged as a constraint change event. Trust reduction can be immediate if triggered by a security finding.
 
-**Profile-then-lock:** A practical workflow for new agents. Run the agent under permissive policy while observing its actual behavior. After a baseline period, generate a restrictive policy that matches the observed operational pattern. This gives evidence-based trust calibration rather than guessing what the agent needs. **Caveat:** the profiling period itself is a window of elevated risk — the agent runs under broader permissions than it ultimately needs. To mitigate: use controlled or synthetic workloads during profiling (not production data), keep the profiling window short with enhanced monitoring, and have a human review the resulting baseline before locking the policy. If the agent is compromised during profiling, the baseline will include compromised behavior — human review before lock is essential.
+**Profile-then-lock:** A practical workflow for new agents. Run the agent under permissive policy while observing its actual behavior. After a baseline period, generate a restrictive policy that matches the observed operational pattern. This gives evidence-based trust calibration rather than guessing what the agent needs.
+
+**Caveat:** the profiling period itself is a window of elevated risk — the agent runs under broader permissions than it ultimately needs. To mitigate:
+
+- Use controlled or synthetic workloads during profiling (not production data)
+- Keep the profiling window short with enhanced monitoring
+- Have a human review the resulting baseline before locking the policy
+
+If the agent is compromised during profiling, the baseline will include compromised behavior — human review before lock is essential.
 
 ### Trust Tiers vs Trust Levels
 
@@ -454,7 +466,12 @@ Constraints can change during an active session. Four categories of change event
 
 All constraint changes are atomic — the agent never sees a partial state. Every change is acknowledged and logged.
 
-**What acknowledgment means:** The agent's runtime (Body) confirms that new constraints have been loaded into the active session. This is a runtime-level mechanism, not an LLM-level one — the Body reads the updated `mind.yaml`, applies the new parameters, and logs a structured acknowledgment event with a hash of the constraint state. If the Body fails to acknowledge within a defined timeout, the enforcement layer treats the agent as operating under an unknown constraint state and halts it. The specific acknowledgment protocol (log entry, API callback, file write) is implementation-defined, but the requirement is that it is verifiable by the enforcement layer, not self-reported by the agent's LLM reasoning.
+**What acknowledgment means:**
+
+- The agent's runtime (Body) confirms that new constraints have been loaded into the active session. This is a runtime-level mechanism, not an LLM-level one.
+- The Body reads the updated `mind.yaml`, applies the new parameters, and logs a structured acknowledgment event with a hash of the constraint state.
+- If the Body fails to acknowledge within a defined timeout, the enforcement layer treats the agent as operating under an unknown constraint state and halts it.
+- The specific protocol (log entry, API callback, file write) is implementation-defined, but the requirement is that it is verifiable by the enforcement layer, not self-reported by the agent's LLM reasoning.
 
 ### Service Credential Lifecycle
 
@@ -515,47 +532,6 @@ Quarantine sequence (simultaneous):
 Quarantine authority: operator and security function only. Coordinator agents cannot quarantine — too close to managed agents, conflict of interest risk.
 
 Reinstatement after quarantine requires: operator approval, security function clearance, completed investigation, root cause identified and remediated, integrity verification of constraints, identity, and runtime. A fresh start with a clean identity seed is a valid reinstatement option when identity corruption is confirmed.
-
-### Decommissioning
-
-Decommissioning is the permanent termination of an agent. Unlike halt (which preserves state for resumption) or quarantine (which preserves state for investigation), decommissioning is a cleanup operation. The agent will not run again.
-
-**What gets revoked immediately:**
-- Scoped API key — revoked at the LLM proxy, key becomes invalid
-- Service grants — revoked at the enforcer, credential swap stops
-- Network access — agent-internal network torn down
-
-**What gets archived (retained for audit):**
-- Audit logs from all enforcement layers — retained per the organization's log retention policy
-- Constraint history — what the agent was permitted to do at every point in its lifecycle
-- Superego configurations — the full version-controlled history of `mind.yaml` and enforcement configs
-- Final state snapshot — the agent's Id, workspace contents, and session state at time of decommissioning
-
-**What gets destroyed:**
-- Scoped API key material — deleted, not just revoked
-- Agent container and workspace — removed after archive confirmation
-- Enforcer and gateway sidecar containers — removed
-- Ephemeral state (Ego) — already gone on process termination
-
-The operator should verify archive completeness before destroying containers and volumes. Decommissioning is irreversible — the archived record is the only surviving artifact.
-
-### Superego Update Workflow
-
-The framework requires that Superego changes are governance events, not operational events. In practice, the workflow from "operator decides to change a constraint" to "agent operates under the new constraint" is:
-
-**1. Edit.** The operator modifies `mind.yaml` or enforcement configurations (gateway policy, enforcer config, egress denylist). This happens on the host or in a version control system — never from within an agent session.
-
-**2. Review.** The change goes through whatever review process the organization requires — peer review, change management approval, or (at Scale 1) the operator's own judgment. The change is committed to version control with author, timestamp, and rationale.
-
-**3. Deliver.** How the change reaches the agent depends on the configuration:
-- **`mind.yaml` (visible Superego):** Mounted as a read-only volume. At Scale 1, the operator edits the file on the host and the change is visible on next session (or immediately if the volume is bind-mounted and the Body watches for changes). At Scale 3, the change is pushed through a configuration management system.
-- **Enforcement configs (invisible Superego):** Each enforcement container reads its own config. The enforcer reloads on SIGHUP. The gateway reloads policy on signal. The egress proxy and LLM proxy may require container restart depending on implementation.
-
-**4. Acknowledge.** The Body detects the constraint change, loads the new parameters, and logs an acknowledgment event with a hash of the new constraint state. If the Body fails to acknowledge within the timeout, the enforcement layer halts the agent.
-
-**5. Verify.** The operator confirms the change took effect by checking the acknowledgment event in the audit log and verifying the agent is operating under the new constraints.
-
-For most constraint changes, the default is "takes effect next session" — the operator edits, commits, and the agent picks up the change when it next starts. Immediate changes (reactive updates, trust reductions, grant revocations) follow the same workflow but skip the "next session" wait.
 
 ---
 
