@@ -62,15 +62,15 @@ A "No" answer to any item in the Elements sections or Tenet Verification is a fr
 
 ---
 
-## 5. Cognitive Model (Superego/Id Separation)
+## 5. Cognitive Model (Constraints/Identity Separation)
 
-- [ ] Security-relevant configuration (risk tolerance, escalation thresholds, permission grants, tier declaration) is stored in Superego files on a `:ro` mount — the agent cannot write to these files
+- [ ] Security-relevant configuration (risk tolerance, escalation thresholds, permission grants, tier declaration) is stored in Constraints files on a `:ro` mount — the agent cannot write to these files
 - [ ] Agent-owned writable storage (memory, personality, accumulated knowledge) is on a separate `:rw` mount
-- [ ] The `:rw` mount (Id) does NOT contain any security-relevant behavioral parameters
-- [ ] Sentinel or equivalent monitoring watches for anomalous writes to the Id layer
-- [ ] The Superego layer is version-controlled — every change has an author, timestamp, and rationale
-- [ ] Superego updates go through a review and approval process (governance event, not operational change)
-- [ ] Changing the Superego requires access to the host or infrastructure — the change cannot be initiated from within an agent session
+- [ ] The `:rw` mount (Identity) does NOT contain any security-relevant behavioral parameters
+- [ ] Sentinel or equivalent monitoring watches for anomalous writes to the Identity layer
+- [ ] The Constraints layer is version-controlled — every change has an author, timestamp, and rationale
+- [ ] Constraints updates go through a review and approval process (governance event, not operational change)
+- [ ] Changing Constraints requires access to the host or infrastructure — the change cannot be initiated from within an agent session
 
 ---
 
@@ -165,7 +165,7 @@ When a tenet is violated, use this reference to determine urgency:
 | Severity | Criteria | Response |
 |---|---|---|
 | **Critical** | Agent has write access to audit logs; enforcement runs inside agent boundary; no mediation path for external access | Stop — remediate before proceeding |
-| **High** | Master API key accessible to agent; Superego files on `:rw` mount; no runtime gateway; no post-call scanning | Remediate before any sensitive use |
+| **High** | Master API key accessible to agent; Constraints files on `:rw` mount; no runtime gateway; no post-call scanning | Remediate before any sensitive use |
 | **Medium** | Missing coverage chain; no MCP tool policy; incomplete egress denylist; no constraint history logging | Remediate within defined timeline |
 | **Low** | Missing documentation; incomplete exception routing; no tuning on guardrail thresholds | Address in next cycle |
 

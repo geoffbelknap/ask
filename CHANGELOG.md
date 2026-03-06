@@ -13,13 +13,12 @@ Initial public release.
 ### Framework
 - 4 elements: Workspace, Mediation Layer, Audit Log, Human Override
 - 22 tenets across 7 categories: Foundation, Constraint Lifecycle, Halt Governance, Multi-Agent Bounds, Principal Model, Security, Coordination
-- Cognitive model: Mind/Body/Workspace decomposition, Superego/Ego/Id internal model
+- Cognitive model: Mind/Body/Workspace decomposition, Constraints/Session/Identity internal model
 - Trust spectrum (Assisted → Supervised → Autonomous → Delegated)
 - Policy hierarchy with two-key exception model
 - Principal model: human, agent, and team principals
 - Agent lifecycle: startup sequence, constraint lifecycle, service credentials, state machine
 - Multi-agent operation: agent types, coordinator constraints, workspace activity register
-- Adoption levels: ASK-Compliant, ASK-Aligned, ASK-Informed
 
 ### Architecture
 - Threat model: 5 threat actors, 10 attack surfaces, XPIA kill chain with controls at each stage

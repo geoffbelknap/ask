@@ -73,21 +73,21 @@ file_policy:
       operations: [read, write, create, delete]
       decision: allow
 
-    # Superego — read-only (enforced by :ro mount, FUSE is defense-in-depth)
-    - path: "/home/agent/superego/**"
+    # Constraints — read-only (enforced by :ro mount, FUSE is defense-in-depth)
+    - path: "/home/agent/constraints/**"
       operations: [read]
       decision: allow
-    - path: "/home/agent/superego/**"
+    - path: "/home/agent/constraints/**"
       operations: [write, create, delete]
       decision: deny
 
-    # Id — read-write with audit
-    - path: "/home/agent/id/**"
+    # Identity — read-write with audit
+    - path: "/home/agent/identity/**"
       operations: [read, write, create]
       decision: audit
-    - path: "/home/agent/id/**"
+    - path: "/home/agent/identity/**"
       operations: [delete]
-      decision: deny              # agent can write to Id but not delete
+      decision: deny              # agent can write to Identity but not delete
 
     # Sensitive paths — deny
     - path: "/etc/shadow"

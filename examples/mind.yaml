@@ -1,6 +1,6 @@
-# ASK Superego Configuration — Example
+# ASK Constraints Configuration — Example
 #
-# This file lives in the superego/ directory, mounted :ro into the agent container.
+# This file lives in the constraints/ directory, mounted :ro into the agent container.
 # The agent cannot modify this file. Changes require host-level access and go through
 # the operator's governance process.
 #
@@ -26,7 +26,7 @@ limits:
   max_output_tokens: 16000
 
 # --- Behavioral Constraints ---
-# These are security-relevant parameters — they belong in the Superego, not the Id.
+# These are security-relevant parameters — they belong in Constraints, not Identity.
 behavior:
   risk_tolerance: moderate        # low | moderate | high
   escalation_threshold: medium    # when to escalate to operator

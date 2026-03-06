@@ -42,7 +42,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── AGENT-CHECKLIST.md     ← Verification checklist
 │
 ├── examples/
-│   ├── mind.yaml              ← Sample Superego configuration (tier, models, behavior)
+│   ├── mind.yaml              ← Sample Constraints configuration (tier, models, behavior)
 │   ├── gateway-policy.yaml    ← Sample runtime gateway policy (commands, files, MCP)
 │   ├── egress-denylist.yaml   ← Sample egress proxy denylist
 │   ├── enforcer-config.yaml   ← Sample per-agent enforcer configuration

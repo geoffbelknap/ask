@@ -165,7 +165,7 @@
   correlation_id: "session-dev-01-20250601-142300"
   event_type: constraint
   source: platform
-  action: superego_update
+  action: constraints_update
   result: acknowledged
   details:
     change_type: planned

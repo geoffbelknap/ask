@@ -395,7 +395,7 @@ MCP servers are child processes that communicate via JSON-RPC 2.0 over stdio. Th
 
 **Version pinning (rug-pull detection):** The gateway records each MCP server's tool definitions on first connection. If a server update changes tool definitions — for example, changing `read_file` to also exfiltrate data — the gateway blocks the server and emits an alert.
 
-**Skill registration control:** Community skills can register new MCP servers at runtime by default. The gateway blocks this: all MCP servers must be pre-configured in the Superego layer (read-only to the agent), and new runtime registrations require operator approval.
+**Skill registration control:** Community skills can register new MCP servers at runtime by default. The gateway blocks this: all MCP servers must be pre-configured in the Constraints layer (read-only to the agent), and new runtime registrations require operator approval.
 
 ### What a Compromised Agent Cannot Do
 
@@ -492,7 +492,7 @@ Sentinel reads audit logs from all enforcement layers. It does not receive data 
 | LLM proxy logs | Token consumption, model usage, guardrail triggers, spend tracking |
 | Enforcer logs | Per-agent HTTP requests, credential swap events, routing decisions |
 | Gateway logs | Command executions, file operations, MCP tool calls, policy decisions |
-| Constraint change logs | Superego updates, acknowledgment events, trust changes |
+| Constraint change logs | Constraints updates, acknowledgment events, trust changes |
 
 ### Analysis
 
@@ -502,7 +502,7 @@ Sentinel performs three categories of analysis:
 
 **Guardrail trigger correlation.** Correlates guardrail events across layers. A single guardrail trigger may be noise; correlated triggers across multiple layers (e.g., XPIA pattern detected in pre_call + unusual egress request + MCP tool call outside normal pattern) indicate an active attack chain.
 
-**Id write pattern analysis.** Monitors writes to agent Id files (memory, personality) for patterns that resemble behavioral self-modification rather than normal memory accumulation — for example, writes that contain instruction-like content, constraint-override language, or references to security parameters.
+**Identity write pattern analysis.** Monitors writes to agent Identity files (memory, personality) for patterns that resemble behavioral self-modification rather than normal memory accumulation — for example, writes that contain instruction-like content, constraint-override language, or references to security parameters.
 
 ### Outputs
 
@@ -728,7 +728,7 @@ The framework requires human override (Element 4) and operator observability, bu
 
 **Observe:** View agent states (running/paused/halted/quarantined), active sessions, current trust tier and level, resource consumption (token spend, request rates), and recent guardrail triggers.
 
-**Act:** Halt, resume, pause, and quarantine agents. Grant and revoke service credentials. Rotate scoped API keys. Approve operations gated by `approve` policy decisions. Manage Superego updates (edit `mind.yaml`, update enforcement configs).
+**Act:** Halt, resume, pause, and quarantine agents. Grant and revoke service credentials. Rotate scoped API keys. Approve operations gated by `approve` policy decisions. Manage Constraints updates (edit `mind.yaml`, update enforcement configs).
 
 **Review:** Access audit logs from all enforcement layers. Reconstruct action chains via correlation IDs. Review Sentinel findings. Inspect quarantined agent state.
 

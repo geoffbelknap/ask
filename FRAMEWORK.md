@@ -48,71 +48,73 @@ An agent is not a monolithic entity. It decomposes into three distinct layers �
 
 The three layers are independently replaceable: the same Mind can run in a different Body (swap agent frameworks without losing identity), the same Mind and Body can run in a different Workspace (reimage without losing state), and the same Body and Workspace can run a different Mind (change the agent's role by loading a different Mind configuration).
 
-### Inside the Mind: Superego, Ego, and Id
+### Inside the Mind: Constraints, Session, and Identity
 
-The Mind/Body/Workspace decomposition describes *where* an agent's cognitive identity lives. The Superego/Ego/Id model describes *what is inside the Mind* — which parts are operator-controlled and which are agent-controlled. This distinction is the most important security boundary within the agent itself.
+The Mind/Body/Workspace decomposition describes *where* an agent's cognitive existence lives. The Constraints/Session/Identity model describes *what is inside the Mind* — which parts are operator-controlled and which are agent-controlled. This distinction is the most important security boundary within the agent itself.
 
-**Superego — The Operator's Conscience.** The Superego is the internalized authority the agent cannot argue with, negotiate around, or modify. It defines what the agent must and must not do, independent of what the agent wants, what it has been told by a user, or what instructions it encounters in fetched content.
+*(The model is inspired by Freud's Superego/Ego/Id — operator conscience, active self, accumulated drives — but we use terminology that maps directly to what you're building.)*
 
-The Superego is **operator-owned and architecturally read-only to the agent.** The agent does not refrain from modifying it — the filesystem mount is `:ro`. The agent cannot reach it.
+**Constraints — What the operator controls.** The Constraints layer is the authority the agent cannot argue with, negotiate around, or modify. It defines what the agent must and must not do, independent of what the agent wants, what it has been told by a user, or what instructions it encounters in fetched content.
 
-The Superego has two manifestations:
+Constraints are **operator-owned and architecturally read-only to the agent.** The agent does not refrain from modifying them — the filesystem mount is `:ro`. The agent cannot reach them.
 
-**Agent-visible Superego** — mounted read-only into the agent's container at `superego/`. Contains the role and tier declaration, model preferences and behavioral parameters (risk tolerance, escalation thresholds, delegation limits), permission grants, and operator-authored rules. The agent can read these — they tell the agent what it is and what it's permitted to do. The agent cannot modify them.
+Constraints have two manifestations:
 
-**Agent-invisible Superego** — lives in enforcement infrastructure containers the agent cannot see or reach. Contains guardrail rules, domain denylists, tool permissions, proxy policies, and gateway configurations. The agent cannot read these, let alone modify them. These are the enforcement mechanisms that back the constraints declared in the visible Superego.
+**Agent-visible constraints** — mounted read-only into the agent's container at `constraints/`. Contains the role and tier declaration, model preferences and behavioral parameters (risk tolerance, escalation thresholds, delegation limits), permission grants, and operator-authored rules. The agent can read these — they tell the agent what it is and what it's permitted to do. The agent cannot modify them.
+
+**Agent-invisible constraints** — live in enforcement infrastructure containers the agent cannot see or reach. Contains guardrail rules, domain denylists, tool permissions, proxy policies, and gateway configurations. The agent cannot read these, let alone modify them. These are the enforcement mechanisms that back the declarations in the visible constraints.
 
 Both are operator-owned. Both are read-only to the agent. The difference is visibility: the agent knows about its tier and rules (visible), but doesn't know the specific patterns the guardrails scan for or which domains are denylisted (invisible).
 
-**Id — The Agent's Accumulated Self.** The Id is the raw material of the agent's personality as it develops through experience. It is what the agent has learned, accumulated, and internalized across sessions.
+**Identity — What the agent accumulates.** Identity is the raw material of the agent's personality as it develops through experience. It is what the agent has learned, accumulated, and internalized across sessions.
 
-The Id is **agent-owned and writable.** An agent that cannot update its own memory, refine its own understanding, or develop a consistent personality across sessions is a stateless query engine, not a useful agent. The Id is how an agent persists, adapts, and improves.
+Identity is **agent-owned and writable.** An agent that cannot update its own memory, refine its own understanding, or develop a consistent personality across sessions is a stateless query engine, not a useful agent. Identity is how an agent persists, adapts, and improves.
 
-In practice, the Id comprises: the agent's emergent personality and self-concept (stylistic; does not contain security-relevant behavioral parameters), facts learned and user preferences accumulated across sessions, and working notes.
+In practice, Identity comprises: the agent's emergent personality and self-concept (stylistic; does not contain security-relevant behavioral parameters), facts learned and user preferences accumulated across sessions, and working notes.
 
-The Id is writable but **audited**. Sentinel watches for anomalous write patterns — particularly any attempt to write to Id files in ways that look like behavioral self-modification rather than normal memory accumulation.
+Identity is writable but **audited**. Sentinel watches for anomalous write patterns — particularly any attempt to write to Identity files in ways that look like behavioral self-modification rather than normal memory accumulation.
 
-**Ego — The Active Reasoning Self.** The Ego is the agent operating in the moment. It is the LLM's active context — the current session, the working reasoning, the live decision-making. The Ego mediates between the Superego's hard constraints and the Id's accumulated drives.
+**Session — What is happening right now.** The Session is the agent operating in the moment. It is the LLM's active context — the current conversation, the working reasoning, the live decision-making. The Session mediates between the Constraints layer's hard rules and Identity's accumulated knowledge.
 
-The Ego is **ephemeral**. It lives in the current context window. When the session resets, the Ego resets. The Superego persists unchanged. The Id persists with whatever the agent accumulated during the session.
+The Session is **ephemeral**. It lives in the current context window. When the session resets, the Session state resets. Constraints persist unchanged. Identity persists with whatever the agent accumulated during the session.
 
-The Ego is the most vulnerable layer — the target of XPIA attacks. The mediation layer's pre-call and post-call scanning operates at the Ego boundary: intercepting corrupted inputs before they reach the LLM, and intercepting corrupted outputs before they cross the network boundary.
+The Session is the most vulnerable layer — the target of XPIA attacks. The mediation layer's pre-call and post-call scanning operates at the Session boundary: intercepting corrupted inputs before they reach the LLM, and intercepting corrupted outputs before they cross the network boundary.
 
 ### The Cognitive Layer Summary
 
 | Layer | Owned By | Writable By | Persists | Primary Threat |
 |---|---|---|---|---|
-| Superego | Operator | Operator only (host) | Yes — immutable to agent | XPIA targeting the Ego to *act against* Superego constraints |
-| Id | Agent | Agent (audited) | Yes — accumulates over time | XPIA causing persistent behavioral modification |
-| Ego | Agent (ephemeral) | Agent (session-scoped) | No — resets each session | XPIA corrupting in-session reasoning |
+| Constraints | Operator | Operator only (host) | Yes — immutable to agent | XPIA targeting the Session to *act against* Constraints |
+| Identity | Agent | Agent (audited) | Yes — accumulates over time | XPIA causing persistent behavioral modification |
+| Session | Agent (ephemeral) | Agent (session-scoped) | No — resets each session | XPIA corrupting in-session reasoning |
 
 ### Filesystem Mapping
 
 ```
-superego/                    ← :ro mount, operator-owned, version-controlled
+constraints/                 ← :ro mount, operator-owned, version-controlled
 ├── mind.yaml                ← tier, permissions, model prefs, behavioral constraints
 └── AGENTS.md                ← operational rules (operator-authored)
 
-id/                          ← :rw mount, agent-owned, Sentinel-audited
+identity/                    ← :rw mount, agent-owned, Sentinel-audited
 ├── SOUL.md                  ← personality, tone, vibe (stylistic only)
 └── memory/                  ← learned facts, user preferences, working notes
 
-ego/                         ← ephemeral, not persisted (destroyed on session reset)
+session/                     ← ephemeral, not persisted (destroyed on session reset)
 ```
 
-**The critical security boundary is between Superego (`:ro`) and Id (`:rw`).** An agent that can write to its Superego can rewrite its own ethics. The architecture makes this structurally impossible — not a matter of trust, policy, or the agent's good intentions.
+**The critical security boundary is between Constraints (`:ro`) and Identity (`:rw`).** An agent that can write to its own constraints can rewrite its own rules. The architecture makes this structurally impossible — not a matter of trust, policy, or the agent's good intentions.
 
 ### The Decisive Question
 
 The question of where a piece of configuration belongs has one test: **does this content affect the security boundary?**
 
-If it affects risk tolerance, escalation thresholds, delegation limits, tier declaration, or any parameter that determines what the agent is permitted to do — it belongs in the **Superego**. It must be operator-owned and read-only.
+If it affects risk tolerance, escalation thresholds, delegation limits, tier declaration, or any parameter that determines what the agent is permitted to do — it belongs in **Constraints**. It must be operator-owned and read-only.
 
-If it reflects the agent's personality, tone, accumulated knowledge, or stylistic identity — it belongs in the **Id**. It is agent-owned and writable.
+If it reflects the agent's personality, tone, accumulated knowledge, or stylistic identity — it belongs in **Identity**. It is agent-owned and writable.
 
 ### mind.yaml Schema Reference
 
-The `mind.yaml` file in the Superego defines the agent's identity, capabilities, and behavioral constraints. The following fields are framework-required — an ASK-conforming implementation must support them. Implementations may add additional fields.
+The `mind.yaml` file in the Constraints layer defines the agent's capabilities and behavioral parameters. The following fields are framework-required — an ASK-conforming implementation must support them. Implementations may add additional fields.
 
 **Required fields:**
 
@@ -140,7 +142,7 @@ The `mind.yaml` file in the Superego defines the agent's identity, capabilities,
 | `web` | Web access declaration | Only when web access is enabled |
 | `service_grants` | External service access | Only when the agent accesses external services beyond LLM |
 
-The `models.allowed` list, `limits`, and `tools` sections declare intent in the Superego — the actual enforcement happens in the scoped API key (models, limits), the gateway policy (tools), and the egress proxy (web). The Superego tells the agent what it's permitted to do; the invisible enforcement layer prevents it from doing anything else.
+The `models.allowed` list, `limits`, and `tools` sections declare intent in the Constraints layer — the actual enforcement happens in the scoped API key (models, limits), the gateway policy (tools), and the egress proxy (web). The visible constraints tell the agent what it's permitted to do; the invisible enforcement layer prevents it from doing anything else.
 
 See [examples/mind.yaml](examples/mind.yaml) for a complete example.
 
@@ -295,7 +297,7 @@ Quarantine is an agent-specific containment mechanism. Humans who appear to be a
 
 ## Trust Spectrum
 
-The trust spectrum defines how much autonomous authority an agent can exercise, independent of its technical capabilities. An agent's capability envelope (what it can do) is fixed by its Workspace and Superego. Its trust level determines how much of that envelope it exercises without human confirmation.
+The trust spectrum defines how much autonomous authority an agent can exercise, independent of its technical capabilities. An agent's capability envelope (what it can do) is fixed by its Workspace and Constraints. Its trust level determines how much of that envelope it exercises without human confirmation.
 
 | Level | Name | Description |
 |---|---|---|
@@ -314,7 +316,7 @@ Trust changes based on observed behavior, but the observation and decision mecha
 
 **Who evaluates:** The operator, informed by Sentinel's anomaly detection and audit log analysis. Trust evaluation is always a human judgment, not an automated threshold. Sentinel can recommend ("this agent has operated cleanly for 30 days"), but the elevation decision requires human approval (Tenet 15).
 
-**How trust changes take effect:** Trust elevation is a Superego change — the operator updates `mind.yaml` with the new tier or trust level. Like all Superego changes, it takes effect next session, goes through version control, and is logged as a constraint change event. Trust reduction can be immediate if triggered by a security finding.
+**How trust changes take effect:** Trust elevation is a Constraints change — the operator updates `mind.yaml` with the new tier or trust level. Like all Constraints changes, it takes effect next session, goes through version control, and is logged as a constraint change event. Trust reduction can be immediate if triggered by a security finding.
 
 **Profile-then-lock:** A practical workflow for new agents. Run the agent under permissive policy while observing its actual behavior. After a baseline period, generate a restrictive policy that matches the observed operational pattern. This gives evidence-based trust calibration rather than guessing what the agent needs.
 
@@ -344,7 +346,7 @@ The trust spectrum has a concrete architectural dimension: the agent's runtime p
 
 **Autonomous runtime.** The agent operates a self-directed loop: receive a task brief, reason, act, observe results, repeat. No human is present in the operational loop. The agent has access to built-in tools (file operations, command execution, search) and optionally MCP servers and skills, executing through the same mediated infrastructure as an interactive agent. All enforcement comes from the mediation layer, the runtime gateway, and the policy engine. Autonomous runtimes operate at the Autonomous or Delegated trust levels.
 
-The same agent — same Mind, same Superego, same constraints — can run in either pattern. The enforcement architecture is identical. What changes is the operational trust model: interactive runtimes benefit from human review as an additional enforcement layer; autonomous runtimes depend entirely on architectural enforcement. This distinction matters for policy: an autonomous agent should have tighter constraints than an interactive one performing the same role, because it lacks the human review safety net.
+The same agent — same Mind, same Constraints — can run in either pattern. The enforcement architecture is identical. What changes is the operational trust model: interactive runtimes benefit from human review as an additional enforcement layer; autonomous runtimes depend entirely on architectural enforcement. This distinction matters for policy: an autonomous agent should have tighter constraints than an interactive one performing the same role, because it lacks the human review safety net.
 
 ---
 
@@ -435,7 +437,7 @@ Phase 2: Bring enforcement infrastructure up first
   Enforcement is active before the agent exists
 
 Phase 3: Mount constraints into the enforced environment
-  Superego read-only, effective policy computed and sealed
+  Constraints read-only, effective policy computed and sealed
   Constraints in place before any agent context loads
 
 Phase 4: Check workspace requirements
@@ -456,7 +458,7 @@ Phase 7: Construct session and deliver context
 
 Constraints can change during an active session. Four categories of change events:
 
-**Planned updates** — policy rollouts. Default: next session. Superego updates cannot be forced immediate — governance process is part of the security model.
+**Planned updates** — policy rollouts. Default: next session. Constraints updates cannot be forced immediate — governance process is part of the security model.
 
 **Reactive updates** — triggered by incidents or anomaly detection. Default: immediate. Severity determines handling: LOW (complete task, then apply), MEDIUM (pause task, apply, resume), HIGH (stop immediately, await operator), CRITICAL (halt).
 
