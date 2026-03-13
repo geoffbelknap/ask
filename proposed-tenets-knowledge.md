@@ -2,7 +2,7 @@
 
 *Extracted from [Compounding Agent Organizations](../agency/docs/specs/platform/compounding-agent-organizations.md) strategy spec. These tenets extend the ASK framework to cover shared organizational knowledge in multi-agent systems.*
 
-*Status: Proposed. Pending integration into FRAMEWORK.md as Tenets 24–25.*
+*Status: Integrated into FRAMEWORK.md as Tenets 23–24.*
 
 ---
 

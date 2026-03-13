@@ -12,7 +12,7 @@ Initial public release.
 
 ### Framework
 - 4 elements: Workspace, Mediation Layer, Audit Log, Human Override
-- 22 tenets across 7 categories: Foundation, Constraint Lifecycle, Halt Governance, Multi-Agent Bounds, Principal Model, Security, Coordination
+- 24 tenets across 8 categories: Foundation, Constraint Lifecycle, Halt Governance, Multi-Agent Bounds, Principal Model, Security, Coordination, Organizational Knowledge
 - Cognitive model: Mind/Body/Workspace decomposition, Constraints/Session/Identity internal model
 - Trust spectrum (Assisted → Supervised → Autonomous → Delegated)
 - Policy hierarchy with two-key exception model

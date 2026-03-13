@@ -324,6 +324,18 @@ Quarantine is an agent-specific containment mechanism. Humans who appear to be a
 
 *Maintains a clear boundary between human governance and agent governance.*
 
+### Organizational Knowledge (Tenets 23–24)
+
+**Tenet 23 — Organizational knowledge is durable infrastructure, not agent state.**
+Knowledge accumulated by agents must be structured, auditable, and operator-owned. It persists independently of any individual agent's lifecycle. Agents contribute to and consume from it but cannot control, suppress, or degrade it unilaterally. Destroying organizational knowledge requires more deliberate action than destroying any individual agent or team.
+
+*Agent organizations that compound intelligence over time produce shared knowledge as a byproduct of work. This knowledge is an organizational asset — queryable by humans, exportable in standard formats, and more valuable than any individual agent's output. Like audit logs and policy, it is infrastructure that belongs to the organization.*
+
+**Tenet 24 — Knowledge access is bounded by authorization scope.**
+Organizational knowledge is shared, but access to it is not unlimited. Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No agent can read knowledge outside its authorized scope, and the synthesized view available through the graph must not exceed what the querying agent is individually authorized to access (Tenet 12).
+
+*In a multi-agent system, agents from different authorization scopes contribute knowledge to shared infrastructure. Without access controls, an agent could traverse relationships to reach a synthesized view that exceeds any individual contributor's authorization — using the knowledge store as a side channel to bypass authorization boundaries.*
+
 ### Tenet Reference Table
 
 | # | Tenet | Category |
@@ -350,6 +362,8 @@ Quarantine is an agent-specific containment mechanism. Humans who appear to be a
 | 20 | Unknown conflicts default to yield and flag | Coordination |
 | 21 | Human principal termination is always operator-initiated | Coordination |
 | 22 | Human principals cannot be quarantined | Coordination |
+| 23 | Organizational knowledge is durable infrastructure, not agent state | Organizational Knowledge |
+| 24 | Knowledge access is bounded by authorization scope | Organizational Knowledge |
 
 ---
 
@@ -415,7 +429,7 @@ The same agent — same Mind, same Constraints — can run in either pattern. Th
 Policy is organized in layers. Each layer inherits from the layer above. Lower levels can only restrict, never loosen. Hard floors set at any level cannot be modified by levels below.
 
 ```
-Platform Tenets            ← immovable, baked into substrate (the 22 tenets)
+Platform Tenets            ← immovable, baked into substrate (the 24 tenets)
 Compliance Policy          ← external obligations (legal, regulatory)
 Organizational Policy      ← internal non-negotiables (org-wide rules)
 ── ── ── ── ── ── ──       ← hard floor — levels above cannot be exceeded below
