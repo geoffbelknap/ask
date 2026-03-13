@@ -6,13 +6,23 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 
 ---
 
+## ASK 2026.03
+
+### Framework
+- New tenet category: Organizational Knowledge (Tenets 23–24)
+  - Tenet 23: Organizational knowledge is durable infrastructure, not agent state
+  - Tenet 24: Knowledge access is bounded by authorization scope
+- 24 tenets across 8 categories
+
+---
+
 ## ASK 2025.06
 
 Initial public release.
 
 ### Framework
 - 4 elements: Workspace, Mediation Layer, Audit Log, Human Override
-- 24 tenets across 8 categories: Foundation, Constraint Lifecycle, Halt Governance, Multi-Agent Bounds, Principal Model, Security, Coordination, Organizational Knowledge
+- 22 tenets across 7 categories: Foundation, Constraint Lifecycle, Halt Governance, Multi-Agent Bounds, Principal Model, Security, Coordination
 - Cognitive model: Mind/Body/Workspace decomposition, Constraints/Session/Identity internal model
 - Trust spectrum (Assisted → Supervised → Autonomous → Delegated)
 - Policy hierarchy with two-key exception model

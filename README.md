@@ -64,7 +64,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ## Versioning
 
-ASK uses date-based versioning: **ASK 2025.06** (the current version).
+ASK uses date-based versioning: **ASK 2026.03** (the current version).
 
 The tenet list (1–24) is considered stable. Tenet numbers will not be reassigned. New tenets may be appended. If a tenet is ever retired, its number is reserved and marked deprecated — it will not be reused.
 

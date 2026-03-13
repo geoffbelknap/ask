@@ -1,6 +1,6 @@
 # ASK — Architecture
 
-**Version: ASK 2025.06**
+**Version: ASK 2026.03**
 
 The technical implementation guide for the ASK operating framework. Read this document to understand what you're defending against and how the architecture defends against it.
 
