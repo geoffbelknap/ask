@@ -110,10 +110,10 @@ If a configuration parameter reflects personality or accumulated knowledge → i
 **Filesystem mapping:**
 ```
 constraints/    ← :ro mount, operator-owned, version-controlled
-├── mind.yaml   ← tier, permissions, model prefs, behavioral constraints
-└── AGENTS.md   ← operational rules
+├── (config)    ← tier, permissions, model prefs, behavioral constraints
+└── (rules)     ← operational rules
 
-identity/       ← :rw mount, agent-owned, Sentinel-audited
+identity/       ← :rw mount, agent-owned, security-monitor-audited
 ├── SOUL.md     ← personality, tone (stylistic only — no security params)
 └── memory/     ← learned facts, user preferences, notes
 ```

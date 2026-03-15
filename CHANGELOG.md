@@ -31,6 +31,13 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 - New limitations: unknown and evolving threat landscape, misaligned reasoning, semantic error propagation
 
 ### Documentation
+- ARCHITECTURE.md restructured: each section now leads with technology-neutral architectural requirements before presenting reference implementation approaches
+- Container Runtime Portability section condensed — portability is now implicit in the requirement-first structure
+- "Sentinel" renamed to "security monitor" across all documents — framework concept distinguished from reference implementation name
+- `mind.yaml` references genericized to "constraints configuration" in framework and architecture docs; schema section in FRAMEWORK.md reframed as required semantic concepts rather than required file format
+- `X-Agency-Service` header replaced with generic "scoped service token" in architecture diagrams
+- Examples directory reframed as reference implementation examples, not framework specifications
+- GLOSSARY.md entries updated: Sentinel → security monitor, runtime enforcement gateway and MCP tool policy definitions genericized
 - New document: RELATED-WORK.md — external frameworks, standards, protocols, and research mapped to ASK
   - NIST AI Agent Standards Initiative and NCCoE AI Agent Identity concept paper
   - NIST Cybersecurity Framework Profile for AI (NISTIR 8596)
@@ -44,7 +51,7 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 - ARCHITECTURE.md threat model replaced with summary linking to THREATS.md
 - Agent Checklist updated with Tenets 23–24 verification items
 - Agent Context updated with Tenets 23–24 in tenets table
-- Glossary updated with new terms: Organizational Knowledge, Knowledge Graph, Sentinel, Quarantine, Coverage Chain, Mind, Body, Function Agent
+- Glossary updated with new terms: Organizational Knowledge, Knowledge Graph, Security Monitor (originally "Sentinel"), Quarantine, Coverage Chain, Mind, Body, Function Agent
 - Glossary Related Work updated with OWASP Top 10 for Agentic Applications
 - File map in README updated to reflect all repository files
 

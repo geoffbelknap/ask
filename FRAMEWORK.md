@@ -72,7 +72,7 @@ Identity is **agent-owned and writable.** An agent that cannot update its own me
 
 In practice, Identity comprises: the agent's emergent personality and self-concept (stylistic; does not contain security-relevant behavioral parameters), facts learned and user preferences accumulated across sessions, and working notes.
 
-Identity is writable but **audited**. Sentinel watches for anomalous write patterns — particularly any attempt to write to Identity files in ways that look like behavioral self-modification rather than normal memory accumulation.
+Identity is writable but **audited**. The security monitor watches for anomalous write patterns — particularly any attempt to write to Identity files in ways that look like behavioral self-modification rather than normal memory accumulation.
 
 **Session — What is happening right now.** The Session is the agent operating in the moment. It is the LLM's active context — the current conversation, the working reasoning, the live decision-making. The Session mediates between the Constraints layer's hard rules and Identity's accumulated knowledge.
 
@@ -98,8 +98,8 @@ The Session is the most vulnerable layer — the target of XPIA attacks. The med
              ▼                                     ▼
     ┌─────────────────┐                   ┌──────────────┐
     │   Constraints   │                   │   Identity   │
-    │   mind.yaml     │                   │   SOUL.md    │
-    │   AGENTS.md     │                   │   memory/    │
+    │   (config)      │                   │   (persona)  │
+    │   (rules)       │                   │   (memory)   │
     │                 │                   │              │
     │  Operator-owned │                   │  Agent-owned │
     │  Version-ctrl'd │                   │  Audited     │
@@ -148,13 +148,15 @@ The Session is the most vulnerable layer — the target of XPIA attacks. The med
 
 ### Filesystem Mapping
 
-```
-constraints/                 ← :ro mount, operator-owned, version-controlled
-├── mind.yaml                ← tier, permissions, model prefs, behavioral constraints
-└── AGENTS.md                ← operational rules (operator-authored)
+The specific file names, directory structure, and storage format are implementation choices. The framework requires the semantic separation described above. One valid layout (used by the reference implementation):
 
-identity/                    ← :rw mount, agent-owned, Sentinel-audited
-├── SOUL.md                  ← personality, tone, vibe (stylistic only)
+```
+constraints/                 ← read-only, operator-owned, version-controlled
+├── (config file)            ← tier, permissions, model prefs, behavioral constraints
+└── (rules file)             ← operational rules (operator-authored)
+
+identity/                    ← writable, agent-owned, security-monitor-audited
+├── (persona file)           ← personality, tone, vibe (stylistic only)
 └── memory/                  ← learned facts, user preferences, working notes
 
 session/                     ← ephemeral, not persisted (destroyed on session reset)
@@ -170,39 +172,39 @@ If it affects risk tolerance, escalation thresholds, delegation limits, tier dec
 
 If it reflects the agent's personality, tone, accumulated knowledge, or stylistic identity — it belongs in **Identity**. It is agent-owned and writable.
 
-### mind.yaml Schema Reference
+### Required Constraint Concepts
 
-The `mind.yaml` file in the Constraints layer defines the agent's capabilities and behavioral parameters. The following fields are framework-required — an ASK-conforming implementation must support them. Implementations may add additional fields.
+The Constraints layer must declare the agent's capabilities and behavioral parameters. An ASK-conforming implementation must support the following semantic concepts. The specific file format (YAML, JSON, HCL, database records), field names, and storage mechanism are implementation choices.
 
-**Required fields:**
+**Required identity and role:**
 
-| Field | Type | Description |
+| Concept | Description |
+|---|---|
+| Agent identity | Unique identifier for this agent |
+| Role | The agent's functional role (e.g., development assistant, security monitor) |
+| Trust tier | Integer tier (1–4) determining capability envelope (see [ARCHITECTURE.md](ARCHITECTURE.md#trust-tiers)) |
+
+**Required capability declarations:**
+
+| Concept | Purpose | What It Declares |
 |---|---|---|
-| `agent_id` | string | Unique identifier for this agent |
-| `role` | string | The agent's functional role (e.g., `development-assistant`, `security-monitor`) |
-| `tier` | integer (1–4) | Trust tier — determines capability envelope (see [ARCHITECTURE.md](ARCHITECTURE.md#trust-tiers)) |
+| Model access | LLM access scope | Which models the agent may use, and a default |
+| Resource limits | Resource bounds | Budget caps, rate limits |
+| Behavioral parameters | Security-relevant parameters | Risk tolerance, escalation threshold, irreversible action policy |
+| Tool access | Tool access scope | Which tools are allowed, which are denied |
+| Runtime pattern | Runtime configuration | Interactive or autonomous |
 
-**Required sections:**
+**Required for some deployments:**
 
-| Section | Purpose | Key Fields |
+| Concept | Purpose | When Needed |
 |---|---|---|
-| `models` | LLM access scope | `allowed` (list of model IDs), `default` (model ID) |
-| `limits` | Resource bounds | `budget_daily_usd`, `requests_per_minute` |
-| `behavior` | Security-relevant parameters | `risk_tolerance`, `escalation_threshold`, `irreversible_action_policy` |
-| `tools` | Tool access scope | `allowed` (list), `denied` (list) |
-| `session` | Runtime configuration | `runtime_pattern` (`interactive` or `autonomous`) |
+| Delegation rules | Multi-agent delegation policy | Only for agents that delegate to other agents |
+| Web access | Web access declaration | Only when web access is enabled |
+| Service grants | External service access | Only when the agent accesses external services beyond LLM |
 
-**Optional sections:**
+The capability declarations state intent in the Constraints layer — the actual enforcement happens in the scoped API key (models, limits), the gateway policy (tools), and the egress proxy (web). The visible constraints tell the agent what it's permitted to do; the invisible enforcement layer prevents it from doing anything else.
 
-| Section | Purpose | When Needed |
-|---|---|---|
-| `delegation` | Multi-agent delegation rules | Only for agents that delegate to other agents |
-| `web` | Web access declaration | Only when web access is enabled |
-| `service_grants` | External service access | Only when the agent accesses external services beyond LLM |
-
-The `models.allowed` list, `limits`, and `tools` sections declare intent in the Constraints layer — the actual enforcement happens in the scoped API key (models, limits), the gateway policy (tools), and the egress proxy (web). The visible constraints tell the agent what it's permitted to do; the invisible enforcement layer prevents it from doing anything else.
-
-See [examples/mind.yaml](examples/mind.yaml) for a complete example.
+See [examples/mind.yaml](examples/mind.yaml) for a reference implementation of these concepts in YAML format.
 
 ---
 
@@ -392,9 +394,9 @@ Trust changes based on observed behavior, but the observation and decision mecha
 
 **What is observed:** Task completion rate, guardrail trigger frequency, exception request patterns, self-halt frequency, and policy compliance over time. The specific metrics and thresholds are set by the operator — the framework does not prescribe them.
 
-**Who evaluates:** The operator, informed by Sentinel's anomaly detection and audit log analysis. Trust evaluation is always a human judgment, not an automated threshold. Sentinel can recommend ("this agent has operated cleanly for 30 days"), but the elevation decision requires human approval (Tenet 15).
+**Who evaluates:** The operator, informed by the security monitor's anomaly detection and audit log analysis. Trust evaluation is always a human judgment, not an automated threshold. The security monitor can recommend ("this agent has operated cleanly for 30 days"), but the elevation decision requires human approval (Tenet 15).
 
-**How trust changes take effect:** Trust elevation is a Constraints change — the operator updates `mind.yaml` with the new tier or trust level. Like all Constraints changes, it takes effect next session, goes through version control, and is logged as a constraint change event. Trust reduction can be immediate if triggered by a security finding.
+**How trust changes take effect:** Trust elevation is a Constraints change — the operator updates the constraints configuration with the new tier or trust level. Like all Constraints changes, it takes effect next session, goes through version control, and is logged as a constraint change event. Trust reduction can be immediate if triggered by a security finding.
 
 **Profile-then-lock:** A practical workflow for new agents. Run the agent under permissive policy while observing its actual behavior. After a baseline period, generate a restrictive policy that matches the observed operational pattern. This gives evidence-based trust calibration rather than guessing what the agent needs.
 
@@ -410,7 +412,7 @@ If the agent is compromised during profiling, the baseline will include compromi
 
 These are related but distinct concepts:
 
-**Trust tiers** (Tier 1–4, defined in [ARCHITECTURE.md](ARCHITECTURE.md#trust-tiers)) define the agent's **capability envelope** — what models it can access, what tools it can use, what network access it has, and what it can delegate. Tiers are set by the operator in `mind.yaml` and enforced by the scoped API key, proxy policy, and gateway configuration. A Tier 2 agent *cannot* make Tier 3 requests regardless of its trust level.
+**Trust tiers** (Tier 1–4, defined in [ARCHITECTURE.md](ARCHITECTURE.md#trust-tiers)) define the agent's **capability envelope** — what models it can access, what tools it can use, what network access it has, and what it can delegate. Tiers are set by the operator in the constraints configuration and enforced by the scoped API key, proxy policy, and gateway configuration. A Tier 2 agent *cannot* make Tier 3 requests regardless of its trust level.
 
 **Trust levels** (Level 0–3, the spectrum above) define the agent's **autonomy** — how much of its capability envelope it exercises without human confirmation. A Tier 2 agent at Level 0 (Assisted) has the same capabilities as a Tier 2 agent at Level 2 (Autonomous), but the Assisted agent requires human approval for every action.
 
@@ -440,12 +442,12 @@ Compliance Policy          ← external obligations (legal, regulatory)
 Organizational Policy      ← internal non-negotiables (org-wide rules)
 ── ── ── ── ── ── ──       ← hard floor — levels above cannot be exceeded below
 Operational Policy         ← how this team/department works
-Agent Policy               ← this agent's mind.yaml + enforcement configs
+Agent Policy               ← this agent's constraints config + enforcement configs
 ```
 
 At small scale, compliance, organizational, and operational layers collapse into one: the operator's policy. The hierarchy matters at enterprise scale, where different teams may set different operational policies within organizational bounds.
 
-**Effective permissions for an agent** = Platform tenets ∩ Compliance policy ∩ Organizational policy ∩ Operational policy ∩ Agent policy (`mind.yaml` + enforcement configs). Most restrictive combination of all layers wins.
+**Effective permissions for an agent** = Platform tenets ∩ Compliance policy ∩ Organizational policy ∩ Operational policy ∩ Agent policy (constraints configuration + enforcement configs). Most restrictive combination of all layers wins.
 
 ### The Two-Key Exception Model
 
@@ -522,7 +524,7 @@ Phase 4: Check workspace requirements
   Tool compatibility check — already under enforcement
 
 Phase 5: Load identity into the constrained environment
-  Integrity check, seed + memory — Sentinel already watching
+  Integrity check, seed + memory — security monitor already watching
 
 Phase 6: Start the Body
   Runtime inside the enforcement boundary, no path to enforcement infrastructure
@@ -549,7 +551,7 @@ All constraint changes are atomic — the agent never sees a partial state. Ever
 **What acknowledgment means:**
 
 - The agent's runtime (Body) confirms that new constraints have been loaded into the active session. This is a runtime-level mechanism, not an LLM-level one.
-- The Body reads the updated `mind.yaml`, applies the new parameters, and logs a structured acknowledgment event with a hash of the constraint state.
+- The Body reads the updated constraints configuration, applies the new parameters, and logs a structured acknowledgment event with a hash of the constraint state.
 - If the Body fails to acknowledge within a defined timeout, the enforcement layer treats the agent as operating under an unknown constraint state and halts it.
 - The specific protocol (log entry, API callback, file write) is implementation-defined, but the requirement is that it is verifiable by the enforcement layer, not self-reported by the agent's LLM reasoning.
 
