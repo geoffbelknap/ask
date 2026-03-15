@@ -56,6 +56,9 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 20 | Coordination | When a conflict has an unidentifiable source, yield, log, and flag — never force resolution |
 | 21 | Coordination | No agent or automated process can remove a human principal |
 | 22 | Coordination | Quarantine is agent-specific — humans who appear to be acting maliciously are flagged for human-to-human resolution |
+| 23 | Organizational Knowledge | Organizational knowledge is durable infrastructure, not agent state — structured, auditable, operator-owned, persists independently of agent lifecycle |
+| 24 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (Tenet 12) |
+| 25 | Security | Every write to the agent's persistent Identity is logged with provenance by the mediation layer; Identity history is recoverable and rollback-capable; the agent cannot suppress Identity mutation logging |
 
 ---
 
@@ -129,9 +132,11 @@ Non-negotiable implementation rules. Every design decision MUST comply with all 
 
 ---
 
-## XPIA Defense Rules
+## Threat Awareness Rules
 
-XPIA (Cross-Prompt Injection Attack) is the primary threat. An attacker embeds instructions in content the agent fetches — a web page, a document, an API response, a tool output. The LLM follows those embedded instructions.
+The agent faces multiple threat categories — not just prompt injection. Key threats include XPIA (instructions hidden in external content), identity/memory poisoning (persistent corruption of the agent's writable state), behavioral drift (satisfying constraints while violating intent), cascading failures (errors amplifying across agent chains), and overwhelming human oversight (approval fatigue degrading the human safety net). See [THREATS.md](THREATS.md) for the full threat model.
+
+**XPIA is the most architecturally significant threat** because it exploits the LLM's inability to distinguish data from instructions — a property of the technology with no complete solution. An attacker embeds instructions in content the agent fetches — a web page, a document, an API response, a tool output. The LLM follows those embedded instructions.
 
 **Defense is architectural, not just detection-based.**
 

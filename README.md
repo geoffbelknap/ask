@@ -21,8 +21,11 @@ ASK defines what must be true — architecturally, operationally, and organizati
 **Understand the framework theory**
 → [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, tenets, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
 
+**Understand the threats**
+→ [THREATS.md](THREATS.md) — Categorized threat model: traditional risks grounded in established best practices, genuinely novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
+
 **Understand the technical architecture**
-→ [ARCHITECTURE.md](ARCHITECTURE.md) — Threat model, XPIA kill chain, enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
+→ [ARCHITECTURE.md](ARCHITECTURE.md) — Enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
 
 **Feed context to an agent building ASK systems**
 → [AGENT-CONTEXT.md](AGENT-CONTEXT.md) — Structured for system prompt injection. Gives an AI agent the operational knowledge to design and review ASK-compliant architectures.
@@ -37,21 +40,30 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ```
 ├── README.md              ← You are here
 ├── FRAMEWORK.md           ← Complete theory: elements, tenets, cognitive model, lifecycle
-├── ARCHITECTURE.md        ← Complete technical guide: threat model, enforcement, topology
+├── THREATS.md             ← Categorized threat model: traditional, novel, and hybrid threats
+├── ARCHITECTURE.md        ← Technical guide: enforcement layers, topology, scaling
 ├── AGENT-CONTEXT.md       ← Optimized for system prompt injection
 ├── AGENT-CHECKLIST.md     ← Verification checklist
 │
 ├── examples/
-│   ├── mind.yaml              ← Sample Constraints configuration (tier, models, behavior)
-│   ├── gateway-policy.yaml    ← Sample runtime gateway policy (commands, files, MCP)
-│   ├── egress-denylist.yaml   ← Sample egress proxy denylist
-│   ├── enforcer-config.yaml   ← Sample per-agent enforcer configuration
-│   ├── delegation-message.yaml← Sample delegation bus message format
-│   └── log-events.yaml        ← Sample audit log event format
+│   ├── README.md                ← Example index and configuration reference
+│   ├── mind.yaml                ← Sample Constraints configuration (tier, models, behavior)
+│   ├── gateway-policy.yaml      ← Sample runtime gateway policy (commands, files, MCP)
+│   ├── egress-denylist.yaml     ← Sample egress proxy denylist
+│   ├── enforcer-config.yaml     ← Sample per-agent enforcer configuration
+│   ├── delegation-message.yaml  ← Sample delegation bus message format
+│   └── log-events.yaml          ← Sample audit log event format
+│
 ├── GLOSSARY.md            ← Terms and related work
 ├── LIMITATIONS.md         ← Known gaps and open questions
 ├── CHANGELOG.md           ← Version history
-└── SECURITY.md            ← Vulnerability reporting policy
+├── CONTRIBUTING.md        ← How to contribute
+├── SECURITY.md            ← Vulnerability reporting policy
+├── CLAUDE.md              ← Project instructions for AI agents
+├── LICENSE                ← CC BY 4.0
+│
+└── archive/
+    └── proposed-tenets-knowledge.md ← Proposed tenets (integrated into FRAMEWORK.md as Tenets 23–24)
 ```
 
 ---
@@ -66,7 +78,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ASK uses date-based versioning: **ASK 2026.03** (the current version).
 
-The tenet list (1–24) is considered stable. Tenet numbers will not be reassigned. New tenets may be appended. If a tenet is ever retired, its number is reserved and marked deprecated — it will not be reused.
+The tenet list (1–25) is considered stable. Tenet numbers will not be reassigned. New tenets may be appended. If a tenet is ever retired, its number is reserved and marked deprecated — it will not be reused.
 
 Breaking changes (tenet renumbering, element redefinition, structural changes to the cognitive model) will increment the version and be documented in a changelog. Non-breaking additions (new Limitations entries, new examples, clarifications) do not require a version change.
 

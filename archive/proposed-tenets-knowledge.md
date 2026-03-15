@@ -1,12 +1,12 @@
 # Proposed ASK Tenets: Organizational Knowledge
 
-*Extracted from [Compounding Agent Organizations](../agency/docs/specs/platform/compounding-agent-organizations.md) strategy spec. These tenets extend the ASK framework to cover shared organizational knowledge in multi-agent systems.*
+*These tenets extend the ASK framework to cover shared organizational knowledge in multi-agent systems.*
 
 *Status: Integrated into FRAMEWORK.md as Tenets 23–24.*
 
 ---
 
-## Tenet 24: Organizational knowledge is durable infrastructure, not agent state.
+## Tenet 23: Organizational knowledge is durable infrastructure, not agent state.
 
 Knowledge accumulated by agents must be structured, auditable, and operator-owned. It persists independently of any individual agent's lifecycle. Agents contribute to and consume from it but cannot control, suppress, or degrade it unilaterally. Destroying organizational knowledge requires more deliberate action than destroying any individual agent or team.
 
@@ -21,7 +21,7 @@ Knowledge accumulated by agents must be structured, auditable, and operator-owne
 
 ---
 
-## Tenet 25: Knowledge access is bounded by authorization scope.
+## Tenet 24: Knowledge access is bounded by authorization scope.
 
 Organizational knowledge is shared, but access to it is not unlimited. Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No agent can read knowledge outside its authorized scope, and the synthesized view available through the graph must not exceed what the querying agent is individually authorized to access (Tenet 12).
 

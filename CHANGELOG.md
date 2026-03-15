@@ -12,7 +12,31 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 - New tenet category: Organizational Knowledge (Tenets 23–24)
   - Tenet 23: Organizational knowledge is durable infrastructure, not agent state
   - Tenet 24: Knowledge access is bounded by authorization scope
-- 24 tenets across 8 categories
+- New tenet in Security category:
+  - Tenet 25: Identity mutations are auditable and recoverable
+- 25 tenets across 8 categories (was 22 across 7)
+- Cognitive model summary table updated: Identity layer primary threats broadened beyond XPIA to include identity poisoning and behavioral drift
+
+### Threat Model
+- New document: THREATS.md — threat model broken out from ARCHITECTURE.md
+- Threats categorized by novelty: Traditional (established best practices), Novel (unique to AI agents), Hybrid (traditional pattern, novel manifestation)
+- Traditional threats grounded in established enterprise security practices
+- Novel threats expanded beyond XPIA to cover broader agentic threat landscape:
+  - Identity and Memory Poisoning — persistent corruption of agent writable state
+  - Behavioral Drift and Misalignment — agents satisfying constraints while violating intent
+  - Cascading Failures in Multi-Agent Systems — semantic error propagation across agent chains
+  - Overwhelming Human Oversight — architectural degradation through approval fatigue
+- LLM-Mediated Instruction Following merged into XPIA entry as root cause analysis
+- New section: "The Threat Landscape is Incomplete" — acknowledges evolving risks, multimodal attack surfaces, and theoretical multi-agent attack patterns
+- New limitations: unknown and evolving threat landscape, misaligned reasoning, semantic error propagation
+
+### Documentation
+- ARCHITECTURE.md threat model replaced with summary linking to THREATS.md
+- Agent Checklist updated with Tenets 23–24 verification items
+- Agent Context updated with Tenets 23–24 in tenets table
+- Glossary updated with new terms: Organizational Knowledge, Knowledge Graph, Sentinel, Quarantine, Coverage Chain, Mind, Body, Function Agent
+- Glossary Related Work updated with OWASP Top 10 for Agentic Applications
+- File map in README updated to reflect all repository files
 
 ---
 
