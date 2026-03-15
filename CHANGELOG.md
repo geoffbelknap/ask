@@ -31,6 +31,8 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 - New limitations: unknown and evolving threat landscape, misaligned reasoning, semantic error propagation
 
 ### Documentation
+- ARCHITECTURE.md restructured: each section now leads with technology-neutral architectural requirements before presenting reference implementation approaches
+- Container Runtime Portability section condensed — portability is now implicit in the requirement-first structure
 - New document: RELATED-WORK.md — external frameworks, standards, protocols, and research mapped to ASK
   - NIST AI Agent Standards Initiative and NCCoE AI Agent Identity concept paper
   - NIST Cybersecurity Framework Profile for AI (NISTIR 8596)

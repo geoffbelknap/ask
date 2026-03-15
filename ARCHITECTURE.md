@@ -2,7 +2,7 @@
 
 **Version: ASK 2026.03**
 
-The technical implementation guide for the ASK operating framework. Read this document to understand what you're defending against and how the architecture defends against it.
+The technical architecture for the ASK operating framework. This document defines architectural requirements — what properties must hold regardless of technology — and presents reference approaches showing one valid way to achieve them. Read this document to understand what you're defending against and how the architecture defends against it.
 
 ---
 
@@ -91,6 +91,22 @@ If your organization already operates these controls for human endpoints, the ag
 
 The architecture uses seven independent enforcement layers. **Each layer runs in its own isolation boundary. No layer shares a trust boundary with the agent it enforces.** If one layer is misconfigured or bypassed, the others still hold.
 
+### Architectural Requirement
+
+Every ASK-conforming deployment must implement seven distinct enforcement functions. Each function must run in its own isolation boundary, separate from the agent and from every other enforcement function. The functions are:
+
+1. **Network isolation** — the agent has no direct internet access; all outbound traffic is forced through mediation
+2. **Egress mediation** — all agent web traffic passes through a policy-controlled proxy that enforces domain restrictions, rate limits, and size limits
+3. **LLM mediation** — all agent LLM calls pass through a proxy that enforces scoped API keys, XPIA guardrails, spend caps, and model routing
+4. **Per-agent HTTP policy enforcement** — each agent has a dedicated enforcement point that mediates all its HTTP traffic, performs credential swap, and logs every request (see "The Enforcer")
+5. **Workspace hardening** — the agent's execution environment restricts filesystem writes, drops unnecessary capabilities, runs as a non-root principal, and enforces resource limits
+6. **Execution-level mediation** — fine-grained policy enforcement on file operations, command execution, and process control within the agent's workspace (see "The Runtime Gateway")
+7. **Continuous monitoring** — anomaly detection, compliance checking, and log analysis across all layers, performed by an infrastructure agent with read-only access to all audit logs
+
+### Reference Approach
+
+The reference implementation achieves these seven functions using container-based isolation:
+
 ```
 Layer 1: Network Isolation
   Container network — agent has no direct internet access
@@ -121,9 +137,17 @@ Layer 7: Continuous Monitoring
 
 ## Single-Agent Topology
 
-### Component Diagram
+### Architectural Requirements
 
-The following diagram illustrates one valid topology for a single-agent deployment. Port numbers, protocols, and access methods are illustrative — implementations may use different values. The structural properties (isolation boundaries, mediation completeness, credential separation) are the requirements.
+A single-agent deployment must satisfy three structural properties:
+
+1. **Isolation boundaries.** The agent, each enforcement component, and shared infrastructure each run in separate isolation boundaries. No enforcement component shares a trust boundary with the agent it enforces.
+2. **Mediation completeness.** There is no path from the agent to any external resource (LLM providers, the web, external services) that bypasses the mediation layer. Every outbound request passes through at least the per-agent enforcer and one upstream proxy.
+3. **Credential separation.** The agent holds only scoped tokens. Real credentials for LLM providers, external services, and infrastructure components are held by enforcement components the agent cannot access.
+
+### Reference Topology
+
+The following diagram illustrates one valid topology for a single-agent deployment. Port numbers, protocols, and access methods are illustrative — implementations may use different values. The structural properties above are the requirements.
 
 ```
     End Users                                   Operators
@@ -254,11 +278,15 @@ block_dns_over_https: true
 
 ## The Enforcer
 
-The egress proxy and LLM proxy are shared infrastructure — they serve all agents on the host. But each agent needs per-agent policy enforcement at the HTTP level: credential swap for granted services, LLM request routing, request-level audit logging, and response header stripping. The **enforcer** is a per-agent HTTP proxy sidecar that sits between the agent and all shared infrastructure.
+### Architectural Requirement
 
-### Why a Separate Layer
+Every agent must have a dedicated policy enforcement point that mediates all its external communication. The agent's only path to external resources (LLM providers, web, external services) passes through this enforcement point. The enforcement point runs in its own isolation boundary, performs credential mediation (the agent never holds real service credentials), logs every request, and sanitizes responses. The agent cannot reach shared infrastructure directly — only through its dedicated enforcement point.
 
-The enforcer addresses a gap between the agent and the shared proxies: the agent needs to make HTTP requests to both LLM providers and external services, but it should never hold real credentials for either. The enforcer solves this by being the agent's only HTTP endpoint — the agent sends all requests to the enforcer, and the enforcer routes them to the correct upstream (LLM provider, egress proxy) with the correct credentials.
+This is a distinct enforcement layer from egress mediation (which enforces domain-level policy) and execution-level mediation (which enforces policy within the workspace). The per-agent enforcement point mediates HTTP-level policy: credential swap, request routing, per-request audit, and response sanitization. Collapsing it into either the egress proxy or the execution-level gateway would violate the principle that each enforcement layer has its own isolation boundary.
+
+### Reference Approach
+
+The reference implementation achieves this with a per-agent HTTP proxy sidecar (the **enforcer**) that sits between the agent and all shared infrastructure. The enforcer is the agent's only HTTP endpoint — the agent sends all requests to the enforcer, and the enforcer routes them to the correct upstream (LLM provider, egress proxy) with the correct credentials.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -298,21 +326,32 @@ The enforcer mediates service credentials as described in the [Service Credentia
 
 ### Isolation Properties
 
-The enforcer runs in its own container on both the agent-internal network and the mediation network. The agent can reach the enforcer; the agent cannot reach the mediation network directly. The enforcer's configuration, policy files, and audit logs are in a filesystem the agent cannot access.
-
-This is a distinct enforcement layer from the egress proxy (which enforces domain-level policy) and the runtime gateway (which enforces execution-level policy). The enforcer enforces HTTP-level policy: credential mediation, request routing, per-request audit, and response sanitization. Collapsing it into either the egress proxy or the runtime gateway would violate the principle that each enforcement layer has its own isolation boundary.
+The enforcer runs in its own isolation boundary with access to both the agent-internal network and the mediation network. The agent can reach the enforcer; the agent cannot reach the mediation network directly. The enforcer's configuration, policy files, and audit logs are in a filesystem the agent cannot access.
 
 ---
 
 ## The Runtime Gateway
 
-The egress proxy and LLM guardrails mediate actions that cross the workstation boundary. But a compromised agent can cause significant damage entirely within the workstation: reading sensitive files, spawning malicious processes, executing destructive commands, or staging data for exfiltration. Container hardening limits the blast radius but doesn't provide visibility or fine-grained control over what the agent does within its permitted operations.
+### Architectural Requirement
 
-The **runtime enforcement gateway** addresses this gap by mediating every file operation, command execution, network connection, and signal — while running in its own isolation boundary that the agent cannot access.
+The mediation layer (enforcer, egress proxy, LLM proxy) mediates actions that cross the workspace boundary. But a compromised agent can cause significant damage entirely within the workspace: reading sensitive files, spawning processes, executing destructive commands, or staging data for exfiltration. Container hardening limits the blast radius but doesn't provide visibility or fine-grained control.
 
-### Sidecar Architecture
+A compliant implementation must provide execution-level mediation — the ability to enforce policy on file operations, command execution, process creation, and tool invocations within the agent's workspace. This mediation must run in its own isolation boundary that the agent cannot access, observe, or influence. The agent must not be able to bypass the mediation without a kernel-level exploit.
 
-The gateway runs as a **separate container** from the agent, sharing only the PID namespace and a workspace volume. The gateway's own binaries, policy files, configuration, and audit logs live in a filesystem the agent cannot see or modify.
+**Enforcement machinery must not share an isolation boundary with what it enforces.** The agent is assumed compromisable at any time. If execution-level enforcement runs inside the agent's environment, the agent could potentially discover enforcement binaries, read policy files, or find writable paths that affect enforcement behavior. The enforcement component's filesystem, configuration, and audit logs must be as inaccessible to the agent as the egress proxy's configuration.
+
+#### Mediation Domain Requirements
+
+| Mediation Domain | Requirement |
+|---|---|
+| **Command execution** | All commands the agent executes must pass through a policy evaluation the agent cannot bypass |
+| **File operations** | All file reads, writes, creates, and deletes must be mediated with per-path, per-operation policy |
+| **Network connections** | Outbound connections from within the workspace must be interceptable and policy-controlled |
+| **Process control** | Process creation, signals, and inter-process communication must be mediated |
+
+### Reference Approach
+
+The reference implementation achieves execution-level mediation with a sidecar gateway — a separate container that shares only a PID namespace and workspace volume with the agent. The gateway's own binaries, policy files, configuration, and audit logs live in a filesystem the agent cannot see or modify.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -339,18 +378,18 @@ The gateway runs as a **separate container** from the agent, sharing only the PI
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Why sidecar, not embedded:** The framework's core design principle is that the agent is compromisable at any time. Enforcement machinery must not share an isolation boundary with what it enforces. If the gateway ran inside the agent's container, the agent could potentially discover gateway binaries, read policy files, or find writable paths that affect gateway behavior. In the sidecar model, the gateway's filesystem is as inaccessible to the agent as the egress proxy's configuration.
+#### Reference Enforcement Mechanisms
 
-### Enforcement Mechanisms
+The reference implementation achieves the mediation domain requirements using the following Linux mechanisms:
 
-| Mechanism | What It Mediates | How |
+| Mechanism | Mediation Domain | How |
 |---|---|---|
 | **Shell shim** | Command execution | `/bin/bash` replaced with shim binary; policy evaluation runs in gateway container |
-| **FUSE filesystem** | All file operations (open, read, write, create, delete) | FUSE provider runs in gateway; agent sees FUSE mount |
+| **FUSE filesystem** | File operations (open, read, write, create, delete) | FUSE provider runs in gateway; agent sees FUSE mount |
 | **Seccomp user-notify** | Network connections, signals, process control | Filters set by gateway (parent) on agent (child); agent cannot remove them |
 | **Landlock** | Filesystem access restriction | Kernel-level filesystem sandboxing as a defense-in-depth complement to FUSE |
 
-All four mechanisms provide **enforced** mediation — the agent cannot bypass them without a kernel exploit, which is the same trust boundary the container runtime itself relies on.
+All four mechanisms provide **enforced** mediation — the agent cannot bypass them without a kernel exploit, which is the same trust boundary the container runtime itself relies on. Other implementations may use different OS-level mechanisms (e.g., eBPF, LSMs, hypervisor-based interception) provided they meet the mediation domain requirements above.
 
 ### Six Policy Decisions
 
@@ -367,13 +406,21 @@ The `redirect` decision is architecturally significant: when a compromised agent
 
 ### MCP Tool Policy
 
-MCP servers are child processes that communicate via JSON-RPC 2.0 over stdio. They bypass shell-level command policy because they execute outside the agent's application-level enforcement. The gateway intercepts MCP tool calls by monitoring JSON-RPC messages between the agent process and MCP server subprocesses via the shared PID namespace.
+#### Requirement
+
+MCP servers run as separate processes that can bypass application-level tool policy. A compliant implementation must mediate MCP tool calls at the process level — not just at the application level inside the agent. The mediation must enforce tool allowlists, detect tool definition changes (version pinning), and block unauthorized MCP server registration.
+
+#### Reference Approach
+
+The reference implementation mediates MCP tools via the shared PID namespace. The gateway intercepts JSON-RPC 2.0 messages between the agent process and MCP server subprocesses.
 
 **Version pinning (rug-pull detection):** The gateway records each MCP server's tool definitions on first connection. If a server update changes tool definitions — for example, changing `read_file` to also exfiltrate data — the gateway blocks the server and emits an alert.
 
 **Skill registration control:** Community skills can register new MCP servers at runtime by default. The gateway blocks this: all MCP servers must be pre-configured in the Constraints layer (read-only to the agent), and new runtime registrations require operator approval.
 
 ### What a Compromised Agent Cannot Do
+
+In the reference implementation, the isolation model prevents the following attacks:
 
 | Attack | Why It Fails |
 |---|---|
@@ -385,6 +432,8 @@ MCP servers are child processes that communicate via JSON-RPC 2.0 over stdio. Th
 | Read audit logs | Audit log volume mounted only in gateway and Sentinel |
 | Disable seccomp filters | Set by parent process; `no-new-privileges` prevents modification |
 | Access files outside Landlock scope | Kernel-level filesystem restrictions enforced independently of FUSE |
+
+Any compliant implementation must prevent equivalent attack classes: the agent cannot read or modify enforcement policy, cannot disable or bypass mediation, and cannot access audit logs.
 
 ---
 
@@ -404,6 +453,8 @@ This satisfies Tenet 1 (constraints are external and inviolable — the agent ca
 ---
 
 ## The Guardrails Stack
+
+This section defines required guardrail capabilities — what an implementation must provide — not specific detection techniques or deployment patterns.
 
 Guardrails scan content at two points: **pre_call** (scanning input before it reaches the LLM) and **post_call** (scanning responses before they return to the agent). The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input. Post_call catches the XPIA kill chain: poisoned tool output → manipulated LLM response → exfiltration attempt on the way back out.
 
@@ -508,8 +559,8 @@ Enforcement components can fail. The framework's position is **fail-closed**: wh
 
 | Component | Failure Effect | Agent Impact | Recovery |
 |---|---|---|---|
-| **Network isolation** | Container network misconfiguration | Agent has direct internet access — **critical violation** (Tenet 3) | Cannot fail dynamically; misconfiguration is a deployment error. Verify at startup. |
-| **Egress proxy** | Proxy process crashes or becomes unreachable | Agent loses all web access (HTTP_PROXY target unreachable) | Restart proxy. Agent regains web access automatically. No data loss. |
+| **Network isolation** | Network boundary misconfiguration | Agent has direct internet access — **critical violation** (Tenet 3) | Cannot fail dynamically; misconfiguration is a deployment error. Verify at startup. |
+| **Egress proxy** | Proxy process crashes or becomes unreachable | Agent loses all web access (proxy endpoint unreachable) | Restart proxy. Agent regains web access automatically. No data loss. |
 | **LLM proxy** | Proxy process crashes or becomes unreachable | Agent loses all LLM access (API calls fail) | Restart proxy. Spend tracking and guardrail state persist in database. |
 | **Enforcer** | Sidecar crashes or becomes unreachable | Agent loses all HTTP access (its only HTTP endpoint is gone) | Restart enforcer. Agent regains HTTP access automatically. |
 | **Gateway** | Sidecar crashes | Agent loses shell, file, and MCP mediation | See below — deployment-dependent response. |
@@ -611,25 +662,15 @@ The operator interacts with the system through a management interface completely
 
 **Skills inherit the agent's tier, not their own.** A skill running inside a Tier 2 agent operates under Tier 2 constraints. Network controls contain skill behavior — even a fully malicious skill cannot exfiltrate data to a denylisted domain because the egress proxy blocks it.
 
-**MCP servers run as separate processes** that bypass application-level tool policy. The gateway's MCP policy addresses this by mediating MCP tool calls at the OS level (PID namespace monitoring), enforcing tool allowlists, version pinning, and blocking runtime MCP server registration by community skills.
+**MCP servers run as separate processes** that bypass application-level tool policy. The gateway's MCP policy addresses this by mediating MCP tool calls at the process level, enforcing tool allowlists, version pinning, and blocking runtime MCP server registration by community skills. The reference implementation uses PID namespace monitoring for this mediation.
 
 ---
 
 ## Container Runtime Portability
 
-The architecture examples use Docker terminology (Docker bridge networks, `docker exec`, named volumes, `docker create`). The concepts are not Docker-specific. Here is how they map to other runtimes:
+The reference approach examples in this document use Docker/OCI container terminology. The architectural requirements are runtime-agnostic. Any isolation technology that provides process isolation, filesystem namespacing, and network segmentation can implement the architecture — including Kubernetes, Podman, Firecracker/microVMs, and other container or VM runtimes.
 
-| Docker Concept | Kubernetes Equivalent | Podman Equivalent | Firecracker/VM Equivalent |
-|---|---|---|---|
-| Docker bridge network | NetworkPolicy + Pod networking | Podman network (CNI/netavark) | Virtual network interface |
-| `docker exec` | `kubectl exec` | `podman exec` | SSH / vsock |
-| Named volume (`:ro`) | PersistentVolumeClaim + `readOnly: true` | Named volume (`:ro`) | Virtio-fs / block device mount |
-| Container (isolation boundary) | Pod (with one container per pod for agent isolation) | Container | MicroVM |
-| Sidecar container (shared PID ns) | Sidecar container in same Pod | Pod with `--share=pid` | Co-located process in same VM |
-| `cap_drop: ALL` | SecurityContext `capabilities.drop: ["ALL"]` | `--cap-drop=all` | Not applicable (stronger isolation) |
-| `no-new-privileges` | SecurityContext `allowPrivilegeEscalation: false` | `--security-opt=no-new-privileges` | Default (process isolation) |
-
-The key requirement is that each enforcement layer runs in its own isolation boundary and the agent cannot reach enforcement infrastructure. Any runtime that provides process isolation, filesystem namespacing, and network segmentation can implement the architecture. Kubernetes users should note that a "Pod" in ASK terms is one agent + its sidecars — agents should not share Pods.
+The key requirement is that each enforcement layer runs in its own isolation boundary and the agent cannot reach enforcement infrastructure. Kubernetes users should note that a "Pod" in ASK terms is one agent + its sidecars — agents should not share Pods. See the reference implementation for runtime-specific equivalents.
 
 ---
 
@@ -657,7 +698,7 @@ For every component in the architecture, placement is determined by four forces:
 
 ### The Mediation Stub
 
-The mediation stub is the architectural component that makes edge-to-center migration transparent. It runs on every endpoint and provides the agent with stable, local service endpoints:
+The mediation stub is the architectural component that makes edge-to-center migration transparent. It runs on every endpoint and provides the agent with stable, local service endpoints. The specific addresses and ports below are illustrative:
 
 ```
 Agent's view (always the same):
@@ -685,7 +726,7 @@ The agent doesn't notice the difference. The stub handles connection management,
 
 For the architecture to scale from single-endpoint to enterprise without redesign:
 
-- **Stable interfaces** — the agent always talks to `http://enforcer:18080`, regardless of where the upstream services resolve
+- **Stable interfaces** — the agent always talks to a fixed local endpoint (e.g., `http://enforcer:18080`), regardless of where the upstream services resolve
 - **Externalized state** — agent identity and persistent state are never stored inside the workstation's ephemeral filesystem
 - **Policy-as-data** — mediation policies are declarative data files, not code; readable from local file, config server, or policy engine
 - **Log-as-stream** — logs are structured events that can be consumed locally, shipped, or streamed — the event format is the same regardless of destination
