@@ -131,9 +131,11 @@ Non-negotiable implementation rules. Every design decision MUST comply with all 
 
 ---
 
-## XPIA Defense Rules
+## Threat Awareness Rules
 
-XPIA (Cross-Prompt Injection Attack) is the primary threat. An attacker embeds instructions in content the agent fetches — a web page, a document, an API response, a tool output. The LLM follows those embedded instructions.
+The agent faces multiple threat categories — not just prompt injection. Key threats include XPIA (instructions hidden in external content), identity/memory poisoning (persistent corruption of the agent's writable state), behavioral drift (satisfying constraints while violating intent), cascading failures (errors amplifying across agent chains), and overwhelming human oversight (approval fatigue degrading the human safety net). See [THREATS.md](THREATS.md) for the full threat model.
+
+**XPIA is the most architecturally significant threat** because it exploits the LLM's inability to distinguish data from instructions — a property of the technology with no complete solution. An attacker embeds instructions in content the agent fetches — a web page, a document, an API response, a tool output. The LLM follows those embedded instructions.
 
 **Defense is architectural, not just detection-based.**
 

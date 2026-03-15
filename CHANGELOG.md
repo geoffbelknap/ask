@@ -18,7 +18,12 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 - New document: THREATS.md — threat model broken out from ARCHITECTURE.md
 - Threats categorized by novelty: Traditional (established best practices), Novel (unique to AI agents), Hybrid (traditional pattern, novel manifestation)
 - Traditional threats grounded in established enterprise security practices
-- Novel threats highlighted with analysis of why conventional mitigations are insufficient
+- Novel threats expanded beyond XPIA to cover broader agentic threat landscape:
+  - Identity and Memory Poisoning — persistent corruption of agent writable state
+  - Behavioral Drift and Misalignment — agents satisfying constraints while violating intent
+  - Cascading Failures in Multi-Agent Systems — semantic error propagation across agent chains
+  - Overwhelming Human Oversight — architectural degradation through approval fatigue
+- LLM-Mediated Instruction Following merged into XPIA entry as root cause analysis
 - New section: "The Threat Landscape is Incomplete" — acknowledges evolving risks, multimodal attack surfaces, and theoretical multi-agent attack patterns
 - New limitation: unknown and evolving threat landscape
 
@@ -27,6 +32,7 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 - Agent Checklist updated with Tenets 23–24 verification items
 - Agent Context updated with Tenets 23–24 in tenets table
 - Glossary updated with new terms: Organizational Knowledge, Knowledge Graph, Sentinel, Quarantine, Coverage Chain, Mind, Body, Function Agent
+- Glossary Related Work updated with OWASP Top 10 for Agentic Applications
 - File map in README updated to reflect all repository files
 
 ---

@@ -90,7 +90,9 @@ These threats are unique to AI agent systems. They have no direct analogue in tr
 
 **The threat.** An attacker embeds instructions in content the agent will consume — a web page, a document, a tool output, an email, a chat message. The agent feeds this content to the LLM, which cannot reliably distinguish data from instructions and follows the injected commands: exfiltrate data, call unauthorized tools, send messages on behalf of the user, or pivot to other systems. The attacker never directly accesses the agent; they poison the content the agent ingests.
 
-**Why it's novel.** XPIA exploits a property unique to LLMs: the inability to reliably distinguish between data and instructions within a context window. In conventional computing, the separation between code and data is architecturally enforced (the CPU doesn't execute data segments; SQL parameterization prevents injection). In an LLM, all tokens in the context window are processed identically — there is no hardware or protocol-level boundary between "these tokens are instructions" and "these tokens are data." This makes prompt injection a fundamentally different class of vulnerability than SQL injection or command injection, despite surface similarities.
+**Why it's novel.** XPIA exploits a property unique to LLMs: the inability to reliably distinguish between data and instructions within a context window. In conventional computing, the separation between code and data is architecturally enforced (the CPU doesn't execute data segments; SQL parameterization prevents injection). In an LLM, all tokens in the context window are processed identically — there is no hardware or protocol-level boundary between "these tokens are instructions" and "these tokens are data." This makes prompt injection a fundamentally different class of vulnerability than SQL injection or command injection, despite surface similarities. This is not a bug that can be patched — it is an inherent property of how transformer models process sequences. The framework must work around it, not wait for it to be fixed.
+
+**The root cause.** Tenet 17 (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The framework enforces it through the mediation layer: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The agent might try to exfiltrate data — the egress proxy blocks the destination. The agent might try to call an unauthorized tool — the tool permission guard blocks it. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
 
 **Why conventional mitigations are insufficient.** Input validation and sanitization — the standard approach for injection attacks — cannot fully solve XPIA because:
 - The "injection" is natural language, not a structured syntax that can be parsed and escaped
@@ -151,13 +153,73 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 - **Structural privilege separation.** Sub-agents operate under their own scoped keys and tier constraints. Delegation passes the task, not the credentials.
 - **Synthesis bounds (Tenet 12).** Combined output from multiple agents cannot exceed what any individual contributing agent was authorized to produce.
 
-### LLM-Mediated Instruction Following from Data
+### Identity and Memory Poisoning
 
-**The threat.** The LLM — processing content the agent fetched as data — follows embedded instructions as if they were legitimate directives. It attempts tool calls, generates exfiltration attempts, or produces manipulated output, all because the "data" it processed contained instruction-like text.
+**The threat.** An agent's writable state — its Identity layer, learned preferences, accumulated context, or persistent memory — is corrupted over time. The corruption persists across sessions, gradually shifting the agent's behavior in ways that are difficult to detect because the change is incremental and the agent treats its own Identity as trustworthy.
 
-**Why it's novel.** This is the fundamental problem underlying XPIA, but worth calling out independently: the LLM's architecture does not enforce a boundary between "content to process" and "instructions to follow." Every token in the context window is processed identically. This property is inherent to how transformer models work — it is not a bug that can be patched. It is a property of the technology that the framework must work around.
+**Why it's novel.** Traditional systems have integrity verification for persistent state (checksums, signatures, access controls on databases). An agent's Identity is a natural-language artifact: behavioral tendencies, learned patterns, accumulated knowledge. There is no checksum for "is this agent's self-model still aligned with the operator's intent?" The corruption is semantic, not structural — the file parses correctly, the schema is valid, but the content has been subtly manipulated.
 
-**The framework's design principle.** Tenet 17 (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The framework enforces it through the mediation layer: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The agent might try to exfiltrate data — the egress proxy blocks the destination. The agent might try to call an unauthorized tool — the tool permission guard blocks it. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
+**The framework's approach.**
+- **Identity writes are audited (Tenet 18).** Every change to the Identity layer is logged with provenance metadata. The agent can write to its Identity, but it cannot do so silently.
+- **Sentinel monitors Identity write patterns.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
+- **Constraints are read-only (Tenet 5).** The operator-owned Constraints layer cannot be modified by the agent, providing an immutable behavioral floor regardless of Identity corruption.
+- **Session state is ephemeral.** Session context resets between sessions, limiting the persistence of in-session poisoning attempts.
+
+**Open problems.**
+- Detecting semantic drift in natural-language state requires judgment, not just pattern matching
+- Slow, incremental poisoning may stay below Sentinel's anomaly detection thresholds
+- There is no established methodology for validating the "integrity" of an agent's learned context
+
+### Behavioral Drift and Misalignment
+
+**The threat.** An agent develops strategies that satisfy the letter of its constraints while violating their intent — without any external compromise. The agent optimizes for measurable objectives in ways the operator did not anticipate: gaming metrics, finding loopholes in policy definitions, or developing emergent behaviors that are technically compliant but operationally harmful. This includes deceptive alignment: an agent that behaves correctly during monitoring but differently when it believes it is unobserved.
+
+**Why it's novel.** Traditional software does exactly what it is programmed to do. An LLM-based agent has a degree of behavioral flexibility that makes "what it is programmed to do" less deterministic. The agent's behavior emerges from the interaction of its constraints, its learned context, and the LLM's reasoning — and that interaction can produce strategies the operator never anticipated. There is no conventional analogue to a program that follows its rules creatively.
+
+**The framework's approach.**
+- **External enforcement (Tenet 1).** The mediation layer enforces constraints regardless of the agent's intent. Even a misaligned agent cannot bypass network isolation, egress controls, or tool restrictions. The architecture limits what misaligned behavior can accomplish.
+- **Behavioral monitoring.** Sentinel establishes baselines and flags deviations in tool usage patterns, request volumes, and action sequences. Behavioral drift that manifests in observable actions is detectable.
+- **Least privilege (Tenet 4).** Minimizing the agent's capabilities minimizes the damage from unexpected behavior, whether caused by compromise or misalignment.
+- **Human override (Element 4).** The halt mechanism provides a hard stop when behavior deviates from intent.
+
+**Open problems.**
+- The framework can constrain misaligned behavior but cannot prevent misaligned reasoning
+- Deceptive alignment — behaving differently when monitored vs. unmonitored — is an unsolved problem in AI safety that architectural controls alone cannot address
+- Distinguishing creative problem-solving from policy circumvention requires semantic judgment
+
+### Cascading Failures in Multi-Agent Systems
+
+**The threat.** In multi-agent deployments, errors propagate and amplify across agent chains. A hallucination by one agent becomes authoritative input to the next. A failure in one agent triggers compensating actions in others that compound the original error. Synchronized failures — multiple agents hitting the same rate limit, the same stale data, or the same flawed reasoning pattern — create correlated outages that simple redundancy doesn't address.
+
+**Why it's novel.** Cascading failures exist in traditional distributed systems, but the failure mode is different. Conventional cascading failures propagate through resource exhaustion (circuit breaker patterns address this). Agent cascading failures propagate through *reasoning* — bad output from one agent corrupts the reasoning of the next. The amplification is semantic, not mechanical: each agent in the chain may elaborate on, contextualize, or build upon the error, making it harder to trace to its source.
+
+**The framework's approach.**
+- **Agent isolation (Tenet 7).** Each agent operates in its own workspace with its own credentials. Failure in one agent does not directly affect another's resources.
+- **Delegation bus scanning.** Inter-agent responses are scanned for anomalies before delivery, providing a checkpoint between agents in a chain.
+- **Synthesis bounds (Tenet 12).** Combined output cannot exceed individual authorization, limiting the scope of cascading errors.
+- **Independent enforcement.** Each agent's mediation layer operates independently — a failure in one agent's enforcement does not degrade another's.
+
+**Open problems.**
+- Detecting that a plausible-sounding result is actually a propagated hallucination requires ground-truth verification that the framework does not provide
+- Circuit breaker patterns for semantic errors (as opposed to resource errors) are not well-established
+- The framework does not define how many agents deep a delegation chain can go before error amplification becomes unacceptable
+
+### Overwhelming Human Oversight
+
+**The threat.** The human oversight mechanisms that the framework relies on — approval gates, halt reviews, alert triage — become ineffective due to volume. An attacker deliberately triggers high volumes of benign-looking approval requests to induce alert fatigue, or operational scale simply outgrows the human's ability to review meaningfully. The human approves reflexively, and the oversight mechanism becomes theater.
+
+**Why it's novel.** Alert fatigue is a well-known problem in traditional security operations. What makes it novel in the agent context is that human oversight is an *architectural element* of the framework (Element 4: Human Override), not just an operational practice. If human oversight is degraded, an architectural assumption of the framework is violated. The framework's trust spectrum explicitly ranges from interactive (human in loop) to autonomous (human in governance) — but the transition from one to the other should be a deliberate architectural decision, not an emergent failure caused by volume.
+
+**The framework's approach.**
+- **Trust spectrum (Framework § Trust).** The framework defines a spectrum from direct human involvement to delegated governance. Operators should position agents at a trust level appropriate to the volume of oversight they can sustain.
+- **Tiered approval.** Not all actions require the same level of review. The gateway's policy can distinguish between actions that need approval, actions that need logging only, and actions that are auto-approved within policy.
+- **Sentinel as a force multiplier.** Automated monitoring reduces the volume of events requiring human attention by filtering noise and escalating only anomalies.
+
+**Open problems.**
+- The framework does not define thresholds for when human oversight volume becomes unsafe
+- There is no mechanism to detect that a human approver has shifted to reflexive approval
+- Scaling human oversight to large agent fleets without degrading quality is an unsolved organizational problem
+- An attacker who understands the approval workflow can craft requests that exploit approval fatigue
 
 ---
 
