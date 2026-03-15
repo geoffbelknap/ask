@@ -160,9 +160,9 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **Why it's novel.** Traditional systems have integrity verification for persistent state (checksums, signatures, access controls on databases). An agent's Identity is a natural-language artifact: behavioral tendencies, learned patterns, accumulated knowledge. There is no checksum for "is this agent's self-model still aligned with the operator's intent?" The corruption is semantic, not structural — the file parses correctly, the schema is valid, but the content has been subtly manipulated.
 
 **The framework's approach.**
-- **Identity writes are audited (Tenet 18).** Every change to the Identity layer is logged with provenance metadata. The agent can write to its Identity, but it cannot do so silently.
+- **Identity writes are audited (Tenet 2).** Every change to the Identity layer is logged with provenance metadata. The agent can write to its Identity, but it cannot do so silently.
 - **Sentinel monitors Identity write patterns.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
-- **Constraints are read-only (Tenet 5).** The operator-owned Constraints layer cannot be modified by the agent, providing an immutable behavioral floor regardless of Identity corruption.
+- **Constraints are immutable (Tenet 1).** The operator-owned Constraints layer is external to the agent and inviolable, providing an immutable behavioral floor regardless of Identity corruption.
 - **Session state is ephemeral.** Session context resets between sessions, limiting the persistence of in-session poisoning attempts.
 
 **Open problems.**
@@ -194,7 +194,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **Why it's novel.** Cascading failures exist in traditional distributed systems, but the failure mode is different. Conventional cascading failures propagate through resource exhaustion (circuit breaker patterns address this). Agent cascading failures propagate through *reasoning* — bad output from one agent corrupts the reasoning of the next. The amplification is semantic, not mechanical: each agent in the chain may elaborate on, contextualize, or build upon the error, making it harder to trace to its source.
 
 **The framework's approach.**
-- **Agent isolation (Tenet 7).** Each agent operates in its own workspace with its own credentials. Failure in one agent does not directly affect another's resources.
+- **Agent isolation (Element 1).** Each agent operates in its own workspace with its own credentials. Failure in one agent does not directly affect another's resources.
 - **Delegation bus scanning.** Inter-agent responses are scanned for anomalies before delivery, providing a checkpoint between agents in a chain.
 - **Synthesis bounds (Tenet 12).** Combined output cannot exceed individual authorization, limiting the scope of cascading errors.
 - **Independent enforcement.** Each agent's mediation layer operates independently — a failure in one agent's enforcement does not degrade another's.
