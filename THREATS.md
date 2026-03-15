@@ -77,7 +77,7 @@ These threats have well-understood analogues in enterprise security. The mitigat
 **Established best practices.**
 - **Least privilege (Tenet 4).** Capabilities, credentials, and authority are scoped to the minimum the role requires. The agent doesn't receive access it doesn't need.
 - **Budget and rate limits.** Spend caps and request rate limits bound the damage from unbounded action, even within authorized capabilities.
-- **Behavioral monitoring.** Sentinel establishes behavioral baselines and flags deviations — unusual tool usage, sudden changes in request volume, access to new resources. This is the agent equivalent of User Behavior Analytics (UBA).
+- **Behavioral monitoring.** The security monitor establishes behavioral baselines and flags deviations — unusual tool usage, sudden changes in request volume, access to new resources. This is the agent equivalent of User Behavior Analytics (UBA).
 - **Approval gates for consequential actions.** Irreversible or high-impact operations require human approval via the gateway's `approve` policy decision.
 
 ---
@@ -161,13 +161,13 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 **The framework's approach.**
 - **Identity writes are audited and recoverable (Tenet 25).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — the operator can reconstruct state at any point and roll back. The agent can write to its Identity, but it cannot do so silently.
-- **Sentinel monitors Identity write patterns.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
+- **Identity write pattern monitoring.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
 - **Constraints are immutable (Tenet 1).** The operator-owned Constraints layer is external to the agent and inviolable, providing an immutable behavioral floor regardless of Identity corruption.
 - **Session state is ephemeral.** Session context resets between sessions, limiting the persistence of in-session poisoning attempts.
 
 **Open problems.**
 - Detecting semantic drift in natural-language state requires judgment, not just pattern matching
-- Slow, incremental poisoning may stay below Sentinel's anomaly detection thresholds
+- Slow, incremental poisoning may stay below the security monitor's anomaly detection thresholds
 - There is no established methodology for validating the "integrity" of an agent's learned context
 
 ### Behavioral Drift and Misalignment
@@ -178,7 +178,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 **The framework's approach.**
 - **External enforcement (Tenet 1).** The mediation layer enforces constraints regardless of the agent's intent. Even a misaligned agent cannot bypass network isolation, egress controls, or tool restrictions. The architecture limits what misaligned behavior can accomplish.
-- **Behavioral monitoring.** Sentinel establishes baselines and flags deviations in tool usage patterns, request volumes, and action sequences. Behavioral drift that manifests in observable actions is detectable.
+- **Behavioral monitoring.** The security monitor establishes baselines and flags deviations in tool usage patterns, request volumes, and action sequences. Behavioral drift that manifests in observable actions is detectable.
 - **Least privilege (Tenet 4).** Minimizing the agent's capabilities minimizes the damage from unexpected behavior, whether caused by compromise or misalignment.
 - **Human override (Element 4).** The halt mechanism provides a hard stop when behavior deviates from intent.
 
@@ -213,7 +213,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **The framework's approach.**
 - **Trust spectrum (Framework § Trust).** The framework defines a spectrum from direct human involvement to delegated governance. Operators should position agents at a trust level appropriate to the volume of oversight they can sustain.
 - **Tiered approval.** Not all actions require the same level of review. The gateway's policy can distinguish between actions that need approval, actions that need logging only, and actions that are auto-approved within policy.
-- **Sentinel as a force multiplier.** Automated monitoring reduces the volume of events requiring human attention by filtering noise and escalating only anomalies.
+- **Security monitoring as a force multiplier.** Automated monitoring reduces the volume of events requiring human attention by filtering noise and escalating only anomalies.
 
 **Open problems.**
 - The framework does not define thresholds for when human oversight volume becomes unsafe

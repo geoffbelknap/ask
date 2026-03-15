@@ -1,14 +1,16 @@
-# ASK — Example Configurations
+# ASK — Reference Implementation Examples
 
-Sample configuration files illustrating ASK framework concepts. These are **reference examples**, not production-ready configurations. Adapt to your deployment.
+These files show **one valid implementation** of the ASK framework using YAML-based configurations. The framework does not require this exact format, file structure, or field naming. An ASK-conforming implementation could use JSON, TOML, HCL, protobuf, database records, or any other format — the framework defines required *concepts*, not required *schemas*.
 
-| File | What It Configures | Where It Lives |
+Use these examples to understand what the framework requires semantically. Adapt the format and structure to your platform.
+
+| File | Framework Concept | What It Illustrates |
 |---|---|---|
-| `mind.yaml` | Agent Constraints — tier, models, budget, behavior, delegation, tools | `constraints/` directory, `:ro` mount in agent container |
-| `gateway-policy.yaml` | Runtime gateway — command, file, and MCP tool policies | Gateway sidecar container, invisible to agent |
-| `egress-denylist.yaml` | Egress proxy — denied domains, rate limits, DNS controls | Egress proxy container, invisible to agent |
-| `enforcer-config.yaml` | Per-agent enforcer — routing, credential swap, audit, response sanitization | Enforcer sidecar container, invisible to agent |
-| `delegation-message.yaml` | Delegation bus — request, validation, and response message format | Delegation bus service (multi-agent deployments) |
-| `log-events.yaml` | Audit log — event format for all enforcement layers | Written by mediation layer to persistent log storage |
+| `mind.yaml` | Constraints layer configuration | Agent identity, tier, models, limits, behavior, tools, delegation |
+| `gateway-policy.yaml` | Execution-level mediation policy | Command, file, and MCP tool policy rules |
+| `egress-denylist.yaml` | Egress mediation policy | Domain denylist, rate limits, DNS controls |
+| `enforcer-config.yaml` | Per-agent HTTP enforcement config | Request routing, credential swap, audit, response sanitization |
+| `delegation-message.yaml` | Delegation bus message format | Request, validation, and response message structure |
+| `log-events.yaml` | Audit log event format | Structured events from all enforcement layers |
 
-All configuration files live outside the agent's isolation boundary. The agent cannot see, read, or modify any of them. Log events are written by enforcement components, not by the agent.
+All configuration lives outside the agent's isolation boundary. The agent cannot see, read, or modify any of it. Log events are written by enforcement components, not by the agent.

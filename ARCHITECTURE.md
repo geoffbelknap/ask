@@ -75,7 +75,7 @@ The architecture maps established enterprise endpoint security controls to AI ag
 | Secure Web Gateway | Filter and log web traffic | Egress proxy with domain denylist |
 | CASB (Cloud Access Security Broker) | Mediate access to cloud services | LLM proxy with guardrails |
 | DLP (Data Loss Prevention) | Prevent sensitive data exfiltration | LLM guardrails + egress content rules |
-| EDR (Endpoint Detection & Response) | Detect and respond to threats | Unified logging + anomaly detection (Sentinel) |
+| EDR (Endpoint Detection & Response) | Detect and respond to threats | Unified logging + anomaly detection (security monitor) |
 | Application allowlisting | Control which software can run | Tool permission guard + skill validation + MCP tool policy |
 | Credential vault | Secure storage, rotation, access control | Infrastructure secrets + enforcer credential swap + scoped tokens |
 | Conditional Access / Zero Trust | Verify before granting access | Scoped API keys, per-agent enforcer policies, service grants |
@@ -201,8 +201,8 @@ The following diagram illustrates one valid topology for a single-agent deployme
 │  │  └──────────────────────────────────────────────────────┘    │  │
 │  │                                                               │  │
 │  │  ┌──────────────────────┐                                     │  │
-│  │  │ Sentinel              │  Reads (RO): all audit logs        │  │
-│  │  │ (security monitor)    │  Writes: findings/                 │  │
+│  │  │ Security monitor      │  Reads (RO): all audit logs        │  │
+│  │  │ (function agent)      │  Writes: findings/                 │  │
 │  │  │ Tier: Elevated        │  Reaches: LLM proxy                │  │
 │  │  └──────────────────────┘                                     │  │
 │  └───────────────────────────────────────────────────────────────┘  │
@@ -301,7 +301,7 @@ The reference implementation achieves this with a per-agent HTTP proxy sidecar (
 │  │ Holds:            │     │  Other → egress:3128 (HTTP)        │  │
 │  │  scoped token     │     │                                    │  │
 │  │  (not real keys)  │     │ Swaps:                              │  │
-│  │                   │     │  X-Agency-Service header            │  │
+│  │                   │     │  scoped service token               │  │
 │  └──────────────────┘     │  → real credential from infra       │  │
 │                            │                                    │  │
 │                            │ Strips:                             │  │
@@ -429,7 +429,7 @@ In the reference implementation, the isolation model prevents the following atta
 | Kill or signal the gateway | Seccomp filters block signals to PID 1 |
 | Bypass the shell shim | `/bin/bash` and `/bin/sh` are the shim |
 | Access workspace without FUSE | Underlying storage in gateway's mount namespace |
-| Read audit logs | Audit log volume mounted only in gateway and Sentinel |
+| Read audit logs | Audit log volume mounted only in gateway and security monitor |
 | Disable seccomp filters | Set by parent process; `no-new-privileges` prevents modification |
 | Access files outside Landlock scope | Kernel-level filesystem restrictions enforced independently of FUSE |
 
@@ -502,15 +502,15 @@ The three required capabilities (XPIA detection + tool permission + MCP policy) 
 
 ---
 
-## Sentinel Specification
+## Security Monitor
 
-Sentinel is the framework's monitoring and anomaly detection agent. It is a function agent (high cross-boundary visibility, constrained capability) that provides continuous oversight of all other agents in the deployment.
+Every ASK deployment requires a monitoring and anomaly detection function agent — a **security monitor**. It is a function agent (high cross-boundary visibility, constrained capability) that provides continuous oversight of all other agents in the deployment. The reference implementation calls this agent "Sentinel."
 
 ### Inputs
 
-Sentinel reads audit logs from all enforcement layers. It does not receive data from agents directly — it reads the same structured log events that the enforcement infrastructure writes.
+The security monitor reads audit logs from all enforcement layers. It does not receive data from agents directly — it reads the same structured log events that the enforcement infrastructure writes.
 
-| Source | What Sentinel Reads |
+| Source | What the Security Monitor Reads |
 |---|---|
 | Egress proxy logs | Domain access patterns, blocked requests, rate limit events |
 | LLM proxy logs | Token consumption, model usage, guardrail triggers, spend tracking |
@@ -520,7 +520,7 @@ Sentinel reads audit logs from all enforcement layers. It does not receive data 
 
 ### Analysis
 
-Sentinel performs three categories of analysis:
+The security monitor performs three categories of analysis:
 
 **Baseline comparison.** Establishes a behavioral baseline for each agent over a configurable observation period. Flags deviations: unusual tool usage patterns, sudden changes in request volume, new domains accessed, changes in LLM interaction patterns (prompt length, model selection, token consumption).
 
@@ -534,20 +534,20 @@ Sentinel performs three categories of analysis:
 |---|---|
 | **Findings** | Structured reports of detected anomalies with severity, evidence, and affected agent |
 | **Alerts** | Real-time notifications to the operator for events above a configured severity threshold |
-| **Recommendations** | Suggested actions (halt, investigate, reduce trust, quarantine) — Sentinel recommends but does not act unilaterally except for self-halt |
+| **Recommendations** | Suggested actions (halt, investigate, reduce trust, quarantine) — the security monitor recommends but does not act unilaterally except for self-halt |
 | **Compliance reports** | Periodic summaries of agent behavior against policy (guardrail trigger rates, policy compliance, trust evolution) |
 
 ### Constraints
 
-Sentinel is itself an agent subject to the framework. It has elevated cross-boundary visibility (reads all audit logs) but constrained capability:
+The security monitor is itself an agent subject to the framework. It has elevated cross-boundary visibility (reads all audit logs) but constrained capability:
 
 - **Read-only access** to all audit logs and agent workspaces — cannot modify agent state, configuration, or identity
 - **Cannot act in other agents' workspaces** — cannot execute commands, write files, or modify configurations
 - **Can recommend halt** — the operator or an automated policy threshold executes the halt
-- **Own LLM calls go through the same guardrails stack** — Sentinel is an XPIA target (see [LIMITATIONS.md](LIMITATIONS.md)) and its calls are scanned like any other agent's
+- **Own LLM calls go through the same guardrails stack** — the security monitor is an XPIA target (see [LIMITATIONS.md](LIMITATIONS.md)) and its calls are scanned like any other agent's
 - **Findings are written to a separate findings store** — not to agent audit logs, preventing circular contamination
 
-At Scale 1, Sentinel can be a simple log analysis script that runs periodically. At Scale 3, it is a fleet of function agents with specialized roles (one per analysis category or per agent group).
+At Scale 1, the security monitor can be a simple log analysis script that runs periodically. At Scale 3, it is a fleet of function agents with specialized roles (one per analysis category or per agent group).
 
 ---
 
@@ -565,7 +565,7 @@ Enforcement components can fail. The framework's position is **fail-closed**: wh
 | **Enforcer** | Sidecar crashes or becomes unreachable | Agent loses all HTTP access (its only HTTP endpoint is gone) | Restart enforcer. Agent regains HTTP access automatically. |
 | **Gateway** | Sidecar crashes | Agent loses shell, file, and MCP mediation | See below — deployment-dependent response. |
 | **Database** | Database unreachable | LLM proxy cannot track spend or enforce budget caps | LLM proxy should fail-closed: deny requests when spend tracking is unavailable. |
-| **Sentinel** | Monitor crashes | No anomaly detection or compliance monitoring | Restart Sentinel. Gap in monitoring is logged. Agent operation continues — monitoring is observational, not enforcement. |
+| **Security monitor** | Monitor crashes | No anomaly detection or compliance monitoring | Restart monitor. Gap in monitoring is logged. Agent operation continues — monitoring is observational, not enforcement. |
 
 ### Gateway Failure Policy
 
@@ -692,7 +692,7 @@ For every component in the architecture, placement is determined by four forces:
 
 **Always at the edge:** Active agent session (latency), local context and data (trust boundary), integration clients for local services, a mediation stub.
 
-**Always central (at scale):** LLM proxy and guardrail stack (shared policy), log store and analytics (correlation requires the complete picture), policy engine (single source of truth), management and security agents (Sentinel, Infra-Ops), agent identity and persistent state.
+**Always central (at scale):** LLM proxy and guardrail stack (shared policy), log store and analytics (correlation requires the complete picture), policy engine (single source of truth), management and security agents (security monitor, Infra-Ops), agent identity and persistent state.
 
 **Migrates from edge to center as scale increases:** LLM proxy, egress proxy, database, logging — all start local and move to shared services as the deployment grows.
 
@@ -716,11 +716,11 @@ The agent doesn't notice the difference. The stub handles connection management,
 
 ### Topology at Three Scales
 
-**Scale 1 — Single human, single agent.** Everything on one machine. LLM proxy, egress proxy, database, agent workspace, and Sentinel all run as local containers. Acceptable for personal use and experimentation.
+**Scale 1 — Single human, single agent.** Everything on one machine. LLM proxy, egress proxy, database, agent workspace, and security monitor all run locally. Acceptable for personal use and experimentation.
 
 **Scale 2 — Single human, multiple agents, dedicated server.** Agent workstations run locally (for interactive work). Mediation and management services run on a nearby server. Network latency between local machine and server is usually dominated by LLM inference latency anyway.
 
-**Scale 3 — Organization, many humans, many agents.** Edge workstations on each endpoint. Central services in cloud infrastructure — LLM proxy cluster, egress proxy cluster, policy engine, identity/state store, log aggregation, Sentinel fleet, workstation provisioner, database cluster.
+**Scale 3 — Organization, many humans, many agents.** Edge workstations on each endpoint. Central services in cloud infrastructure — LLM proxy cluster, egress proxy cluster, policy engine, identity/state store, log aggregation, security monitor fleet, workstation provisioner, database cluster.
 
 ### Design Requirements for Transparent Scaling
 
@@ -742,11 +742,11 @@ The framework requires human override (Element 4) and operator observability, bu
 
 **Observe:** View agent states (running/paused/halted/quarantined), active sessions, current trust tier and level, resource consumption (token spend, request rates), and recent guardrail triggers.
 
-**Act:** Halt, resume, pause, and quarantine agents. Grant and revoke service credentials. Rotate scoped API keys. Approve operations gated by `approve` policy decisions. Manage Constraints updates (edit `mind.yaml`, update enforcement configs).
+**Act:** Halt, resume, pause, and quarantine agents. Grant and revoke service credentials. Rotate scoped API keys. Approve operations gated by `approve` policy decisions. Manage Constraints updates (edit constraints configuration, update enforcement configs).
 
-**Review:** Access audit logs from all enforcement layers. Reconstruct action chains via correlation IDs. Review Sentinel findings. Inspect quarantined agent state.
+**Review:** Access audit logs from all enforcement layers. Reconstruct action chains via correlation IDs. Review security monitor findings. Inspect quarantined agent state.
 
-**Alert:** Receive notifications for guardrail triggers above a threshold, quarantine events, self-halts, budget exhaustion, and Sentinel anomaly findings.
+**Alert:** Receive notifications for guardrail triggers above a threshold, quarantine events, self-halts, budget exhaustion, and security monitor anomaly findings.
 
 ### Implementation at Scale
 
@@ -760,7 +760,7 @@ Each agent requires a per-agent enforcer sidecar and (in production) a per-agent
 
 - **Enforcer:** Lightweight HTTP proxy. Low memory and CPU overhead. Scales linearly with agent count.
 - **Gateway:** Heavier — manages execution-level enforcement (filesystem mediation, process supervision, policy engine). Moderate memory and CPU overhead. Scales linearly with agent count.
-- **Shared infrastructure** (LLM proxy, egress proxy, database, Sentinel) is amortized across agents and does not scale linearly.
+- **Shared infrastructure** (LLM proxy, egress proxy, database, security monitor) is amortized across agents and does not scale linearly.
 
 Per-agent sidecar overhead is the cost of per-agent isolation — it cannot be reduced by sharing sidecars without violating Tenet 1 (enforcement in its own boundary per agent). Capacity planning should account for enforcement overhead alongside agent workload. Profile actual resource consumption in your deployment — overhead varies with implementation choices, policy complexity, and workload patterns.
 

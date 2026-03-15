@@ -67,7 +67,7 @@ A "No" answer to any item in the Elements sections or Tenet Verification is a fr
 - [ ] Security-relevant configuration (risk tolerance, escalation thresholds, permission grants, tier declaration) is stored in Constraints files on a `:ro` mount — the agent cannot write to these files
 - [ ] Agent-owned writable storage (memory, personality, accumulated knowledge) is on a separate `:rw` mount
 - [ ] The `:rw` mount (Identity) does NOT contain any security-relevant behavioral parameters
-- [ ] Sentinel or equivalent monitoring watches for anomalous writes to the Identity layer
+- [ ] Security monitor (or equivalent monitoring) watches for anomalous writes to the Identity layer
 - [ ] The Constraints layer is version-controlled — every change has an author, timestamp, and rationale
 - [ ] Constraints updates go through a review and approval process (governance event, not operational change)
 - [ ] Changing Constraints requires access to the host or infrastructure — the change cannot be initiated from within an agent session
