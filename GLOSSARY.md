@@ -56,18 +56,4 @@
 
 ## Related Work
 
-This architecture draws on established security patterns applied to the novel domain of AI agent runtime security:
-
-**Zero Trust Architecture (NIST SP 800-207):** The principle that no entity is inherently trusted, all access is verified, and breach is assumed. Applied here to AI agents rather than human users.
-
-**Managed Device Security (MDM/UEM):** Enterprise endpoint management patterns — device profiles, application allowlisting, conditional access — applied to agent containers.
-
-**Microservice Security Patterns:** Sidecar proxies, service mesh, network policy — applied to agent isolation rather than service-to-service communication.
-
-**OS Kernel Security Model:** The analogy of the kernel mediating hardware access applied to proxies mediating AI agent access to external resources.
-
-**MITRE ATLAS (Adversarial Threat Landscape for AI Systems):** Threat taxonomy for AI systems that informs the threat model.
-
-**MAESTRO (CSA):** A [seven-layer threat classification taxonomy](https://cloudsecurityalliance.org/blog/2025/02/06/agentic-ai-threat-modeling-framework-maestro) for agentic AI covering foundation models through agent ecosystems. MAESTRO catalogs *what can go wrong* across the full AI stack; ASK defines *what must be true* at the runtime enforcement level. The two frameworks are complementary but address different questions — MAESTRO is a threat taxonomy, ASK is an operating framework. MAESTRO's coverage of foundation model threats and data pipeline attacks addresses areas that ASK explicitly scopes out (see [LIMITATIONS.md](LIMITATIONS.md)).
-
-**OWASP Top 10 for Agentic Applications:** A [threat catalog and mitigation playbook](https://genai.owasp.org/resource/agentic-ai-threats-and-mitigations/) for agentic AI systems, identifying ten risk categories (ASI01–ASI10) including agent goal hijack, tool misuse, identity and privilege abuse, supply chain risks, unexpected code execution, memory and context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation, and rogue agents. OWASP enumerates threats and recommends mitigations across the full application stack; ASK defines the architectural properties that must hold at the runtime enforcement level. ASK's threat model ([THREATS.md](THREATS.md)) covers the agent runtime threats that overlap with OWASP's catalog; OWASP's coverage of application-level concerns (authentication flows, API security, user interface risks) addresses areas outside ASK's scope.
+See [RELATED-WORK.md](RELATED-WORK.md) for a comprehensive map of how ASK relates to external frameworks, standards, threat taxonomies, protocols, and industry research.

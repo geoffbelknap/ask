@@ -62,6 +62,18 @@ These are binary conditions. Each one either holds or it is violated. Design and
 
 ---
 
+## Standards Landscape
+
+ASK exists within a growing ecosystem. Key external references:
+- **NIST NCCoE** is developing agent identity and authorization guidelines using OAuth 2.0/2.1, OIDC, SPIFFE/SPIRE, SCIM, and NGAC.
+- **A2A** (Agent2Agent protocol, Linux Foundation) enables cross-organizational agent communication — ASK Tenets 17–19 govern how compliant systems interact with external agents.
+- **CoSAI** published an MCP security white paper with 12 threat categories — use it to inform gateway MCP policy.
+- **OWASP Top 10 for Agentic Applications** catalogs application-level risks; ASK covers runtime enforcement.
+
+See [RELATED-WORK.md](RELATED-WORK.md) for full analysis.
+
+---
+
 ## The Cognitive Model: What Goes Where
 
 Every piece of agent configuration belongs in exactly one layer. The decisive question: **does this content affect the security boundary?**
