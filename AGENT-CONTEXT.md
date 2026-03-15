@@ -56,6 +56,8 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 20 | Coordination | When a conflict has an unidentifiable source, yield, log, and flag — never force resolution |
 | 21 | Coordination | No agent or automated process can remove a human principal |
 | 22 | Coordination | Quarantine is agent-specific — humans who appear to be acting maliciously are flagged for human-to-human resolution |
+| 23 | Organizational Knowledge | Organizational knowledge is durable infrastructure, not agent state — structured, auditable, operator-owned, persists independently of agent lifecycle |
+| 24 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (Tenet 12) |
 
 ---
 

@@ -12,7 +12,13 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 - New tenet category: Organizational Knowledge (Tenets 23–24)
   - Tenet 23: Organizational knowledge is durable infrastructure, not agent state
   - Tenet 24: Knowledge access is bounded by authorization scope
-- 24 tenets across 8 categories
+- 24 tenets across 8 categories (was 22 across 7)
+
+### Documentation
+- Agent Checklist updated with Tenets 23–24 verification items
+- Agent Context updated with Tenets 23–24 in tenets table
+- Glossary updated with new terms: Organizational Knowledge, Knowledge Graph, Sentinel, Quarantine, Coverage Chain, Mind, Body, Function Agent
+- File map in README updated to reflect all repository files
 
 ---
 

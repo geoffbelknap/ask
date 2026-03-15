@@ -42,16 +42,22 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── AGENT-CHECKLIST.md     ← Verification checklist
 │
 ├── examples/
-│   ├── mind.yaml              ← Sample Constraints configuration (tier, models, behavior)
-│   ├── gateway-policy.yaml    ← Sample runtime gateway policy (commands, files, MCP)
-│   ├── egress-denylist.yaml   ← Sample egress proxy denylist
-│   ├── enforcer-config.yaml   ← Sample per-agent enforcer configuration
-│   ├── delegation-message.yaml← Sample delegation bus message format
-│   └── log-events.yaml        ← Sample audit log event format
+│   ├── README.md                ← Example index and configuration reference
+│   ├── mind.yaml                ← Sample Constraints configuration (tier, models, behavior)
+│   ├── gateway-policy.yaml      ← Sample runtime gateway policy (commands, files, MCP)
+│   ├── egress-denylist.yaml     ← Sample egress proxy denylist
+│   ├── enforcer-config.yaml     ← Sample per-agent enforcer configuration
+│   ├── delegation-message.yaml  ← Sample delegation bus message format
+│   └── log-events.yaml          ← Sample audit log event format
+│
 ├── GLOSSARY.md            ← Terms and related work
 ├── LIMITATIONS.md         ← Known gaps and open questions
 ├── CHANGELOG.md           ← Version history
-└── SECURITY.md            ← Vulnerability reporting policy
+├── CONTRIBUTING.md        ← How to contribute
+├── SECURITY.md            ← Vulnerability reporting policy
+├── CLAUDE.md              ← Project instructions for AI agents
+├── proposed-tenets-knowledge.md ← Proposed tenets (Organizational Knowledge — integrated)
+└── LICENSE                ← CC BY 4.0
 ```
 
 ---
