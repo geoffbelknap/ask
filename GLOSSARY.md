@@ -64,3 +64,5 @@ This architecture draws on established security patterns applied to the novel do
 **OS Kernel Security Model:** The analogy of the kernel mediating hardware access applied to proxies mediating AI agent access to external resources.
 
 **MITRE ATLAS (Adversarial Threat Landscape for AI Systems):** Threat taxonomy for AI systems that informs the threat model.
+
+**MAESTRO (CSA):** A [seven-layer threat classification taxonomy](https://cloudsecurityalliance.org/blog/2025/02/06/agentic-ai-threat-modeling-framework-maestro) for agentic AI covering foundation models through agent ecosystems. MAESTRO catalogs *what can go wrong* across the full AI stack; ASK defines *what must be true* at the runtime enforcement level. The two frameworks are complementary but address different questions — MAESTRO is a threat taxonomy, ASK is an operating framework. MAESTRO's coverage of foundation model threats and data pipeline attacks addresses areas that ASK explicitly scopes out (see [LIMITATIONS.md](LIMITATIONS.md)).
