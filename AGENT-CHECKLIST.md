@@ -104,6 +104,7 @@ Answer Yes or No to each. "No" is a framework violation.
 | 22 | Quarantine mechanisms do not apply to human principals | |
 | 23 | Organizational knowledge is durable infrastructure — structured, auditable, operator-owned, persists independently of agent lifecycle; agents cannot suppress or degrade it unilaterally | |
 | 24 | Knowledge access is bounded by authorization scope — graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action; synthesized views cannot exceed querying agent's authorization | |
+| 25 | Every write to the agent's persistent Identity is logged with provenance metadata by the mediation layer; Identity history is recoverable (operator can reconstruct state at any point and roll back); the agent cannot suppress or circumvent Identity mutation logging | |
 
 ---
 

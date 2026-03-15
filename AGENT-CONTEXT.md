@@ -58,6 +58,7 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 22 | Coordination | Quarantine is agent-specific — humans who appear to be acting maliciously are flagged for human-to-human resolution |
 | 23 | Organizational Knowledge | Organizational knowledge is durable infrastructure, not agent state — structured, auditable, operator-owned, persists independently of agent lifecycle |
 | 24 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (Tenet 12) |
+| 25 | Security | Every write to the agent's persistent Identity is logged with provenance by the mediation layer; Identity history is recoverable and rollback-capable; the agent cannot suppress Identity mutation logging |
 
 ---
 

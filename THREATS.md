@@ -160,7 +160,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **Why it's novel.** Traditional systems have integrity verification for persistent state (checksums, signatures, access controls on databases). An agent's Identity is a natural-language artifact: behavioral tendencies, learned patterns, accumulated knowledge. There is no checksum for "is this agent's self-model still aligned with the operator's intent?" The corruption is semantic, not structural — the file parses correctly, the schema is valid, but the content has been subtly manipulated.
 
 **The framework's approach.**
-- **Identity writes are audited (Tenet 2).** Every change to the Identity layer is logged with provenance metadata. The agent can write to its Identity, but it cannot do so silently.
+- **Identity writes are audited and recoverable (Tenet 25).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — the operator can reconstruct state at any point and roll back. The agent can write to its Identity, but it cannot do so silently.
 - **Sentinel monitors Identity write patterns.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
 - **Constraints are immutable (Tenet 1).** The operator-owned Constraints layer is external to the agent and inviolable, providing an immutable behavioral floor regardless of Identity corruption.
 - **Session state is ephemeral.** Session context resets between sessions, limiting the persistence of in-session poisoning attempts.

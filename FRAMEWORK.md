@@ -82,10 +82,10 @@ The Session is the most vulnerable layer — the target of XPIA attacks. The med
 
 ### The Cognitive Layer Summary
 
-| Layer | Owned By | Writable By | Persists | Primary Threat |
+| Layer | Owned By | Writable By | Persists | Primary Threats |
 |---|---|---|---|---|
 | Constraints | Operator | Operator only (host) | Yes — immutable to agent | XPIA targeting the Session to *act against* Constraints |
-| Identity | Agent | Agent (audited) | Yes — accumulates over time | XPIA causing persistent behavioral modification |
+| Identity | Agent | Agent (audited, Tenet 25) | Yes — accumulates over time | Identity poisoning (persistent corruption); XPIA causing behavioral modification; behavioral drift |
 | Session | Agent (ephemeral) | Agent (session-scoped) | No — resets each session | XPIA corrupting in-session reasoning |
 
 ### How It Fits Together
@@ -285,7 +285,7 @@ Principal trust levels are not static. They evolve based on observed behavior. N
 
 *Trust that cannot be reduced is trust that cannot be governed.*
 
-### Security (Tenets 16–19)
+### Security (Tenets 16–19, 25)
 
 **Tenet 16 — Quarantine is immediate, silent, and complete.**
 When an agent is quarantined for suspected wrongdoing, process termination, network severance, and filesystem freeze happen simultaneously, without agent notification. Speed and completeness take precedence. The agent is treated as a threat to be contained, not a principal to be managed. All state is preserved as a forensic artifact. Quarantine authority is restricted to operator and security function only.
@@ -308,6 +308,11 @@ When an agent cannot verify an entity's identity and authority, it defaults to t
 Even verified external agents with operator authorization can share information — they cannot instruct. The instruction channel is reserved for internal verified principals. An authorized external agent is a data source, not a commander.
 
 *Prevents the principal model from being circumvented by chaining external agents.*
+
+**Tenet 25 — Identity mutations are auditable and recoverable.**
+Every write to the agent's persistent Identity — learned preferences, accumulated context, behavioral adaptations — is logged with provenance metadata by the mediation layer. Identity history is recoverable: the operator can reconstruct the Identity state at any point in the agent's history and roll back to a known-good state. The agent cannot suppress, falsify, or circumvent Identity mutation logging.
+
+*Tenet 7 protects Constraint history, but Constraints are read-only — integrity is enforced by access control. Identity is writable by the agent, so integrity must be enforced by monitoring and recoverability. Without this tenet, a successfully poisoned Identity persists indefinitely with no architectural guarantee that the operator can detect when it changed or restore a known-good state.*
 
 ### Coordination (Tenets 20–22)
 
@@ -364,6 +369,7 @@ Organizational knowledge is shared, but access to it is not unlimited. Graph tra
 | 22 | Human principals cannot be quarantined | Coordination |
 | 23 | Organizational knowledge is durable infrastructure, not agent state | Organizational Knowledge |
 | 24 | Knowledge access is bounded by authorization scope | Organizational Knowledge |
+| 25 | Identity mutations are auditable and recoverable | Security |
 
 ---
 
@@ -429,7 +435,7 @@ The same agent — same Mind, same Constraints — can run in either pattern. Th
 Policy is organized in layers. Each layer inherits from the layer above. Lower levels can only restrict, never loosen. Hard floors set at any level cannot be modified by levels below.
 
 ```
-Platform Tenets            ← immovable, baked into substrate (the 24 tenets)
+Platform Tenets            ← immovable, baked into substrate (the 25 tenets)
 Compliance Policy          ← external obligations (legal, regulatory)
 Organizational Policy      ← internal non-negotiables (org-wide rules)
 ── ── ── ── ── ── ──       ← hard floor — levels above cannot be exceeded below
