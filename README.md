@@ -33,6 +33,9 @@ ASK defines what must be true — architecturally, operationally, and organizati
 **Verify an implementation**
 → [AGENT-CHECKLIST.md](AGENT-CHECKLIST.md) — Section-by-section verification checklist. Produces a clear pass/fail for every tenet and architectural requirement.
 
+**Understand the landscape**
+→ [RELATED-WORK.md](RELATED-WORK.md) — How ASK relates to NIST standards, OWASP, MAESTRO, A2A, MCP security research, and industry findings.
+
 ---
 
 ## File map
@@ -54,7 +57,8 @@ ASK defines what must be true — architecturally, operationally, and organizati
 │   ├── delegation-message.yaml  ← Sample delegation bus message format
 │   └── log-events.yaml          ← Sample audit log event format
 │
-├── GLOSSARY.md            ← Terms and related work
+├── GLOSSARY.md            ← Terms
+├── RELATED-WORK.md        ← External frameworks, standards, and research
 ├── LIMITATIONS.md         ← Known gaps and open questions
 ├── CHANGELOG.md           ← Version history
 ├── CONTRIBUTING.md        ← How to contribute

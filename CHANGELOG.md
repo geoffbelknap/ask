@@ -31,6 +31,15 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
 - New limitations: unknown and evolving threat landscape, misaligned reasoning, semantic error propagation
 
 ### Documentation
+- New document: RELATED-WORK.md — external frameworks, standards, protocols, and research mapped to ASK
+  - NIST AI Agent Standards Initiative and NCCoE AI Agent Identity concept paper
+  - NIST Cybersecurity Framework Profile for AI (NISTIR 8596)
+  - CoSAI MCP Security White Paper
+  - Agent2Agent (A2A) protocol
+  - Cisco State of AI Security 2026
+  - Gravitee State of AI Agent Security 2026
+- Related Work section in GLOSSARY.md replaced with pointer to RELATED-WORK.md
+- File map in README updated to reflect RELATED-WORK.md
 - ARCHITECTURE.md threat model replaced with summary linking to THREATS.md
 - Agent Checklist updated with Tenets 23–24 verification items
 - Agent Context updated with Tenets 23–24 in tenets table
