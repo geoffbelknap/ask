@@ -56,8 +56,10 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── CONTRIBUTING.md        ← How to contribute
 ├── SECURITY.md            ← Vulnerability reporting policy
 ├── CLAUDE.md              ← Project instructions for AI agents
-├── proposed-tenets-knowledge.md ← Proposed tenets (Organizational Knowledge — integrated)
-└── LICENSE                ← CC BY 4.0
+├── LICENSE                ← CC BY 4.0
+│
+└── archive/
+    └── proposed-tenets-knowledge.md ← Proposed tenets (integrated into FRAMEWORK.md as Tenets 23–24)
 ```
 
 ---
