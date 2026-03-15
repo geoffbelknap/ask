@@ -38,6 +38,7 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
   - Agent2Agent (A2A) protocol
   - Cisco State of AI Security 2026
   - Gravitee State of AI Agent Security 2026
+  - Microsoft AI Agent Security Research (threat modeling, NIST governance, runtime defense)
 - Related Work section in GLOSSARY.md replaced with pointer to RELATED-WORK.md
 - File map in README updated to reflect RELATED-WORK.md
 - ARCHITECTURE.md threat model replaced with summary linking to THREATS.md
