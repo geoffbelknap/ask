@@ -14,7 +14,16 @@ ASK uses date-based versioning. Tenet numbers are stable — they will not be re
   - Tenet 24: Knowledge access is bounded by authorization scope
 - 24 tenets across 8 categories (was 22 across 7)
 
+### Threat Model
+- New document: THREATS.md — threat model broken out from ARCHITECTURE.md
+- Threats categorized by novelty: Traditional (established best practices), Novel (unique to AI agents), Hybrid (traditional pattern, novel manifestation)
+- Traditional threats grounded in established enterprise security practices
+- Novel threats highlighted with analysis of why conventional mitigations are insufficient
+- New section: "The Threat Landscape is Incomplete" — acknowledges evolving risks, multimodal attack surfaces, and theoretical multi-agent attack patterns
+- New limitation: unknown and evolving threat landscape
+
 ### Documentation
+- ARCHITECTURE.md threat model replaced with summary linking to THREATS.md
 - Agent Checklist updated with Tenets 23–24 verification items
 - Agent Context updated with Tenets 23–24 in tenets table
 - Glossary updated with new terms: Organizational Knowledge, Knowledge Graph, Sentinel, Quarantine, Coverage Chain, Mind, Body, Function Agent

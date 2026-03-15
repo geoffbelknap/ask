@@ -62,6 +62,8 @@ This architecture significantly raises the cost and complexity of attacking an A
 
 **Interactive and autonomous runtimes have different risk profiles.** The same enforcement applies to both, but autonomous runtimes lack the human review safety net. The framework recommends tighter constraints for autonomous agents, but concrete policy differences are left to the operator.
 
+**The threat landscape is incomplete and evolving.** This framework is designed around threats that are understood today. AI agent security is a nascent field. Novel attack classes will emerge — XPIA itself was not widely recognized until agents began operating autonomously at scale. Multimodal agents (processing images, audio, video) create injection surfaces that current guardrails do not address. Agent-to-agent attack patterns are largely theoretical, based on architectural analysis rather than observed incidents. The interaction between agent capabilities and attack surface is nonlinear: each new capability creates interaction effects with existing capabilities that may produce unexpected vulnerabilities. The framework's defense-in-depth architecture is designed to remain resilient as the threat landscape evolves, but no architecture can defend against threats that have not yet been imagined. See [THREATS.md § The Threat Landscape is Incomplete](THREATS.md#the-threat-landscape-is-incomplete) for full discussion.
+
 ---
 
-*See also: [Threat Model](ARCHITECTURE.md#the-threat-model) for the threats these limitations relate to.*
+*See also: [Threat Model](THREATS.md) for the threats these limitations relate to.*

@@ -21,8 +21,11 @@ ASK defines what must be true — architecturally, operationally, and organizati
 **Understand the framework theory**
 → [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, tenets, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
 
+**Understand the threats**
+→ [THREATS.md](THREATS.md) — Categorized threat model: traditional risks grounded in established best practices, genuinely novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
+
 **Understand the technical architecture**
-→ [ARCHITECTURE.md](ARCHITECTURE.md) — Threat model, XPIA kill chain, enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
+→ [ARCHITECTURE.md](ARCHITECTURE.md) — Enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
 
 **Feed context to an agent building ASK systems**
 → [AGENT-CONTEXT.md](AGENT-CONTEXT.md) — Structured for system prompt injection. Gives an AI agent the operational knowledge to design and review ASK-compliant architectures.
@@ -37,7 +40,8 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ```
 ├── README.md              ← You are here
 ├── FRAMEWORK.md           ← Complete theory: elements, tenets, cognitive model, lifecycle
-├── ARCHITECTURE.md        ← Complete technical guide: threat model, enforcement, topology
+├── THREATS.md             ← Categorized threat model: traditional, novel, and hybrid threats
+├── ARCHITECTURE.md        ← Technical guide: enforcement layers, topology, scaling
 ├── AGENT-CONTEXT.md       ← Optimized for system prompt injection
 ├── AGENT-CHECKLIST.md     ← Verification checklist
 │
