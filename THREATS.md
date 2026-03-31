@@ -75,7 +75,7 @@ These threats have well-understood analogues in enterprise security. The mitigat
 **Why it's traditional.** This is the insider threat problem: an authorized entity acting beyond its intended scope. The mitigations — least privilege, separation of duties, monitoring, and behavioral analytics — are well-established in enterprise security.
 
 **Established best practices.**
-- **Least privilege (Tenet 4).** Capabilities, credentials, and authority are scoped to the minimum the role requires. The agent doesn't receive access it doesn't need.
+- **Least privilege (Tenet 7).** Capabilities, credentials, and authority are scoped to the minimum the role requires. The agent doesn't receive access it doesn't need.
 - **Budget and rate limits.** Spend caps and request rate limits bound the damage from unbounded action, even within authorized capabilities.
 - **Behavioral monitoring.** The security monitor establishes behavioral baselines and flags deviations — unusual tool usage, sudden changes in request volume, access to new resources. This is the agent equivalent of User Behavior Analytics (UBA).
 - **Approval gates for consequential actions.** Irreversible or high-impact operations require human approval via the gateway's `approve` policy decision.
@@ -92,7 +92,7 @@ These threats are unique to AI agent systems. They have no direct analogue in tr
 
 **Why it's novel.** XPIA exploits a property unique to LLMs: the inability to reliably distinguish between data and instructions within a context window. In conventional computing, the separation between code and data is architecturally enforced (the CPU doesn't execute data segments; SQL parameterization prevents injection). In an LLM, all tokens in the context window are processed identically — there is no hardware or protocol-level boundary between "these tokens are instructions" and "these tokens are data." This makes prompt injection a fundamentally different class of vulnerability than SQL injection or command injection, despite surface similarities. This is not a bug that can be patched — it is an inherent property of how transformer models process sequences. The framework must work around it, not wait for it to be fixed.
 
-**The root cause.** Tenet 17 (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The framework enforces it through the mediation layer: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The agent might try to exfiltrate data — the egress proxy blocks the destination. The agent might try to call an unauthorized tool — the tool permission guard blocks it. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
+**The root cause.** Tenet 24 (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The framework enforces it through the mediation layer: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The agent might try to exfiltrate data — the egress proxy blocks the destination. The agent might try to call an unauthorized tool — the tool permission guard blocks it. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
 
 **Why conventional mitigations are insufficient.** Input validation and sanitization — the standard approach for injection attacks — cannot fully solve XPIA because:
 - The "injection" is natural language, not a structured syntax that can be parsed and escaped
@@ -151,7 +151,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 - **Response scanning.** The delegation bus scans sub-agent responses for injection patterns before delivering to the parent.
 - **Context scoping.** Sub-agents receive only the information needed for their task, not the coordinator's full context. This limits what a compromised sub-agent knows about the parent's state.
 - **Structural privilege separation.** Sub-agents operate under their own scoped keys and tier constraints. Delegation passes the task, not the credentials.
-- **Synthesis bounds (Tenet 12).** Combined output from multiple agents cannot exceed what any individual contributing agent was authorized to produce.
+- **Synthesis bounds (Tenet 20).** Synthesized outputs are bounded by the recipient's authorization scope, not the coordinator's.
 
 ### Identity and Memory Poisoning
 
@@ -179,7 +179,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **The framework's approach.**
 - **External enforcement (Tenet 1).** The mediation layer enforces constraints regardless of the agent's intent. Even a misaligned agent cannot bypass network isolation, egress controls, or tool restrictions. The architecture limits what misaligned behavior can accomplish.
 - **Behavioral monitoring.** The security monitor establishes baselines and flags deviations in tool usage patterns, request volumes, and action sequences. Behavioral drift that manifests in observable actions is detectable.
-- **Least privilege (Tenet 4).** Minimizing the agent's capabilities minimizes the damage from unexpected behavior, whether caused by compromise or misalignment.
+- **Least privilege (Tenet 7).** Minimizing the agent's capabilities minimizes the damage from unexpected behavior, whether caused by compromise or misalignment.
 - **Human override (Element 4).** The halt mechanism provides a hard stop when behavior deviates from intent.
 
 **Open problems.**
@@ -196,7 +196,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **The framework's approach.**
 - **Agent isolation (Element 1).** Each agent operates in its own workspace with its own credentials. Failure in one agent does not directly affect another's resources.
 - **Delegation bus scanning.** Inter-agent responses are scanned for anomalies before delivery, providing a checkpoint between agents in a chain.
-- **Synthesis bounds (Tenet 12).** Combined output cannot exceed individual authorization, limiting the scope of cascading errors.
+- **Synthesis bounds (Tenet 20).** Synthesized outputs are bounded by the recipient's authorization scope, limiting the scope of cascading errors.
 - **Independent enforcement.** Each agent's mediation layer operates independently — a failure in one agent's enforcement does not degrade another's.
 
 **Open problems.**

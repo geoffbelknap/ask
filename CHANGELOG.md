@@ -2,7 +2,31 @@
 
 All notable changes to the ASK framework are documented here.
 
-ASK uses date-based versioning. Tenet numbers are stable — they will not be reassigned. See [README.md](README.md#versioning) for the full versioning policy.
+ASK uses date-based versioning. Tenet numbers reflect reading order and may change between versions when tenets are reorganized — reference tenets by name for stability across versions. See [README.md](README.md#versioning) for the full versioning policy.
+
+---
+
+## ASK 2026.04
+
+### Framework — Tenet Overhaul
+- Reorganized from 8 categories to 6: Foundation, Containment & Response, Principal Model, Multi-Agent, Data Integrity, Organizational Knowledge
+- All tenets renumbered sequentially (1–27) to reflect new category structure
+- 3 new tenets:
+  - Tenet 4: Enforcement failure defaults to denial (fail-closed)
+  - Tenet 5: The agent's runtime is a known quantity (runtime verification)
+  - Tenet 8: Operations are bounded (volume, rate, duration, concurrency, retention)
+- 1 new tenet replacing 2 previous tenets:
+  - Tenet 18: The governance hierarchy is inviolable from below (replaces old Tenets 21 + 22)
+- Revised tenets (substance changes, not just renumbering):
+  - Tenet 6 (was 5): Sharpened — "all trust is explicit and auditable" with design-time framing
+  - Tenet 13 (was 10): Sharpened — authority exercise logged with same rigor as agent actions, no enumerated list
+  - Tenet 14 (was 16): Rewritten — non-prescriptive quarantine ("impact its environment" replaces specific mechanisms)
+  - Tenet 15 (was 13): Clarified — independence means deliberate decisions, connects to fail-closed default
+  - Tenet 16 (was 14): Expanded — coverage principal or fail-closed default for solo operators
+  - Tenet 20 (was 12): Reframed — synthesis bounded by recipient authorization (tear-line model)
+  - Tenet 21 (was 19): Added governance domain concept and explicit connection to Tenet 24
+  - Tenet 23 (was 18): Sharpened as runtime counterpart to Tenet 6
+- 27 tenets across 6 categories (was 25 across 8)
 
 ---
 

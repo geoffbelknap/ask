@@ -80,9 +80,9 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ## Versioning
 
-ASK uses date-based versioning: **ASK 2026.03** (the current version).
+ASK uses date-based versioning: **ASK 2026.04** (the current version).
 
-The tenet list (1–25) is considered stable. Tenet numbers will not be reassigned. New tenets may be appended. If a tenet is ever retired, its number is reserved and marked deprecated — it will not be reused.
+Tenet numbers reflect reading order within the framework document and may change between versions when tenets are reorganized. Reference tenets by name for stability across versions. The changelog documents all numbering changes between versions.
 
 Breaking changes (tenet renumbering, element redefinition, structural changes to the cognitive model) will increment the version and be documented in a changelog. Non-breaking additions (new Limitations entries, new examples, clarifications) do not require a version change.
 

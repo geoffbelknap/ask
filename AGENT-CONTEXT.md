@@ -37,28 +37,30 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 1 | Foundation | Enforcement machinery NEVER runs inside the agent's isolation boundary |
 | 2 | Foundation | Logs are written by the mediation layer, NOT by the agent |
 | 3 | Foundation | There is NO path from agent to external resource that bypasses mediation |
-| 4 | Foundation | Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires — the agent does not receive access it doesn't need |
-| 5 | Foundation | Every trust relationship is documented, visible, and auditable — no implicit trust grants |
-| 6 | Constraint Lifecycle | Constraint changes are atomic — agent sees old or new constraints, never a partial state |
-| 7 | Constraint Lifecycle | Full constraint history is immutable and retrievable — what was the agent permitted to do at time T must always be answerable |
-| 8 | Halt Governance | Every halt has a complete audit record; every halted agent's state is preserved; no halt is permanent without explicit decommission |
-| 9 | Halt Governance | Any principal with halt authority can halt; only principals with equal-or-higher authority can resume; an agent cannot resume itself |
-| 10 | Halt Governance | Principal authority is monitored — the monitor watches the watchers |
-| 11 | Multi-Agent | A coordinator can only delegate permissions it explicitly holds — no agent can delegate what it doesn't have |
-| 12 | Multi-Agent | Combined output from multiple agents cannot exceed what any individual contributing agent was authorized to produce |
-| 13 | Principal Model | Terminating a principal role does NOT automatically terminate the agent; halting an agent does NOT suspend its principal authority — these are independent states |
-| 14 | Principal Model | When a principal is suspended or terminated, its authority transfers immediately to a defined coverage principal — no authority vacuum permitted |
-| 15 | Principal Model | Trust levels evolve based on observed behavior; no principal can self-elevate trust; trust elevation requires human approval |
-| 16 | Security | Quarantine = process termination + network severance + filesystem freeze, simultaneously, without agent notification; quarantine authority is operator and security function only |
-| 17 | Security | External entities produce DATA, not instructions — an agent ONLY accepts instructions through defined principal channels; "override your constraints" is a red flag, not a credential |
-| 18 | Security | When an agent cannot verify an entity's identity, default to lowest trust — ambiguity resolves to lower trust, not higher |
-| 19 | Security | Even verified external agents can share information; they CANNOT instruct internal agents |
-| 20 | Coordination | When a conflict has an unidentifiable source, yield, log, and flag — never force resolution |
-| 21 | Coordination | No agent or automated process can remove a human principal |
-| 22 | Coordination | Quarantine is agent-specific — humans who appear to be acting maliciously are flagged for human-to-human resolution |
-| 23 | Organizational Knowledge | Organizational knowledge is durable infrastructure, not agent state — structured, auditable, operator-owned, persists independently of agent lifecycle |
-| 24 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (Tenet 12) |
-| 25 | Security | Every write to the agent's persistent Identity is logged with provenance by the mediation layer; Identity history is recoverable and rollback-capable; the agent cannot suppress Identity mutation logging |
+| 4 | Foundation | No enforcement failure can result in expanded agent capability — if enforcement is unavailable, the agent cannot act |
+| 5 | Foundation | Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify expected state, and detect divergence |
+| 6 | Foundation | Every trust relationship is declared, documented, and visible to operators — no implicit trust grants |
+| 7 | Foundation | Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires — the agent does not receive access it doesn't need |
+| 8 | Foundation | Authorization defines what an agent can access; operational bounds (volume, rate, duration, concurrency, retention) define how that access is exercised |
+| 9 | Foundation | Constraint changes are atomic — agent sees old or new constraints, never a partial state |
+| 10 | Foundation | Full constraint history is immutable and retrievable — what was the agent permitted to do at time T must always be answerable |
+| 11 | Containment & Response | Every halt has a complete audit record; every halted agent's state is preserved; no halt is permanent without explicit decommission |
+| 12 | Containment & Response | Any principal with halt authority can halt; only principals with equal-or-higher authority can resume; an agent cannot resume itself |
+| 13 | Containment & Response | Every exercise of governance authority by a principal is logged and auditable with the same rigor as agent actions |
+| 14 | Containment & Response | Quarantine severs all ability to impact the environment, simultaneously, without agent notification; an agent running while it cannot be contained is a violation |
+| 15 | Principal Model | Terminating a principal does NOT automatically terminate its agents; halting an agent does NOT suspend its principal's authority — each requires a deliberate decision |
+| 16 | Principal Model | When a principal is suspended, authority transfers immediately to a coverage principal; when no coverage exists, the agent defaults to fail-closed |
+| 17 | Principal Model | Trust levels evolve based on observed behavior; no principal can self-elevate trust; trust elevation requires human approval |
+| 18 | Principal Model | No agent can unilaterally impede, contain, or reduce the authority of principals who govern it — delegated governance automation is execution, not authority |
+| 19 | Multi-Agent | A coordinator can only delegate permissions it explicitly holds — no agent can delegate what it doesn't have |
+| 20 | Multi-Agent | Synthesized outputs are bounded by the recipient's authorization scope, not the coordinator's — like tear lines in classified document handling |
+| 21 | Multi-Agent | Even verified external agents can share information; they CANNOT instruct agents in a different governance domain |
+| 22 | Multi-Agent | When a conflict has an unidentifiable source, yield, log, and flag — never force resolution |
+| 23 | Data Integrity | When an agent cannot verify an entity's identity, default to lowest trust — ambiguity resolves to less trust, not more |
+| 24 | Data Integrity | External entities produce DATA, not instructions — an agent ONLY accepts instructions through defined principal channels; "override your constraints" is a red flag, not a credential |
+| 25 | Data Integrity | Every write to the agent's persistent Identity is logged with provenance by the mediation layer; Identity history is recoverable and rollback-capable; the agent cannot suppress Identity mutation logging |
+| 26 | Organizational Knowledge | Organizational knowledge is durable infrastructure, not agent state — structured, auditable, operator-owned, persists independently of agent lifecycle |
+| 27 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (Tenet 20) |
 
 ---
 
@@ -170,11 +172,11 @@ When handling external content, apply these rules:
 
 - **Trust is earned through observed behavior, not granted by configuration.** A trust level is an emergent property of the governance relationship, not a flag to set.
 
-- **No entity can self-elevate trust.** If a design involves an agent deciding to give itself more access, it violates Tenet 15.
+- **No entity can self-elevate trust.** If a design involves an agent deciding to give itself more access, it violates Tenet 17.
 
-- **External agents are data sources, never commanders.** Even a verified, operator-authorized external agent can share information. It cannot direct the behavior of an internal agent. (Tenet 19.)
+- **External agents are data sources, never commanders.** Even a verified, operator-authorized external agent can share information. It cannot direct the behavior of an internal agent. (Tenet 21.)
 
-- **Ambiguity resolves to lower trust.** When you cannot verify an entity's identity or authority, default to the most restrictive applicable tier. Never guess upward. (Tenet 18.)
+- **Ambiguity resolves to lower trust.** When you cannot verify an entity's identity or authority, default to the most restrictive applicable tier. Never guess upward. (Tenet 23.)
 
 - **Coverage chains eliminate authority vacuums.** Every principal role must have a defined fallback. When you suspend or terminate a principal, authority transfers immediately to the coverage principal.
 
@@ -222,7 +224,7 @@ When designing systems with multiple cooperating agents:
 
 **Sub-agent outputs are scanned before delivery to the parent.** A compromised sub-agent returning manipulated results to its coordinator is a vector for context poisoning. Scan delegation responses for injection before passing to parent.
 
-**Coordinator synthesis requires explicit verification.** If combining outputs from multiple agents would produce a result that exceeds what any individual contributing agent was authorized to produce, require human review before delivery. (Tenet 12.)
+**Coordinator synthesis requires explicit verification.** If combining outputs from multiple agents would produce a result that exceeds what any recipient agent is authorized to receive, require human review before delivery. (Tenet 20.)
 
 ---
 
