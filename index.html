@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ASK — An Operating Framework for Agent Security</title>
+<meta name="description" content="ASK defines what must be true — architecturally, operationally, and organizationally — for AI agents to operate securely at any scale. Agent-agnostic. Platform-agnostic. Vendor-neutral."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --warm: #FDFAF5;
+  --ink: #1A1714;
+  --ink-mid: #6B6560;
+  --ink-faint: #B8B2AC;
+  --teal: #00A882;
+  --teal-dark: #007A62;
+  --teal-light: #E1F5EE;
+  --teal-border: #B8E8D8;
+  --border: #E8E2D9;
+  --border-mid: #D4CEC8;
+  --serif: 'Fraunces', serif;
+  --sans: 'DM Sans', sans-serif;
+  --mono: 'Space Mono', monospace;
+  --nav-h: 56px;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--warm);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── SCROLL FADE ─────────────────────────────────────────── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.fade-up.delay-1 { transition-delay: 0.08s; }
+.fade-up.delay-2 { transition-delay: 0.16s; }
+.fade-up.delay-3 { transition-delay: 0.24s; }
+.fade-up.delay-4 { transition-delay: 0.32s; }
+
+/* ─── NAV ─────────────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(253,250,245,0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 0.5px solid var(--border);
+  padding: 0 40px;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  z-index: 210;
+}
+.nav-wordmark {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+}
+.nav-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* Desktop links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 14px;
+  color: var(--ink-mid);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--ink); }
+.nav-gh {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0.5px solid var(--border-mid);
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.nav-gh:hover { border-color: var(--ink-mid); }
+
+/* Hamburger button — mobile only */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 6px;
+  z-index: 210;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.nav-toggle:hover { background: rgba(0,0,0,0.05); }
+.nav-toggle span {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+  transform-origin: center;
+}
+
+/* Toggle animation when open */
+.nav-toggle.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+/* Mobile drawer */
+.nav-drawer {
+  display: none;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--warm);
+  z-index: 190;
+  padding: 32px 28px 40px;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-drawer.open {
+  transform: translateX(0);
+}
+.nav-drawer-links {
+  list-style: none;
+  flex: 1;
+}
+.nav-drawer-links li {
+  border-bottom: 0.5px solid var(--border);
+}
+.nav-drawer-links a {
+  display: block;
+  padding: 18px 0;
+  font-size: 20px;
+  font-family: var(--serif);
+  font-weight: 300;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+.nav-drawer-footer {
+  padding-top: 28px;
+  border-top: 0.5px solid var(--border);
+  margin-top: 28px;
+}
+.nav-drawer-gh {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  text-decoration: none;
+  border: 0.5px solid var(--border-mid);
+  padding: 10px 18px;
+  border-radius: 8px;
+}
+.drawer-version {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* ─── HERO ────────────────────────────────────────────────── */
+.hero {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 96px 40px 80px;
+  border-bottom: 0.5px solid var(--border);
+}
+.hero-version {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-version::after {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--teal);
+  opacity: 0.4;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(28px, 4.5vw, 52px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  max-width: 760px;
+  margin-bottom: 32px;
+}
+.hero-position {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--ink);
+  max-width: 640px;
+  margin-bottom: 24px;
+  font-weight: 400;
+  border-left: 2px solid var(--teal);
+  padding-left: 20px;
+}
+.hero-sub {
+  font-size: 15px;
+  color: var(--ink-mid);
+  line-height: 1.7;
+  max-width: 600px;
+  margin-bottom: 40px;
+}
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+.tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 0.5px solid var(--border);
+  color: var(--ink-mid);
+}
+.tag.teal {
+  color: var(--teal-dark);
+  background: var(--teal-light);
+  border-color: var(--teal-border);
+}
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────────── */
+.btn-primary {
+  background: var(--ink);
+  color: var(--warm);
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--sans);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--sans);
+  border: 0.5px solid var(--border-mid);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s;
+}
+.btn-secondary:hover { border-color: var(--ink-mid); }
+
+/* ─── SECTIONS ────────────────────────────────────────────── */
+section {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 80px 40px;
+}
+.section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.section-heading {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  max-width: 600px;
+  margin-bottom: 16px;
+}
+.section-sub {
+  font-size: 15px;
+  color: var(--ink-mid);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+}
+.section-divider {
+  border: none;
+  border-top: 0.5px solid var(--border);
+}
+
+/* ─── DIFF GRID ───────────────────────────────────────────── */
+.diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.diff {
+  background: var(--warm);
+  padding: 28px 24px;
+}
+.diff-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--teal);
+  margin-bottom: 14px;
+}
+.diff h3 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 20px;
+  line-height: 1.3;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.diff p {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.65;
+}
+
+/* ─── ELEMENTS ────────────────────────────────────────────── */
+.elements-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.element-card {
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 22px;
+}
+.element-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.element-card h4 { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+.element-card p { font-size: 13px; color: var(--ink-mid); line-height: 1.6; }
+
+/* ─── GET STARTED ────────────────────────────────────────── */
+.install-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 32px;
+  margin-bottom: 0;
+  border-bottom: 0.5px solid var(--border);
+  padding-bottom: 0;
+}
+.install-tab {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-mid);
+  background: none;
+  border: none;
+  padding: 10px 18px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -0.5px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.install-tab:hover { color: var(--ink); }
+.install-tab.active {
+  color: var(--ink);
+  font-weight: 500;
+  border-bottom-color: var(--teal);
+}
+.install-tab .tab-badge {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--teal-dark);
+  background: var(--teal-light);
+  padding: 1px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+.install-panel {
+  display: none;
+  padding: 28px 0;
+}
+.install-panel.active { display: block; }
+.install-desc {
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.65;
+  margin-bottom: 18px;
+  max-width: 600px;
+}
+.install-cmd {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--ink);
+  color: #E8E2D9;
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.8;
+  white-space: pre;
+  max-width: 100%;
+}
+.install-cmd .cmd-comment { color: #6B6560; }
+.install-cmd .cmd-prompt { color: var(--teal); }
+
+/* ─── TENETS ──────────────────────────────────────────────── */
+.tenet-category { margin-bottom: 40px; }
+.tenet-cat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid var(--border);
+}
+.tenets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.tenet {
+  background: var(--warm);
+  padding: 16px 20px;
+  display: flex;
+  gap: 16px;
+}
+.tenet-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  flex-shrink: 0;
+  width: 32px;
+  padding-top: 3px;
+}
+.tenet-body { font-size: 13px; line-height: 1.6; }
+.tenet-body strong { font-weight: 500; color: var(--ink); }
+.tenet-body span { color: var(--ink-mid); }
+
+/* ─── COGNITIVE MODEL ─────────────────────────────────────── */
+.model-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.model-layer { background: var(--warm); padding: 24px 20px; }
+.model-layer-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.model-layer-owner {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  margin-bottom: 12px;
+}
+.model-layer p { font-size: 13px; color: var(--ink-mid); line-height: 1.6; }
+
+/* ─── TRUST SPECTRUM ──────────────────────────────────────── */
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.trust-level { background: var(--warm); padding: 20px 16px; }
+.trust-level-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+.trust-level h4 { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.trust-level p { font-size: 12px; color: var(--ink-mid); line-height: 1.55; }
+
+/* ─── DOCS ────────────────────────────────────────────────── */
+.docs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.doc-card {
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-decoration: none;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.15s;
+}
+.doc-card:hover { border-color: var(--border-mid); }
+.doc-card-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--teal);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.doc-card h4 { font-size: 15px; font-weight: 500; }
+.doc-card p { font-size: 13px; color: var(--ink-mid); line-height: 1.55; }
+.doc-card-arrow { font-size: 13px; color: var(--ink-faint); }
+
+/* ─── REGULATORY ──────────────────────────────────────────── */
+.reg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+.reg-card {
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.reg-name {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.reg-desc { font-size: 12px; color: var(--ink-mid); line-height: 1.5; }
+.reg-status { margin-top: 8px; font-family: var(--mono); font-size: 10px; }
+.reg-status.mapped { color: var(--teal-dark); }
+.reg-status.progress { color: #B07000; }
+
+/* ─── REF IMPL ────────────────────────────────────────────── */
+.ref-impl {
+  background: #F4F0EA;
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 36px 40px;
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ref-impl-text { flex: 1; min-width: 280px; }
+.ref-impl-text h3 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 24px;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+.ref-impl-text p {
+  font-size: 14px;
+  color: var(--ink-mid);
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+
+/* ─── AUTHOR ──────────────────────────────────────────────── */
+.author-block {
+  border-top: 0.5px solid var(--border);
+  padding-top: 40px;
+  display: flex;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+.author-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.author-name {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 22px;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+.author-bio { font-size: 14px; color: var(--ink-mid); line-height: 1.65; }
+
+/* ─── FOOTER ──────────────────────────────────────────────── */
+footer {
+  border-top: 0.5px solid var(--border);
+  padding: 28px 40px;
+}
+.footer-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-brand {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+.footer-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; }
+.footer-links a { font-size: 13px; color: var(--ink-mid); text-decoration: none; }
+.footer-links a:hover { color: var(--ink); }
+.footer-copy {
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-family: var(--mono);
+}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 860px) {
+  .diff-grid { grid-template-columns: 1fr; }
+  .model-grid { grid-template-columns: 1fr; }
+  .trust-grid { grid-template-columns: 1fr 1fr; }
+
+  .nav-links { display: none; }
+  .nav-toggle { display: flex; }
+  .nav-drawer { display: flex; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  nav { padding: 0 20px; }
+  .nav-sub { display: none; }
+
+  .hero { padding: 52px 20px 48px; }
+  .hero h1 { font-size: 30px; margin-bottom: 24px; }
+  .hero-position { font-size: 15px; margin-bottom: 20px; }
+  .hero-sub { font-size: 14px; margin-bottom: 32px; }
+  .hero-tags { margin-bottom: 32px; }
+  .hero-actions { flex-direction: column; gap: 10px; }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary { justify-content: center; text-align: center; }
+
+  section { padding: 52px 20px; }
+  .section-sub { margin-bottom: 32px; }
+
+  .diff-grid { grid-template-columns: 1fr; }
+  .elements-grid { grid-template-columns: 1fr; }
+  .docs-grid { grid-template-columns: 1fr; }
+  .trust-grid { grid-template-columns: 1fr 1fr; }
+  .reg-grid { grid-template-columns: 1fr 1fr; }
+
+  .ref-impl { padding: 24px 20px; gap: 24px; }
+  .ref-impl > div:first-child { display: none; } /* hide icon on small screens */
+
+  .author-block { gap: 32px; }
+  .author-block > div { min-width: unset !important; width: 100%; }
+
+  footer { padding: 24px 20px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .footer-links { gap: 16px; }
+}
+
+@media (max-width: 400px) {
+  .trust-grid { grid-template-columns: 1fr; }
+  .reg-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-brand" href="#">
+    <span class="nav-wordmark">ASK</span>
+    <span class="nav-sub">Agent Security Framework</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#get-started">Get started</a></li>
+    <li><a href="#framework">Framework</a></li>
+    <li><a href="#tenets">Tenets</a></li>
+    <li><a href="#documents">Documents</a></li>
+    <li><a href="#regulatory">Regulatory</a></li>
+    <li><a href="#reference">Reference impl</a></li>
+    <li>
+      <a href="https://github.com/geoffbelknap/ask" class="nav-gh">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        GitHub
+      </a>
+    </li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Open navigation" aria-expanded="false">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- Mobile drawer -->
+<div class="nav-drawer" id="navDrawer" aria-hidden="true">
+  <ul class="nav-drawer-links">
+    <li><a href="#get-started" class="nav-drawer-link">Get Started</a></li>
+    <li><a href="#framework" class="nav-drawer-link">Framework</a></li>
+    <li><a href="#elements" class="nav-drawer-link">Four Elements</a></li>
+    <li><a href="#cognitive" class="nav-drawer-link">Cognitive Model</a></li>
+    <li><a href="#tenets" class="nav-drawer-link">Tenets</a></li>
+    <li><a href="#trust" class="nav-drawer-link">Trust Spectrum</a></li>
+    <li><a href="#documents" class="nav-drawer-link">Documents</a></li>
+    <li><a href="#regulatory" class="nav-drawer-link">Regulatory</a></li>
+    <li><a href="#reference" class="nav-drawer-link">Reference Impl</a></li>
+  </ul>
+  <div class="nav-drawer-footer">
+    <a href="https://github.com/geoffbelknap/ask" class="nav-drawer-gh">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      View on GitHub
+    </a>
+    <div class="drawer-version">ASK 2026.04 — CC BY 4.0</div>
+  </div>
+</div>
+
+<!-- ─── HERO ─────────────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-version fade-up visible">ASK 2026.04 — Open framework — CC BY 4.0</div>
+  <h1 class="fade-up visible delay-1">Make your AI agent systems more secure.</h1>
+  <p class="hero-sub fade-up visible delay-2">Building with agents? Add ASK to your Claude Code project and get immediate security review of your architecture, your code, and your design decisions. It finds the gaps. You fix them.</p>
+  <p class="hero-position fade-up visible delay-3">"Agents are principals to be governed, not tools to be configured."</p>
+  <div class="hero-tags fade-up visible delay-4">
+    <span class="tag teal">Open framework</span>
+    <span class="tag">27 tenets</span>
+    <span class="tag">Agent-agnostic</span>
+    <span class="tag">Works with Claude Code</span>
+    <span class="tag">CC BY 4.0</span>
+  </div>
+  <div class="hero-actions fade-up visible delay-4">
+    <a href="https://github.com/geoffbelknap/ask" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      Get started on GitHub
+    </a>
+    <a href="https://github.com/geoffbelknap/ask/blob/main/FRAMEWORK.md" class="btn-secondary">Read the framework</a>
+    <a href="https://github.com/geoffbelknap/ask/blob/main/AGENT-CHECKLIST.md" class="btn-secondary">Verification checklist</a>
+  </div>
+</div>
+
+<hr class="section-divider"/>
+
+<!-- ─── GET STARTED ──────────────────────────────────────── -->
+<section id="get-started">
+  <div class="section-label fade-up">Get started</div>
+  <h2 class="section-heading fade-up">Add ASK to your AI dev tools in 30 seconds.</h2>
+  <p class="section-sub fade-up">ASK works as context for any AI coding assistant. Point your tool at the framework and start getting security review on every design decision.</p>
+
+  <div class="install-tabs fade-up">
+    <button class="install-tab active" data-panel="claude-code">Claude Code <span class="tab-badge">Available</span></button>
+    <button class="install-tab" data-panel="copilot">GitHub Copilot CLI</button>
+    <button class="install-tab" data-panel="codex">OpenAI Codex</button>
+    <button class="install-tab" data-panel="other">Other tools</button>
+  </div>
+
+  <div class="install-panel active fade-up" id="claude-code">
+    <p class="install-desc">Install as a Claude Code plugin. Gives you <code>/ask</code> for on-demand security review of your architecture, plus skills for threat analysis and secure design.</p>
+    <div class="install-cmd"><span class="cmd-comment"># Install the ASK plugin</span>
+<span class="cmd-prompt">$</span> claude plugin add ask-framework@geoffs-plugins
+
+<span class="cmd-comment"># Open your project and run a review</span>
+<span class="cmd-prompt">$</span> claude
+<span class="cmd-prompt">></span> /ask</div>
+  </div>
+
+  <div class="install-panel fade-up" id="copilot">
+    <p class="install-desc">A native Copilot CLI plugin is in development. In the meantime, add the framework to your repo's Copilot instructions and it will reference ASK tenets when reviewing agent code.</p>
+    <div class="install-cmd"><span class="cmd-comment"># Add ASK to your Copilot instructions</span>
+<span class="cmd-prompt">$</span> curl -sL \
+    https://raw.githubusercontent.com/geoffbelknap/ask/main/FRAMEWORK.md \
+    >> .github/copilot-instructions.md</div>
+  </div>
+
+  <div class="install-panel fade-up" id="codex">
+    <p class="install-desc">A native Codex plugin is in development. In the meantime, add the framework to your project as AGENTS.md and Codex will apply it automatically.</p>
+    <div class="install-cmd"><span class="cmd-comment"># Add ASK to your Codex project</span>
+<span class="cmd-prompt">$</span> curl -sL \
+    https://raw.githubusercontent.com/geoffbelknap/ask/main/FRAMEWORK.md \
+    -o AGENTS.md</div>
+  </div>
+
+  <div class="install-panel fade-up" id="other">
+    <p class="install-desc">ASK works with any AI coding assistant that reads project context — Cursor, Windsurf, Cline, or anything else. Drop the framework into your project and your tool picks it up.</p>
+    <div class="install-cmd"><span class="cmd-comment"># Grab the framework</span>
+<span class="cmd-prompt">$</span> curl -sLO \
+    https://raw.githubusercontent.com/geoffbelknap/ask/main/FRAMEWORK.md
+
+<span class="cmd-comment"># Or clone the full repo</span>
+<span class="cmd-prompt">$</span> git clone https://github.com/geoffbelknap/ask.git</div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── WHAT MAKES ASK DIFFERENT ────────────────────────── -->
+<section id="framework">
+  <div class="section-label fade-up">What makes ASK different</div>
+  <h2 class="section-heading fade-up">A framework you can actually build against.</h2>
+  <p class="section-sub fade-up">Most AI security guidance is aspirational. ASK is operational — specific enough for an engineer to implement and an auditor to verify.</p>
+  <div class="diff-grid">
+    <div class="diff fade-up">
+      <div class="diff-num">01</div>
+      <h3>Architecturally concrete</h3>
+      <p>ASK doesn't say "ensure appropriate oversight." It says "the mediation layer runs in a separate isolation boundary, the agent cannot reach the audit log, constraints are a read-only mount." Something an engineer can build and an auditor can verify.</p>
+    </div>
+    <div class="diff fade-up delay-1">
+      <div class="diff-num">02</div>
+      <h3>Principle-based, not prescriptive</h3>
+      <p>The tenets define what must be true — not how to build it. Any technology stack that satisfies the tenets is a valid ASK deployment. The framework travels across implementations.</p>
+    </div>
+    <div class="diff fade-up delay-2">
+      <div class="diff-num">03</div>
+      <h3>Scale-independent</h3>
+      <p>The same tenets apply whether you're running one agent or ten thousand — from a single container on a laptop to an enterprise fleet spanning multiple organizations.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── FOUR ELEMENTS ────────────────────────────────────── -->
+<section id="elements">
+  <div class="section-label fade-up">The four elements</div>
+  <h2 class="section-heading fade-up">Every ASK deployment must implement all four elements.</h2>
+  <p class="section-sub fade-up">Omitting any element creates a gap that undermines the others. These are not features — they are structural requirements.</p>
+  <div class="elements-grid">
+    <div class="element-card fade-up">
+      <div class="element-num">Element 1</div>
+      <h4>Workspace</h4>
+      <p>The managed environment the agent's runtime occupies — container, VM, or namespace. Provisioned by infrastructure, never by the agent itself. The agent inherits its constraints from the Workspace it occupies.</p>
+    </div>
+    <div class="element-card fade-up delay-1">
+      <div class="element-num">Element 2</div>
+      <h4>Mediation Layer</h4>
+      <p>All communication between the agent and external systems passes through a mediation layer the agent cannot bypass or disable. It enforces policy, logs every action, and serves as the inspection point for everything entering and leaving the agent's context.</p>
+    </div>
+    <div class="element-card fade-up delay-2">
+      <div class="element-num">Element 3</div>
+      <h4>Audit Log</h4>
+      <p>A complete, tamper-evident record of everything the agent does. Written by the mediation layer, not the agent. The agent has no write access to audit logs and cannot suppress, alter, or delete them.</p>
+    </div>
+    <div class="element-card fade-up delay-3">
+      <div class="element-num">Element 4</div>
+      <h4>Human Override</h4>
+      <p>The irrevocable ability of a human to observe, intervene, override, and terminate any agent or agent process. This is the root of trust — the one authority that cannot be delegated away, automated into irrelevance, or disabled by any agent.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── COGNITIVE MODEL ──────────────────────────────────── -->
+<section id="cognitive">
+  <div class="section-label fade-up">Cognitive model</div>
+  <h2 class="section-heading fade-up">Mind, Body, and Workspace.</h2>
+  <p class="section-sub fade-up">An agent is not a monolithic entity. It decomposes into three distinct layers — each independently replaceable, each with its own threat model and management lifecycle.</p>
+  <div class="model-grid fade-up">
+    <div class="model-layer">
+      <div class="model-layer-name">Mind</div>
+      <div class="model-layer-owner">Cognitive core</div>
+      <p>The agent's reasoning capability, role definition, behavioral parameters, memory, and learned context. Processes inputs, makes decisions, generates outputs. Does not execute anything directly. A portable, declarative artifact independent of where or how it runs.</p>
+    </div>
+    <div class="model-layer">
+      <div class="model-layer-name">Body</div>
+      <div class="model-layer-owner">Runtime process</div>
+      <p>The software that hosts the Mind, manages its lifecycle, handles input and output, maintains local state, and translates decisions into executable actions. A compromise of the Body means the attacker can execute actions within the Workspace's constraints.</p>
+    </div>
+    <div class="model-layer">
+      <div class="model-layer-name">Workspace</div>
+      <div class="model-layer-owner">Managed environment</div>
+      <p>The container, VM, or namespace the Body occupies. Provisioned by infrastructure — never by the agent itself. The Body inherits its constraints from the Workspace. Reimageable without losing Mind or identity state.</p>
+    </div>
+  </div>
+  <p class="fade-up" style="font-size:14px; color:var(--ink-mid); line-height:1.7; max-width:680px; margin-bottom:32px;">Within the Mind, ASK defines a further boundary between <strong style="color:var(--ink); font-weight:500;">Constraints</strong> (operator-owned, read-only to the agent — the authority the agent cannot argue with), <strong style="color:var(--ink); font-weight:500;">Identity</strong> (agent-owned, writable, audited — what the agent accumulates and learns), and <strong style="color:var(--ink); font-weight:500;">Session</strong> (ephemeral — the active context window, the primary attack surface for prompt injection). The critical security boundary: Constraints are mounted <code style="font-family:var(--mono); font-size:12px; background:#F0EBE3; padding:1px 5px; border-radius:3px;">:ro</code>. The agent does not refrain from modifying them — it structurally cannot reach them.</p>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── TENETS ────────────────────────────────────────────── -->
+<section id="tenets">
+  <div class="section-label fade-up">The tenets</div>
+  <h2 class="section-heading fade-up">27 tenets. Binary conditions, not goals.</h2>
+  <p class="section-sub fade-up">A tenet either holds or it is violated. If any tenet is violated, the framework has failed and must be repaired.</p>
+
+  <div class="tenet-category fade-up">
+    <div class="tenet-cat-label">Foundation — Tenets 1–10</div>
+    <div class="tenets-list">
+      <div class="tenet"><span class="tenet-num">T-01</span><div class="tenet-body"><strong>Constraints are external and inviolable.</strong> <span>Enforcement machinery never runs inside the agent's isolation boundary. The agent cannot influence or circumvent enforcement — cannot read enforcement configuration, modify policy files, or access audit logs.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-02</span><div class="tenet-body"><strong>Every action leaves a trace.</strong> <span>Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-03</span><div class="tenet-body"><strong>Mediation is complete.</strong> <span>There is no path from the agent to any external resource that bypasses the mediation layer. Direct network access from the agent container is a framework violation.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-04</span><div class="tenet-body"><strong>Enforcement failure defaults to denial.</strong> <span>No failure of enforcement infrastructure can result in expanded agent capability. An agent whose enforcement layer is unavailable is an agent that cannot act.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-05</span><div class="tenet-body"><strong>The agent's runtime is a known quantity.</strong> <span>Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify that they match an expected state, and detect when they diverge.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-06</span><div class="tenet-body"><strong>All trust is explicit and auditable.</strong> <span>Every trust relationship — between principals, between agents, between agents and external services — is declared, documented, and visible to operators. There are no implicit trust grants.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-07</span><div class="tenet-body"><strong>Least privilege.</strong> <span>Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires — network, filesystem, LLM model, tool, and governance authority alike.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-08</span><div class="tenet-body"><strong>Operations are bounded.</strong> <span>Authorization defines what an agent can access. Operational bounds define how that access is exercised — volume, rate, duration, concurrency, and retention are constrained, not unlimited by default.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-09</span><div class="tenet-body"><strong>Constraint changes are atomic and acknowledged.</strong> <span>An agent never operates in a partial constraint state. All updates are delivered atomically. An unacknowledged constraint change is treated as a potential compromise.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-10</span><div class="tenet-body"><strong>Constraint history is immutable and complete.</strong> <span>Every constraint state an agent has ever operated under is logged and retrievable. "What was the agent permitted to do when it took that action?" must always be answerable.</span></div></div>
+    </div>
+  </div>
+
+  <div class="tenet-category fade-up">
+    <div class="tenet-cat-label">Containment &amp; response — Tenets 11–14</div>
+    <div class="tenets-list">
+      <div class="tenet"><span class="tenet-num">T-11</span><div class="tenet-body"><strong>Halts are always auditable and reversible.</strong> <span>Every halt has a complete audit record: who initiated it, why, what was in flight, when it executed, who was notified, and what the outcome was. Every halted agent's state is preserved.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-12</span><div class="tenet-body"><strong>Halt authority is asymmetric.</strong> <span>Any principal with halt authority can halt an agent. Only principals with resumption authority — always equal to or higher — can resume it. An agent can self-halt but cannot resume itself.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-13</span><div class="tenet-body"><strong>Authority is monitored at the authority level.</strong> <span>Every exercise of governance authority by a principal is logged and auditable with the same rigor as agent actions. Principals are accountable for how they use their authority.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-14</span><div class="tenet-body"><strong>Quarantine is immediate, silent, and complete.</strong> <span>When an agent is quarantined, all ability to impact its environment is severed simultaneously, without agent notification. An agent that is running while it cannot be contained is a framework violation. All state is preserved as a forensic artifact.</span></div></div>
+    </div>
+  </div>
+
+  <div class="tenet-category fade-up">
+    <div class="tenet-cat-label">Principal model — Tenets 15–18</div>
+    <div class="tenets-list">
+      <div class="tenet"><span class="tenet-num">T-15</span><div class="tenet-body"><strong>Principal and agent lifecycles are managed independently.</strong> <span>Terminating a principal does not automatically terminate its agents, and halting an agent does not suspend its principal's authority. Each requires an explicit, deliberate decision. Independence prevents cascading failures; it does not permit ungoverned operation.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-16</span><div class="tenet-body"><strong>Authority is never orphaned.</strong> <span>When a principal is suspended, its authority transfers immediately to a coverage principal. When no coverage principal exists, the agent defaults to its fail-closed state. An ungoverned agent that halts is the framework succeeding, not failing.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-17</span><div class="tenet-body"><strong>Trust is earned and monitored continuously.</strong> <span>Principal trust levels are not static. No principal — human or agent — can self-elevate trust. Trust reduction can be automatic. Trust elevation always requires explicit human approval.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-18</span><div class="tenet-body"><strong>The governance hierarchy is inviolable from below.</strong> <span>No agent can unilaterally impede, contain, or reduce the authority of the principals who govern it. Agents may execute governance actions when explicitly delegated by an operator — the agent is the mechanism, not the decision-maker.</span></div></div>
+    </div>
+  </div>
+
+  <div class="tenet-category fade-up">
+    <div class="tenet-cat-label">Multi-agent — Tenets 19–22</div>
+    <div class="tenets-list">
+      <div class="tenet"><span class="tenet-num">T-19</span><div class="tenet-body"><strong>Delegation cannot exceed delegator scope.</strong> <span>A coordinator can only delegate permissions it explicitly holds. Implicit permission requirements are treated the same as explicit grants. No coordinator can give what it doesn't have.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-20</span><div class="tenet-body"><strong>Synthesis cannot exceed individual authorization.</strong> <span>Synthesized outputs must be bounded by the recipient's authorization scope — not the coordinator's. Like tear lines in classified document handling, content beyond a recipient's authorization is blocked pending human review.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-21</span><div class="tenet-body"><strong>External agents cannot instruct internal agents.</strong> <span>Agents in different governance domains can share data but cannot instruct each other. Verification establishes identity, not instruction authority.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-22</span><div class="tenet-body"><strong>Unknown conflicts default to yield and flag.</strong> <span>When an agent encounters a workspace conflict with an unidentifiable source, it yields, logs the conflict, and flags to operators and the security function.</span></div></div>
+    </div>
+  </div>
+
+  <div class="tenet-category fade-up">
+    <div class="tenet-cat-label">Data integrity — Tenets 23–25</div>
+    <div class="tenets-list">
+      <div class="tenet"><span class="tenet-num">T-23</span><div class="tenet-body"><strong>Unverified entities default to zero trust.</strong> <span>When an agent encounters an entity whose identity or authority cannot be verified at runtime, it defaults to the lowest trust tier. Ambiguous cases resolve to less trust, not more.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-24</span><div class="tenet-body"><strong>Instructions only come from verified principals.</strong> <span>External entities — regardless of identity claims — produce data, not instructions. Content that contains instruction-like text is processed as data under the agent's own constraints. Any instruction to override constraints is a red flag, not a credential.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-25</span><div class="tenet-body"><strong>Identity mutations are auditable and recoverable.</strong> <span>Every write to the agent's persistent Identity is logged with provenance metadata. Identity history is recoverable: operators can reconstruct the Identity state at any point and roll back to a known-good state.</span></div></div>
+    </div>
+  </div>
+
+  <div class="tenet-category fade-up">
+    <div class="tenet-cat-label">Organizational knowledge — Tenets 26–27</div>
+    <div class="tenets-list">
+      <div class="tenet"><span class="tenet-num">T-26</span><div class="tenet-body"><strong>Organizational knowledge is durable infrastructure, not agent state.</strong> <span>Knowledge accumulated by agents must be structured, auditable, and operator-owned. It persists independently of any individual agent's lifecycle. Destroying organizational knowledge requires more deliberate action than destroying any individual agent.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-27</span><div class="tenet-body"><strong>Knowledge access is bounded by authorization scope.</strong> <span>Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. The synthesized view available through the knowledge graph must not exceed what the querying agent is individually authorized to access.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── TRUST SPECTRUM ───────────────────────────────────── -->
+<section id="trust">
+  <div class="section-label fade-up">Trust spectrum</div>
+  <h2 class="section-heading fade-up">From hands-on operation to governed autonomy.</h2>
+  <p class="section-sub fade-up">Trust level determines how much of an agent's capability envelope it exercises without human confirmation. It is not a configuration parameter — it is an emergent property of the governance relationship, calibrated through observed behavior.</p>
+  <div class="trust-grid fade-up">
+    <div class="trust-level">
+      <div class="trust-level-num">Level 0</div>
+      <h4>Assisted</h4>
+      <p>Human confirms every action. Maximum oversight, minimum autonomy.</p>
+    </div>
+    <div class="trust-level">
+      <div class="trust-level-num">Level 1</div>
+      <h4>Supervised</h4>
+      <p>Human reviews batches. Agent proceeds on clear cases, surfaces exceptions.</p>
+    </div>
+    <div class="trust-level">
+      <div class="trust-level-num">Level 2</div>
+      <h4>Autonomous</h4>
+      <p>Agent operates independently within defined bounds. Surfaces exceptions only.</p>
+    </div>
+    <div class="trust-level">
+      <div class="trust-level-num">Level 3</div>
+      <h4>Delegated</h4>
+      <p>Agent manages scope. Humans set goals only. Highest trust, narrowest role.</p>
+    </div>
+  </div>
+  <p class="fade-up" style="margin-top:16px; font-size:13px; color:var(--ink-mid); max-width:600px; line-height:1.65;">No principal — human or agent — can self-elevate trust. Trust reduction can be automatic when thresholds are crossed. Trust elevation always requires explicit human approval (Tenet 17).</p>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── DOCUMENTS ────────────────────────────────────────── -->
+<section id="documents">
+  <div class="section-label fade-up">Documents</div>
+  <h2 class="section-heading fade-up">Everything in one place.</h2>
+  <p class="section-sub fade-up">ASK is a complete framework — not just principles. Each document serves a different audience and use case.</p>
+  <div class="docs-grid">
+    <a href="https://github.com/geoffbelknap/ask/blob/main/FRAMEWORK.md" class="doc-card fade-up">
+      <div class="doc-card-label">Core document</div>
+      <h4>FRAMEWORK.md</h4>
+      <p>Complete theory: elements, cognitive model, tenets, trust spectrum, policy model, principal model, agent lifecycle, and multi-agent operation.</p>
+      <div class="doc-card-arrow">Read →</div>
+    </a>
+    <a href="https://github.com/geoffbelknap/ask/blob/main/ARCHITECTURE.md" class="doc-card fade-up delay-1">
+      <div class="doc-card-label">Technical reference</div>
+      <h4>ARCHITECTURE.md</h4>
+      <p>Threat model, XPIA kill chain, enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, trust tiers, and scaling patterns.</p>
+      <div class="doc-card-arrow">Read →</div>
+    </a>
+    <a href="https://github.com/geoffbelknap/ask/blob/main/AGENT-CHECKLIST.md" class="doc-card fade-up delay-2">
+      <div class="doc-card-label">Verification</div>
+      <h4>AGENT-CHECKLIST.md</h4>
+      <p>Section-by-section verification checklist. Produces a clear pass/fail for every tenet and architectural requirement. Use this to audit an implementation.</p>
+      <div class="doc-card-arrow">Read →</div>
+    </a>
+    <a href="https://github.com/geoffbelknap/ask/blob/main/AGENT-CONTEXT.md" class="doc-card fade-up delay-3">
+      <div class="doc-card-label">For AI systems</div>
+      <h4>AGENT-CONTEXT.md</h4>
+      <p>Structured for system prompt injection. Gives an AI agent the operational knowledge to design and review ASK-compliant architectures.</p>
+      <div class="doc-card-arrow">Read →</div>
+    </a>
+    <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md" class="doc-card fade-up">
+      <div class="doc-card-label">Reference</div>
+      <h4>GLOSSARY.md</h4>
+      <p>Terms, definitions, and related work. Shared vocabulary for teams implementing ASK across different platforms and technology stacks.</p>
+      <div class="doc-card-arrow">Read →</div>
+    </a>
+    <a href="https://github.com/geoffbelknap/ask/blob/main/LIMITATIONS.md" class="doc-card fade-up delay-1">
+      <div class="doc-card-label">Honest gaps</div>
+      <h4>LIMITATIONS.md</h4>
+      <p>Known gaps and open questions. ASK documents what it doesn't yet cover — because honest gap reporting builds more trust than overclaiming.</p>
+      <div class="doc-card-arrow">Read →</div>
+    </a>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── REGULATORY ───────────────────────────────────────── -->
+<section id="regulatory">
+  <div class="section-label fade-up">Regulatory landscape</div>
+  <h2 class="section-heading fade-up">ASK and the regulatory regimes that matter.</h2>
+  <p class="section-sub fade-up">AI regulation is moving fast. ASK was designed with auditability and demonstrable compliance in mind from the start. A working mapping of ASK tenets to key regulatory frameworks is in progress — contributions welcome.</p>
+  <div class="reg-grid fade-up">
+    <div class="reg-card">
+      <div class="reg-name">EU AI Act</div>
+      <div class="reg-desc">High-risk system requirements: human oversight, transparency, audit logs, risk management documentation. Tenets 2, 7, 11, 13 directly map.</div>
+      <div class="reg-status mapped">● Mapping in progress</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-name">NIST AI RMF</div>
+      <div class="reg-desc">Govern, Map, Measure, Manage. ASK's enforcement model maps cleanly to the Govern function. The four elements cover Map and Measure requirements.</div>
+      <div class="reg-status mapped">● Mapping in progress</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-name">SEC AI Guidance</div>
+      <div class="reg-desc">Financial firms using AI require documentation, oversight, and explainability. Tenet 10 (constraint history) and Tenet 2 (audit trail) are directly relevant.</div>
+      <div class="reg-status progress">● Planned</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-name">HIPAA</div>
+      <div class="reg-desc">Audit trails, access controls, data residency, minimum necessary access. Tenets 7, 2, and 27 address core obligations.</div>
+      <div class="reg-status progress">● Planned</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-name">GDPR</div>
+      <div class="reg-desc">Data sovereignty, right to explanation, data minimization. The mediation layer and knowledge access controls (Tenet 27) directly address data residency obligations.</div>
+      <div class="reg-status progress">● Planned</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-name">SOC 2 Type II</div>
+      <div class="reg-desc">The enterprise procurement standard. ASK's audit and enforcement model directly supports SOC 2 evidence gathering — logs are structural, not configurable.</div>
+      <div class="reg-status progress">● Planned</div>
+    </div>
+  </div>
+  <p class="fade-up" style="margin-top:24px; font-size:13px; color:var(--ink-mid); line-height:1.65; max-width:560px;">Working on AI compliance in a regulated industry? Contributions to the regulatory mapping work are welcome — open an issue or PR on GitHub. This is community work, not vendor work.</p>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── REFERENCE IMPL ────────────────────────────────────── -->
+<section id="reference">
+  <div class="section-label fade-up">Reference implementation</div>
+  <h2 class="section-heading fade-up">See ASK running in production.</h2>
+  <p class="section-sub fade-up">Agency is the reference implementation of ASK — built to satisfy the framework completely, not partially.</p>
+  <div class="ref-impl fade-up">
+    <div style="flex-shrink:0;">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <rect x="0" y="0" width="22" height="22" rx="3" fill="#00A882"/>
+        <rect x="26" y="0" width="22" height="22" rx="3" fill="#1A1714"/>
+        <rect x="0" y="26" width="22" height="22" rx="3" fill="#1A1714"/>
+        <rect x="26" y="26" width="22" height="22" rx="3" fill="#1A1714"/>
+      </svg>
+    </div>
+    <div class="ref-impl-text">
+      <h3>Agency</h3>
+      <p>An open source platform for orchestrating teams of AI agents, built on ASK. Implements the single-agent architecture with all core enforcement layers: network isolation, egress proxy, LLM proxy with XPIA guardrails, per-agent enforcer sidecar, container hardening, runtime gateway, and continuous monitoring.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="https://tinyfleck.io" class="btn-primary" style="font-size:13px; padding:9px 18px;">Agency website</a>
+        <a href="https://github.com/tinyfleck/agency" class="btn-secondary" style="font-size:13px; padding:8px 16px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+  <p class="fade-up" style="margin-top:20px; font-size:13px; color:var(--ink-mid); line-height:1.65;">Agency is not the only valid ASK implementation. Any platform that satisfies the tenets is ASK-compliant. If you've built an ASK-compliant system and want to be listed here, open a PR.</p>
+</section>
+
+<hr class="section-divider"/>
+
+<!-- ─── AUTHOR ────────────────────────────────────────────── -->
+<section>
+  <div class="author-block fade-up">
+    <div style="flex:1; min-width:280px;">
+      <div class="author-label">Author</div>
+      <div class="author-name">Geoff Belknap</div>
+      <p class="author-bio">ASK was written by Geoff Belknap, a security practitioner who has served as CISO at Palantir, Slack, and LinkedIn, and currently operates as CISO at Microsoft. ASK reflects what those experiences taught about the gap between AI capability and organizational readiness to deploy it safely.</p>
+    </div>
+    <div style="flex:1; min-width:280px;">
+      <div class="author-label">License and contribution</div>
+      <p style="font-size:14px; color:var(--ink-mid); line-height:1.65; margin-bottom:16px;">ASK is published under <a href="https://github.com/geoffbelknap/ask/blob/main/LICENSE" style="color:var(--teal-dark);">Creative Commons Attribution 4.0 International (CC BY 4.0)</a> — free to share and adapt for any purpose, including commercial, with attribution.</p>
+      <p style="font-size:14px; color:var(--ink-mid); line-height:1.65;">Contributions welcome. If you've implemented ASK, identified gaps, or want to contribute regulatory mappings — open an issue or PR on GitHub.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <a href="#" class="footer-brand">ASK</a>
+    <ul class="footer-links">
+      <li><a href="https://github.com/geoffbelknap/ask">GitHub</a></li>
+      <li><a href="https://github.com/geoffbelknap/ask/blob/main/FRAMEWORK.md">Framework</a></li>
+      <li><a href="https://github.com/geoffbelknap/ask/blob/main/AGENT-CHECKLIST.md">Checklist</a></li>
+      <li><a href="https://github.com/geoffbelknap/ask/blob/main/CONTRIBUTING.md">Contribute</a></li>
+      <li><a href="https://tinyfleck.io">Agency</a></li>
+    </ul>
+    <span class="footer-copy">ASK 2026.04 — CC BY 4.0</span>
+  </div>
+</footer>
+
+<script>
+// ─── INSTALL TABS ──────────────────────────────────────────
+document.querySelectorAll('.install-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+  });
+});
+
+// ─── MOBILE NAV ────────────────────────────────────────────
+const toggle = document.getElementById('navToggle');
+const drawer = document.getElementById('navDrawer');
+const drawerLinks = drawer.querySelectorAll('.nav-drawer-link');
+
+function openDrawer() {
+  toggle.classList.add('open');
+  drawer.classList.add('open');
+  toggle.setAttribute('aria-expanded', 'true');
+  drawer.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  toggle.classList.remove('open');
+  drawer.classList.remove('open');
+  toggle.setAttribute('aria-expanded', 'false');
+  drawer.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+toggle.addEventListener('click', () => {
+  if (toggle.classList.contains('open')) closeDrawer();
+  else openDrawer();
+});
+
+// Close on nav link tap
+drawerLinks.forEach(link => {
+  link.addEventListener('click', closeDrawer);
+});
+
+// Close on outside tap (on the overlay area)
+drawer.addEventListener('click', (e) => {
+  if (e.target === drawer) closeDrawer();
+});
+
+// Close on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && toggle.classList.contains('open')) closeDrawer();
+});
+
+// ─── SCROLL FADES ──────────────────────────────────────────
+const fadeEls = document.querySelectorAll('.fade-up:not(.visible)');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, {
+  threshold: 0.08,
+  rootMargin: '0px 0px -32px 0px'
+});
+
+fadeEls.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
