@@ -22,7 +22,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 → [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, tenets, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
 
 **Understand the threats**
-→ [THREATS.md](THREATS.md) — Categorized threat model: traditional risks grounded in established best practices, genuinely novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
+→ [THREATS.md](THREATS.md) — Threat catalog: traditional risks grounded in established best practices, genuinely novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
 
 **Understand the technical architecture**
 → [ARCHITECTURE.md](ARCHITECTURE.md) — Enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
@@ -43,7 +43,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ```
 ├── README.md              ← You are here
 ├── FRAMEWORK.md           ← Complete theory: elements, tenets, cognitive model, lifecycle
-├── THREATS.md             ← Categorized threat model: traditional, novel, and hybrid threats
+├── THREATS.md             ← Threat catalog: traditional, novel, and hybrid threats
 ├── ARCHITECTURE.md        ← Technical guide: enforcement layers, topology, scaling
 ├── AGENT-CONTEXT.md       ← Optimized for system prompt injection
 ├── AGENT-CHECKLIST.md     ← Verification checklist

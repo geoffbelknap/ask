@@ -6,9 +6,9 @@ The technical architecture for the ASK operating framework. This document define
 
 ---
 
-## The Threat Model
+## The Threat Catalog
 
-The full threat model is in [THREATS.md](THREATS.md). It categorizes each threat by novelty — traditional risks with established mitigations, genuinely novel risks unique to AI agents, and hybrid threats that follow traditional patterns but manifest in agent-specific ways.
+The full threat catalog is in [THREATS.md](THREATS.md). It categorizes each threat by novelty — traditional risks with established mitigations, genuinely novel risks unique to AI agents, and hybrid threats that follow traditional patterns but manifest in agent-specific ways.
 
 ### Summary
 

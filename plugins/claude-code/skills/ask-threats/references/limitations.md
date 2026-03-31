@@ -72,4 +72,4 @@ This architecture significantly raises the cost and complexity of attacking an A
 
 ---
 
-*See also: [Threat Model](THREATS.md) for the threats these limitations relate to.*
+*See also: [Threat Catalog](THREATS.md) for the threats these limitations relate to.*

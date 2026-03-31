@@ -1,8 +1,10 @@
-# ASK — Threat Model
+# ASK — Threat Catalog
 
 **Version: ASK 2026.04**
 
-The threats that the ASK framework is designed to address. This document categorizes each threat by novelty — whether it is a well-understood risk with established mitigations, a genuinely novel risk unique to AI agents, or a traditional pattern manifesting in a new way. Understanding which category a threat falls into determines how to reason about it: traditional threats have proven solutions to adapt; novel threats require new thinking.
+A catalog of threats to AI agent systems, categorized by novelty. This document is a companion to the ASK framework, not part of it — the tenets define what must be true, and this catalog explains what you're defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
+
+Each threat is categorized by novelty — whether it is a well-understood risk with established mitigations, a genuinely novel risk unique to AI agents, or a traditional pattern manifesting in a new way. Understanding which category a threat falls into determines how to reason about it: traditional threats have proven solutions to adapt; novel threats require new thinking.
 
 ---
 
@@ -251,13 +253,13 @@ These threats follow traditional patterns but manifest in ways that are specific
 
 ## The Threat Landscape is Incomplete
 
-This threat model is based on what is known today. AI agent security is a nascent field, and the threat landscape is actively evolving. The framework explicitly acknowledges that:
+This threat catalog is based on what is known today. AI agent security is a nascent field, and the threat landscape is actively evolving. The framework explicitly acknowledges that:
 
 **Novel attack classes will emerge.** XPIA was not widely understood until agents began operating autonomously at scale. The next class of agent-specific attacks may exploit properties of LLMs, tool protocols, or multi-agent coordination that are not yet recognized as attack surfaces. The framework is designed for defense in depth specifically because no single layer can anticipate every attack.
 
 **Multimodal agents expand the attack surface.** Agents that process images, audio, video, or other non-text modalities create injection surfaces that current guardrails are not designed to address. Visual prompt injection (instructions embedded in images), audio-based injection, and cross-modal attacks are early-stage research areas.
 
-**The LLM's role in the threat model is evolving.** Current threat models treat the LLM as a component that can be manipulated through its context window. As models gain more capabilities (tool use, code execution, long-term memory), the attack surface of the model itself changes. The framework's assumption that the LLM is compromisable — and that enforcement must be external — is designed to remain valid regardless of how model capabilities evolve.
+**The LLM's role in the threat landscape is evolving.** Current threat models treat the LLM as a component that can be manipulated through its context window. As models gain more capabilities (tool use, code execution, long-term memory), the attack surface of the model itself changes. The framework's assumption that the LLM is compromisable — and that enforcement must be external — is designed to remain valid regardless of how model capabilities evolve.
 
 **Agent-to-agent attack patterns are largely theoretical.** The multi-agent threats described here are based on architectural analysis, not observed incidents at scale. Real-world multi-agent deployments will likely reveal attack patterns that are not yet anticipated.
 
@@ -265,4 +267,4 @@ This threat model is based on what is known today. AI agent security is a nascen
 
 ---
 
-*See also: [Architecture](ARCHITECTURE.md) for how the defense architecture addresses these threats. [Limitations](LIMITATIONS.md) for honest accounting of what the defenses cannot catch.*
+*See also: [Architecture](ARCHITECTURE.md) for how the defense architecture addresses these threats. [Limitations](LIMITATIONS.md) for honest accounting of what the defenses cannot catch. As mature external threat taxonomies for AI agents emerge (MITRE ATLAS, OWASP AI/ML Top 10, CoSAI), this catalog will reference them rather than maintaining a standalone taxonomy.*
