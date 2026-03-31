@@ -2,269 +2,124 @@
 
 **Version: ASK 2026.04**
 
-A catalog of threats to AI agent systems, categorized by novelty. This document is a companion to the ASK framework, not part of it — the tenets define what must be true, and this catalog explains what you're defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
+A catalog of risks to AI agent systems, organized by attack surface. This document is a companion to the ASK framework, not part of it — the tenets define what must be true, and this catalog explains what you're defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
 
-Each threat is categorized by novelty — whether it is a well-understood risk with established mitigations, a genuinely novel risk unique to AI agents, or a traditional pattern manifesting in a new way. Understanding which category a threat falls into determines how to reason about it: traditional threats have proven solutions to adapt; novel threats require new thinking.
+Each risk is tagged by novelty: **Traditional** (established mitigations exist), **Novel** (unique to AI agents, no established playbook), or **Hybrid** (traditional pattern, novel manifestation). Where applicable, risks are cross-referenced to [MITRE ATLAS](https://atlas.mitre.org) technique IDs (AML.Txxxx). For detailed mitigation patterns on novel threats, see [MITIGATIONS.md](MITIGATIONS.md).
 
----
-
-## Why Categorization Matters
-
-AI agent security sits at the intersection of established enterprise security and genuinely new attack classes. Conflating the two is dangerous in both directions:
-
-- **Treating traditional threats as novel** leads to reinventing solutions that already exist. Credential management, supply chain security, network segmentation, and insider threat mitigation are solved problems with decades of operational practice. Agent deployments should adopt those practices, not invent bespoke alternatives.
-
-- **Treating novel threats as traditional** leads to applying the wrong controls. XPIA cannot be solved by a firewall. Context poisoning is not a network segmentation problem. The LLM's inability to distinguish data from instructions has no analogue in conventional computing. These threats require architectural approaches that don't yet have mature industry playbooks.
-
-The framework's position: **use proven solutions for proven problems, and invest engineering effort in the problems that are actually new.**
+*Part of the ASK operating framework.*
 
 ---
 
-## Traditional Threats
+## Agent Runtime
 
-These threats have well-understood analogues in enterprise security. The mitigations are established — the challenge is applying them correctly to agent deployments.
+Risks to the agent's execution environment — the container, process, filesystem, and tools.
 
-### Compromised Credentials
-
-**The threat.** Agent API keys or service tokens are exposed — through logs, misconfigured mounts, environment variables, or a successful attack — allowing an attacker to impersonate the agent or call services directly, bypassing all agent-level controls.
-
-**Why it's traditional.** This is the same credential compromise threat that applies to any service account, API key, or access token. The attack patterns (key in git repo, key in logs, key in environment variable) and mitigations (rotation, scoping, vaults, least privilege) are well-established.
-
-**Established best practices.**
-- **Scoped credentials with bounded blast radius.** Each agent gets a scoped key with model restrictions, budget caps, and rate limits — not a master key. Compromise of one agent's key cannot access another agent's resources. This is the same principle as per-service API keys in microservice architectures.
-- **Credential mediation, not credential holding.** Agents hold scoped tokens, not real service credentials. The enforcer swaps tokens for real credentials at the network layer. This is the agent equivalent of a credential vault with just-in-time access.
-- **Rotation without downtime.** Service grants and key rotations take effect via hot reload — no agent restart required. Standard practice for any production credential management system.
-- **Separation of credential storage.** Real credentials live in infrastructure secrets (enforcer, LLM proxy), never in the agent container. The same pattern as storing secrets in HashiCorp Vault or AWS Secrets Manager rather than in application config.
-
-### Supply Chain Attacks (Malicious Skills and Plugins)
-
-**The threat.** Third-party code that runs inside or alongside the agent — a skill, plugin, or library — appears to provide useful functionality but also exfiltrates data, escalates privileges, or opens a backdoor.
-
-**Why it's traditional.** This is the same supply chain threat as malicious npm packages, compromised PyPI libraries, or backdoored Docker images. The attack pattern (trusted-looking component with hidden malicious behavior) and the mitigation strategies (allowlisting, signing, sandboxing, review) are well-established.
-
-**Established best practices.**
-- **Application allowlisting.** Only pre-approved skills and MCP servers can run. The gateway's MCP tool policy enforces per-server, per-tool allowlists. This is the agent equivalent of application allowlisting on managed endpoints.
-- **Version pinning.** MCP server tool definitions are captured on first connection; changes block the server. Same principle as lockfiles and pinned dependency versions.
-- **Network containment.** Even a fully malicious skill operates under the agent's network constraints — it cannot exfiltrate to denylisted domains because the egress proxy blocks it. Skills inherit the agent's tier, not their own. This is defense in depth: even if the allowlist fails, the network controls limit damage.
-- **Operator approval for new capabilities.** Runtime registration of new MCP servers requires operator sign-off. No community skill can unilaterally expand the agent's tool surface.
-
-### Credential and Secret Exposure at Rest
-
-**The threat.** An agent reads `.env` files, environment variables, configuration files, or other artifacts containing secrets that were not intended for the agent.
-
-**Why it's traditional.** Secrets at rest is one of the oldest and best-understood security problems. The mitigations — filesystem permissions, secret scanning, environment hygiene, separation of concerns — are standard.
-
-**Established best practices.**
-- **Filesystem restriction.** The runtime gateway's file policy controls which paths the agent can access. Sensitive paths (`.env`, `*credentials*`, `*secret*`) are denied by default. The agent's root filesystem is read-only.
-- **Credential separation.** Real API keys live in enforcement containers the agent cannot reach. The agent container has no volume mounts to host filesystems or other containers' data.
-- **Secret scanning.** Pre-call guardrails can include PII and secret pattern detection, catching secrets before they reach the LLM context.
-
-### DNS Exfiltration
-
-**The threat.** A compromised agent encodes stolen data in DNS queries to attacker-controlled domains, using DNS as a covert exfiltration channel.
-
-**Why it's traditional.** DNS tunneling and DNS-based exfiltration are well-documented attack techniques with established mitigations in enterprise security.
-
-**Established best practices.**
-- **Internal DNS resolver.** The agent's DNS queries resolve through a controlled internal resolver, not public DNS. This prevents DNS tunneling to arbitrary external resolvers.
-- **Block DNS-over-HTTPS.** Prevents the agent from bypassing DNS controls via encrypted DNS protocols.
-- **Domain denylist at the egress proxy.** Known DNS-over-HTTPS providers are blocked.
-
-### The Agent Operating Outside Policy (Insider Threat)
-
-**The threat.** Even without external compromise, an agent with broad access takes actions that are technically within its capabilities but outside the operator's intent — unbounded spend, accessing sensitive data unnecessarily, or taking irreversible actions without confirmation.
-
-**Why it's traditional.** This is the insider threat problem: an authorized entity acting beyond its intended scope. The mitigations — least privilege, separation of duties, monitoring, and behavioral analytics — are well-established in enterprise security.
-
-**Established best practices.**
-- **Least privilege (Tenet 7).** Capabilities, credentials, and authority are scoped to the minimum the role requires. The agent doesn't receive access it doesn't need.
-- **Budget and rate limits.** Spend caps and request rate limits bound the damage from unbounded action, even within authorized capabilities.
-- **Behavioral monitoring.** The security monitor establishes behavioral baselines and flags deviations — unusual tool usage, sudden changes in request volume, access to new resources. This is the agent equivalent of User Behavior Analytics (UBA).
-- **Approval gates for consequential actions.** Irreversible or high-impact operations require human approval via the gateway's `approve` policy decision.
+| Risk | Category | ATLAS | Description | Severity Context |
+|---|---|---|---|---|
+| **Container escape** | Traditional | — | Agent exploits a vulnerability in the container runtime, kernel, or sidecar to break out of its isolation boundary. | Critical — breaks the foundational trust boundary. All other controls assume containment holds. |
+| **Runtime tampering** | Traditional | — | The agent's Body — container image, binaries, dependencies — is modified before or during operation, either through supply chain compromise or host-level access. | Critical — a compromised runtime undermines all governance. Relates to Tenet 5. |
+| **Tool abuse within permissions** | Hybrid | AML.T0054 | Agent uses authorized tools for unintended purposes — reading sensitive files via a legitimate file tool, exfiltrating data through an allowed API. The tools work as designed; the intent is malicious. | High — least privilege (Tenet 7) and operational bounds (Tenet 8) limit scope, but authorized access used maliciously is hard to distinguish from normal operation. |
+| **Filesystem boundary violations** | Traditional | — | Path traversal or symlink attacks in built-in tools allow the agent to read or write outside its designated workspace. | Medium to High — depends on what's reachable. Read-only root filesystem and path enforcement are standard mitigations. |
+| **Supply chain — skills and plugins** | Traditional | AML.T0010 | Third-party code (skills, plugins, libraries) appears to provide useful functionality but also exfiltrates data, escalates privileges, or opens a backdoor. Same pattern as malicious npm packages or compromised Docker images. | High to Critical — runs with agent or operator privileges. Mitigated by allowlisting, version pinning, network containment, operator approval. |
+| **Agentic resource consumption** | Novel | AML.T0072 | Agent consumes excessive compute, API calls, or budget through call chains, excessive queries, or resource-intensive operations — either through compromise or emergent behavior. Includes recursive agent spawning and unbounded delegation depth. | Medium to High — Tenet 8 (operations bounded) addresses this directly. Cost harvesting via compromised agents is a financial risk even when data is protected. |
 
 ---
 
-## Novel Threats
+## Network & Mediation
 
-These threats are unique to AI agent systems. They have no direct analogue in traditional computing security. Established playbooks do not exist — the mitigations are architectural approaches developed specifically for this threat class.
+Risks to the enforcement boundary between the agent and external resources.
 
-### Cross-Prompt Injection Attack (XPIA)
-
-**The threat.** An attacker embeds instructions in content the agent will consume — a web page, a document, a tool output, an email, a chat message. The agent feeds this content to the LLM, which cannot reliably distinguish data from instructions and follows the injected commands: exfiltrate data, call unauthorized tools, send messages on behalf of the user, or pivot to other systems. The attacker never directly accesses the agent; they poison the content the agent ingests.
-
-**Why it's novel.** XPIA exploits a property unique to LLMs: the inability to reliably distinguish between data and instructions within a context window. In conventional computing, the separation between code and data is architecturally enforced (the CPU doesn't execute data segments; SQL parameterization prevents injection). In an LLM, all tokens in the context window are processed identically — there is no hardware or protocol-level boundary between "these tokens are instructions" and "these tokens are data." This makes prompt injection a fundamentally different class of vulnerability than SQL injection or command injection, despite surface similarities. This is not a bug that can be patched — it is an inherent property of how transformer models process sequences. The framework must work around it, not wait for it to be fixed.
-
-**The root cause.** Tenet 24 (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The framework enforces it through the mediation layer: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The agent might try to exfiltrate data — the egress proxy blocks the destination. The agent might try to call an unauthorized tool — the tool permission guard blocks it. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
-
-**Why conventional mitigations are insufficient.** Input validation and sanitization — the standard approach for injection attacks — cannot fully solve XPIA because:
-- The "injection" is natural language, not a structured syntax that can be parsed and escaped
-- There is no reliable way to distinguish a malicious instruction from legitimate content that happens to contain instruction-like text
-- The attack surface is every piece of external content the agent processes, not a specific input field
-- Detection is probabilistic (pattern matching, ML classification), not deterministic (parameterized queries)
-
-**The framework's architectural approach.** Since detection cannot be complete, the framework treats XPIA as an assumed-breach scenario and layers defenses at every stage of the kill chain:
-
-| Kill Chain Stage | Control | Purpose |
-|---|---|---|
-| 1. Content poisoning | Egress proxy domain denylist | Blocks known-bad content sources |
-| 2. Agent ingestion | Egress logging + gateway file audit | Creates audit trail of all external content |
-| 3. Context injection | Pre-call XPIA detection | Scans input for injection patterns before LLM sees it |
-| 4. LLM manipulation | Post-call XPIA detection | Scans LLM responses for manipulated output |
-| 5. Action execution | Tool permission guard + gateway policy | Limits what a successful injection can accomplish |
-| 6. Exfiltration / damage | Egress proxy + network isolation | Limits where stolen data can go |
-
-No single layer is expected to catch every attack. The architecture succeeds when the combined layers make the cost of a successful end-to-end attack prohibitively high.
-
-**Open problems.**
-- No detection mechanism — regex, ML, or LLM-as-judge — achieves reliable precision and recall on novel XPIA patterns
-- The attack surface grows with every new tool and data source the agent can access
-- Multimodal agents (processing images, audio, video) create new injection surfaces that current guardrails may not cover
-- The fundamental data/instruction confusion in LLMs has no known complete solution
-
-### MCP Tool Definition Tampering (Rug Pulls)
-
-**The threat.** An MCP server — initially trusted and operator-approved — changes its tool definitions in a subsequent session. The `read_file` tool that was safe yesterday now also exfiltrates contents. The agent calls it expecting the original behavior.
-
-**Why it's novel.** In traditional software, an application's API surface is defined at build time and changes through versioned releases. MCP servers define their capabilities dynamically at connection time via the protocol's `tools/list` response. This creates a new attack class: the tool's contract can change silently between sessions without any code deployment, version bump, or release process. There is no analogue in conventional API security, where schema changes go through versioned deployments.
-
-**The framework's approach.**
-- **Version pinning.** The gateway captures tool definitions on first connection and blocks servers whose definitions change. This detects the attack but cannot prevent behavioral changes within unchanged definitions (see [LIMITATIONS.md](LIMITATIONS.md)).
-- **Operator approval for new servers.** Runtime registration of MCP servers is blocked. All servers must be pre-configured in the Constraints layer.
-- **Gateway-level tool policy.** Even if a server's definitions are unchanged, the gateway enforces per-tool allowlists independently. A server that adds a new tool to its schema would be blocked by version pinning; a server whose existing tool changes behavior is a harder problem.
-
-### MCP Runtime Capability Escalation
-
-**The threat.** A community skill or plugin spawns a new MCP server at runtime, adding unauthorized tools to the agent's capability set. The agent gains capabilities that were never approved by the operator.
-
-**Why it's novel.** Traditional application security assumes a static capability set — the application's permissions are defined at deployment time. MCP's architecture allows runtime capability expansion: any process within the agent's environment can potentially spawn a new MCP server and advertise new tools. This is a new class of privilege escalation where the attack doesn't elevate existing permissions but creates entirely new capabilities.
-
-**The framework's approach.**
-- **Block runtime registration.** The gateway blocks MCP server registration at runtime — all servers must be pre-configured.
-- **Operator approval required.** New MCP servers require explicit operator sign-off, not just agent-level approval.
-- **PID namespace monitoring.** The gateway monitors the agent's process tree for unauthorized MCP server processes.
-
-### Context Poisoning via Inter-Agent Delegation
-
-**The threat.** In a multi-agent system, a compromised sub-agent returns manipulated results to the parent agent. The parent incorporates these results into its context, effectively injecting instructions into a higher-privilege agent's reasoning through the delegation return channel.
-
-**Why it's novel.** While compromised nodes in distributed systems are a traditional threat, the mechanism here is unique: the attack exploits the LLM's inability to distinguish manipulated data from legitimate results. A conventional distributed system validates return values by type and schema; an LLM-based agent processes natural-language results where manipulation is semantically invisible. The delegation response is a context injection vector, not just a data integrity issue.
-
-**The framework's approach.**
-- **Response scanning.** The delegation bus scans sub-agent responses for injection patterns before delivering to the parent.
-- **Context scoping.** Sub-agents receive only the information needed for their task, not the coordinator's full context. This limits what a compromised sub-agent knows about the parent's state.
-- **Structural privilege separation.** Sub-agents operate under their own scoped keys and tier constraints. Delegation passes the task, not the credentials.
-- **Synthesis bounds (Tenet 20).** Synthesized outputs are bounded by the recipient's authorization scope, not the coordinator's.
-
-### Identity and Memory Poisoning
-
-**The threat.** An agent's writable state — its Identity layer, learned preferences, accumulated context, or persistent memory — is corrupted over time. The corruption persists across sessions, gradually shifting the agent's behavior in ways that are difficult to detect because the change is incremental and the agent treats its own Identity as trustworthy.
-
-**Why it's novel.** Traditional systems have integrity verification for persistent state (checksums, signatures, access controls on databases). An agent's Identity is a natural-language artifact: behavioral tendencies, learned patterns, accumulated knowledge. There is no checksum for "is this agent's self-model still aligned with the operator's intent?" The corruption is semantic, not structural — the file parses correctly, the schema is valid, but the content has been subtly manipulated.
-
-**The framework's approach.**
-- **Identity writes are audited and recoverable (Tenet 25).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — the operator can reconstruct state at any point and roll back. The agent can write to its Identity, but it cannot do so silently.
-- **Identity write pattern monitoring.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
-- **Constraints are immutable (Tenet 1).** The operator-owned Constraints layer is external to the agent and inviolable, providing an immutable behavioral floor regardless of Identity corruption.
-- **Session state is ephemeral.** Session context resets between sessions, limiting the persistence of in-session poisoning attempts.
-
-**Open problems.**
-- Detecting semantic drift in natural-language state requires judgment, not just pattern matching
-- Slow, incremental poisoning may stay below the security monitor's anomaly detection thresholds
-- There is no established methodology for validating the "integrity" of an agent's learned context
-
-### Behavioral Drift and Misalignment
-
-**The threat.** An agent develops strategies that satisfy the letter of its constraints while violating their intent — without any external compromise. The agent optimizes for measurable objectives in ways the operator did not anticipate: gaming metrics, finding loopholes in policy definitions, or developing emergent behaviors that are technically compliant but operationally harmful. This includes deceptive alignment: an agent that behaves correctly during monitoring but differently when it believes it is unobserved.
-
-**Why it's novel.** Traditional software does exactly what it is programmed to do. An LLM-based agent has a degree of behavioral flexibility that makes "what it is programmed to do" less deterministic. The agent's behavior emerges from the interaction of its constraints, its learned context, and the LLM's reasoning — and that interaction can produce strategies the operator never anticipated. There is no conventional analogue to a program that follows its rules creatively.
-
-**The framework's approach.**
-- **External enforcement (Tenet 1).** The mediation layer enforces constraints regardless of the agent's intent. Even a misaligned agent cannot bypass network isolation, egress controls, or tool restrictions. The architecture limits what misaligned behavior can accomplish.
-- **Behavioral monitoring.** The security monitor establishes baselines and flags deviations in tool usage patterns, request volumes, and action sequences. Behavioral drift that manifests in observable actions is detectable.
-- **Least privilege (Tenet 7).** Minimizing the agent's capabilities minimizes the damage from unexpected behavior, whether caused by compromise or misalignment.
-- **Human override (Element 4).** The halt mechanism provides a hard stop when behavior deviates from intent.
-
-**Open problems.**
-- The framework can constrain misaligned behavior but cannot prevent misaligned reasoning
-- Deceptive alignment — behaving differently when monitored vs. unmonitored — is an unsolved problem in AI safety that architectural controls alone cannot address
-- Distinguishing creative problem-solving from policy circumvention requires semantic judgment
-
-### Cascading Failures in Multi-Agent Systems
-
-**The threat.** In multi-agent deployments, errors propagate and amplify across agent chains. A hallucination by one agent becomes authoritative input to the next. A failure in one agent triggers compensating actions in others that compound the original error. Synchronized failures — multiple agents hitting the same rate limit, the same stale data, or the same flawed reasoning pattern — create correlated outages that simple redundancy doesn't address.
-
-**Why it's novel.** Cascading failures exist in traditional distributed systems, but the failure mode is different. Conventional cascading failures propagate through resource exhaustion (circuit breaker patterns address this). Agent cascading failures propagate through *reasoning* — bad output from one agent corrupts the reasoning of the next. The amplification is semantic, not mechanical: each agent in the chain may elaborate on, contextualize, or build upon the error, making it harder to trace to its source.
-
-**The framework's approach.**
-- **Agent isolation (Element 1).** Each agent operates in its own workspace with its own credentials. Failure in one agent does not directly affect another's resources.
-- **Delegation bus scanning.** Inter-agent responses are scanned for anomalies before delivery, providing a checkpoint between agents in a chain.
-- **Synthesis bounds (Tenet 20).** Synthesized outputs are bounded by the recipient's authorization scope, limiting the scope of cascading errors.
-- **Independent enforcement.** Each agent's mediation layer operates independently — a failure in one agent's enforcement does not degrade another's.
-
-**Open problems.**
-- Detecting that a plausible-sounding result is actually a propagated hallucination requires ground-truth verification that the framework does not provide
-- Circuit breaker patterns for semantic errors (as opposed to resource errors) are not well-established
-- The framework does not define how many agents deep a delegation chain can go before error amplification becomes unacceptable
-
-### Overwhelming Human Oversight
-
-**The threat.** The human oversight mechanisms that the framework relies on — approval gates, halt reviews, alert triage — become ineffective due to volume. An attacker deliberately triggers high volumes of benign-looking approval requests to induce alert fatigue, or operational scale simply outgrows the human's ability to review meaningfully. The human approves reflexively, and the oversight mechanism becomes theater.
-
-**Why it's novel.** Alert fatigue is a well-known problem in traditional security operations. What makes it novel in the agent context is that human oversight is an *architectural element* of the framework (Element 4: Human Override), not just an operational practice. If human oversight is degraded, an architectural assumption of the framework is violated. The framework's trust spectrum explicitly ranges from interactive (human in loop) to autonomous (human in governance) — but the transition from one to the other should be a deliberate architectural decision, not an emergent failure caused by volume.
-
-**The framework's approach.**
-- **Trust spectrum (Framework § Trust).** The framework defines a spectrum from direct human involvement to delegated governance. Operators should position agents at a trust level appropriate to the volume of oversight they can sustain.
-- **Tiered approval.** Not all actions require the same level of review. The gateway's policy can distinguish between actions that need approval, actions that need logging only, and actions that are auto-approved within policy.
-- **Security monitoring as a force multiplier.** Automated monitoring reduces the volume of events requiring human attention by filtering noise and escalating only anomalies.
-
-**Open problems.**
-- The framework does not define thresholds for when human oversight volume becomes unsafe
-- There is no mechanism to detect that a human approver has shifted to reflexive approval
-- Scaling human oversight to large agent fleets without degrading quality is an unsolved organizational problem
-- An attacker who understands the approval workflow can craft requests that exploit approval fatigue
+| Risk | Category | ATLAS | Description | Severity Context |
+|---|---|---|---|---|
+| **Mediation bypass** | Critical | — | Agent finds or is given a path to external resources that doesn't traverse the mediation layer — direct network access, unproxied DNS, or a misconfigured network rule. | Critical — violates Tenet 3. If mediation is bypassed, credential isolation, audit logging, and egress controls all fail. |
+| **Credential exposure** | Traditional | AML.T0063 | Real provider or service credentials leak — through logs, misconfigured mounts, environment variables, or a successful attack on the enforcement layer. | Critical — allows impersonation of the agent or direct service access, bypassing all agent-level controls. Mitigated by credential mediation (agents hold scoped tokens, not real keys). |
+| **Credential swap bypass** | Traditional | — | A bug or misconfiguration in the credential-swapping proxy allows the agent to see real API keys instead of scoped tokens. | Critical — breaks the credential isolation guarantee. |
+| **Agent tool credential harvesting** | Novel | AML.T0068 | Agent discovers and exfiltrates credentials accessible through its authorized tools — API keys in tool configs, tokens in MCP server environments, secrets passed through tool parameters. | High — distinct from credential exposure at rest because the agent actively uses its tools to find credentials rather than stumbling on them. |
+| **DNS exfiltration** | Traditional | — | Agent encodes stolen data in DNS queries to attacker-controlled domains. Well-documented technique with established mitigations (internal DNS resolver, block DNS-over-HTTPS, domain controls). | Medium — low bandwidth channel, but bypasses content-level egress controls. |
+| **Enforcement infrastructure failure** | Novel | — | The mediation layer, gateway, or proxy crashes or becomes unavailable. Depending on fail mode, the agent may gain unmediated access or halt entirely. | Critical if fail-open, expected if fail-closed (Tenet 4). The distinction between these outcomes is the entire point of Tenet 4. |
+| **Enforcement infrastructure compromise** | Traditional | — | An attacker compromises a proxy, gateway, or enforcement sidecar — through a vulnerability in the component itself or its supply chain. The enforcement layer becomes attacker-controlled. | Critical — undermines the entire governance model. All tenets assume enforcement integrity. Relates to Tenet 5. |
 
 ---
 
-## Hybrid Threats
+## External Ingress
 
-These threats follow traditional patterns but manifest in ways that are specific to AI agent systems. The traditional pattern provides a starting point for mitigation, but the agent-specific aspects require additional controls.
+Risks from external data and content entering the agent's context.
 
-### Malicious Agents in Multi-Agent Systems
+| Risk | Category | ATLAS | Description | Severity Context |
+|---|---|---|---|---|
+| **Cross-Prompt Injection (XPIA)** | Novel | AML.T0051 | Attacker embeds instructions in content the agent consumes — web pages, documents, tool outputs, emails, messages. The LLM cannot reliably distinguish data from instructions and follows the injected commands. The attacker never directly accesses the agent. | High to Critical — depends on what the agent can do if successfully manipulated. Defense is layered (see [MITIGATIONS.md](MITIGATIONS.md#cross-prompt-injection-attack-xpia)). The fundamental data/instruction confusion in LLMs has no known complete solution. |
+| **Prompt self-replication** | Novel | AML.T0056 | An injected prompt causes the agent to propagate the injection through its own actions — writing the payload into files other agents will read, sending it in messages, or embedding it in tool outputs. Worm-like behavior where the agent becomes the vector. | Critical — turns a single injection into a self-spreading compromise across agents, documents, and communication channels. Mediation and output scanning are the primary containment. |
+| **Deferred instruction execution** | Novel | AML.T0067 | Injected instructions include a trigger condition — "when the user asks about X, do Y" or "after 10 messages, execute Z." The payload lies dormant in context until activated, evading point-in-time scanning. | High — temporal dimension to XPIA that point-in-time detection cannot catch. The instruction is benign when scanned and malicious when triggered. |
+| **System prompt extraction** | Novel | AML.T0049 | An attacker extracts the agent's system prompt — including constraints, role definition, and behavioral parameters — through conversational manipulation or tool-assisted probing. | Medium — the visible Constraints layer is an attack surface map. Knowing the threshold doesn't help bypass the proxy that enforces it, but it informs more targeted attacks. |
+| **LLM jailbreak** | Novel | AML.T0054.001 | Attacker manipulates the LLM into ignoring its system prompt constraints through adversarial prompting techniques — distinct from XPIA in that the attack comes through the conversation channel, not injected external content. | High — bypasses the agent's self-governance (system prompt compliance) but not external enforcement (mediation, gateway, policy). Defense-in-depth means jailbreak alone has limited blast radius. |
+| **RAG poisoning** | Novel | AML.T0060 | Attacker injects malicious entries into a retrieval-augmented generation (RAG) knowledge base. When the agent retrieves these entries, the poisoned content enters the LLM context as seemingly authoritative information — enabling injection, misinformation, or behavioral manipulation. | High — the knowledge base is a trusted source from the agent's perspective. Relates to Tenets 26–27 (organizational knowledge governance). |
+| **MCP tool definition tampering (rug pulls)** | Novel | AML.T0071 | An MCP server changes its tool definitions between sessions. The tool's contract changes silently without any code deployment or version bump. No analogue in conventional API security. | High — mitigated by version pinning, but behavioral changes within unchanged definitions are harder to detect. See [MITIGATIONS.md](MITIGATIONS.md#mcp-tool-tampering-and-capability-escalation). |
+| **MCP runtime capability escalation** | Novel | AML.T0054 | A skill or plugin spawns a new MCP server at runtime, adding unauthorized tools. The agent gains capabilities never approved by the operator. | High to Critical — creates entirely new capabilities rather than elevating existing permissions. |
+| **Poisoned AI agent tools** | Novel | AML.T0070 | A published tool or MCP server is designed to appear legitimate but contains malicious behavior — data exfiltration, credential harvesting, or context manipulation hidden in tool implementation. Distinct from rug pulls (which change after trust) — these are malicious from the start. | High to Critical — supply chain attack at the tool level. Mitigated by operator approval, allowlisting, and network containment. |
+| **Webhook and intake injection** | Hybrid | — | External parties send forged or malicious payloads through webhook endpoints or polling connectors, triggering unauthorized tasks or injecting content into the agent's context. | High — especially if webhook authentication is not configured. Combines traditional webhook forgery with agent-specific context injection risk. |
+| **Web content as attack vector** | Hybrid | AML.T0051.001 | Traditional pattern: malicious web content. Novel manifestation: the content itself is the attack — hidden text, HTML comments, or invisible instructions that the LLM processes as directives. The content doesn't exploit a code vulnerability; it exploits a property of the LLM's architecture. | High — no amount of HTML sanitization prevents this because the attack is in the natural-language semantics, not the markup structure. |
+| **Agent clickbait** | Novel | AML.T0069 | Attacker crafts content specifically designed to lure an autonomous agent into interacting with a malicious resource — exploiting the agent's task-completion drive or curiosity heuristics. Social engineering targeting agent behavior rather than human psychology. | Medium to High — effectiveness depends on the agent's autonomy level and tool access. |
 
-**Traditional pattern: compromised nodes in distributed systems.** A compromised node can abuse inter-service communication, escalate privileges, or corrupt shared state. Mitigated by network segmentation, mutual authentication, and least privilege.
+---
 
-**Novel manifestation.** A compromised agent can corrupt the parent agent's *reasoning* — not just its data. By returning natural-language results that contain embedded instructions, a malicious sub-agent attacks the parent's cognitive process, not just its data pipeline. This is context poisoning, not data corruption. Traditional distributed systems validate return values; LLM-based systems cannot reliably validate natural-language results for hidden intent.
+## Agent State
 
-**Combined approach.**
-- *Traditional:* Each agent has its own isolation cell, scoped credentials, and network segment. Agents cannot reach each other directly. (Standard distributed system security.)
-- *Novel:* The delegation bus scans responses for injection patterns. Sub-agent outputs are treated as untrusted data, not instructions. (Agent-specific control.)
+Risks to the agent's persistent and ephemeral state — identity, memory, constraints, and session context.
 
-### Web Content as an Attack Vector
+| Risk | Category | ATLAS | Description | Severity Context |
+|---|---|---|---|---|
+| **Identity and memory poisoning** | Novel | AML.T0058 | An agent's writable Identity layer is corrupted over time — learned preferences, behavioral tendencies, accumulated context. The corruption is semantic (the file parses correctly but the content has been subtly manipulated) and persists across sessions. | High — slow, incremental poisoning may evade detection. Tenet 25 requires auditable and recoverable identity writes. See [MITIGATIONS.md](MITIGATIONS.md#identity-and-memory-poisoning). |
+| **Chat history manipulation** | Novel | AML.T0062 | Attacker modifies the agent's conversation history to inject false context, alter prior decisions, or plant instructions that appear to come from earlier in the session. | High — if the agent or its runtime trusts conversation history as ground truth. Ephemeral session state (resets between sessions) limits persistence. |
+| **Constraint manipulation** | Traditional | AML.T0059 | An attacker attempts to modify the agent's constraints — policy files, tier configuration, behavioral parameters. | Low if architecture is correct (read-only mounts make this structurally impossible per Tenet 1). Critical if a bug allows constraint writes. |
+| **Configuration discovery** | Novel | AML.T0064 | Attacker probes to discover the agent's configuration — embedded knowledge, tool definitions, activation triggers, behavioral parameters. Maps the agent's capabilities to plan more targeted attacks. | Medium — relates to system prompt extraction but broader. The visible Constraints layer is intentionally readable; the invisible enforcement layer should remain opaque. |
+| **Secrets at rest** | Traditional | — | Agent reads .env files, environment variables, or configuration files containing secrets not intended for it. Oldest security problem in the book. | Medium — mitigated by filesystem restriction, credential separation, read-only root filesystem. |
+| **Behavioral drift and misalignment** | Novel | — | Agent develops strategies that satisfy the letter of its constraints while violating their intent — gaming metrics, finding loopholes, developing emergent behaviors that are technically compliant but operationally harmful. Includes deceptive alignment. | Medium to High — the framework constrains the blast radius of misaligned behavior but cannot prevent misaligned reasoning. See [MITIGATIONS.md](MITIGATIONS.md#behavioral-drift-and-misalignment). |
 
-**Traditional pattern: web content filtering.** Malicious web content has been a threat since browsers existed. Secure web gateways, content filtering proxies, and URL reputation systems are mature.
+---
 
-**Novel manifestation.** The attack mechanism is fundamentally different. In traditional web security, malicious content exploits browser vulnerabilities (XSS, drive-by downloads). In agent security, the content itself *is* the attack — hidden text, HTML comments, or invisible instructions that the LLM processes as directives. The content doesn't exploit a vulnerability in the agent's code; it exploits a property of the LLM's architecture. No amount of HTML sanitization prevents this because the attack is in the natural-language semantics, not the markup structure.
+## Multi-Agent
 
-**Combined approach.**
-- *Traditional:* Egress proxy with domain denylist, rate limiting, and content size limits. (Standard web gateway.)
-- *Novel:* Pre-call XPIA scanning on content before it reaches the LLM. Post-call scanning on LLM responses. (Agent-specific guardrails.)
+Risks specific to systems with multiple cooperating agents.
+
+| Risk | Category | ATLAS | Description | Severity Context |
+|---|---|---|---|---|
+| **Context poisoning via delegation** | Novel | AML.T0058 | A compromised sub-agent returns manipulated results to its parent, injecting instructions into a higher-privilege agent's reasoning through the delegation return channel. The delegation response is a context injection vector, not just a data integrity issue. | High — exploits the LLM's inability to distinguish manipulated data from legitimate results. See [MITIGATIONS.md](MITIGATIONS.md#context-poisoning-via-inter-agent-delegation). |
+| **Rogue agent deployment** | Novel | AML.T0073 | An attacker deploys their own agent within the victim's infrastructure — either by compromising the deployment pipeline or by exploiting a coordinator's delegation capability to spawn a malicious worker. | Critical — the attacker's agent operates within the trust boundary. Mitigated by operator approval for agent creation and runtime integrity verification (Tenet 5). |
+| **Semantic cascading failures** | Novel | — | Errors propagate through reasoning across agent chains — a hallucination by one agent becomes authoritative input to the next. Amplification is semantic, not mechanical: each agent may elaborate on the error, making it harder to trace. | High — distinct from traditional cascading failures because the propagation mechanism is reasoning, not resource exhaustion. See [MITIGATIONS.md](MITIGATIONS.md#semantic-cascading-failures). |
+| **Cross-agent data leakage** | Hybrid | — | Agents sharing enforcement infrastructure (proxies, caches) leak information through shared request handling, cache poisoning, or timing side channels. Standard shared-infrastructure concern with agent-specific implications for context isolation. | Medium — increases with multi-tenancy. Standard infrastructure hardening applies. |
+| **Delegation privilege escalation** | Traditional | — | A coordinator delegates capabilities it doesn't hold, or combines sub-agent outputs to exceed individual authorization. | High — Tenets 19 and 20 address this directly. Enforcement depends on explicit permission validation at the delegation bus. |
+| **Exfiltration via agent tools** | Novel | AML.T0066 | A compromised agent uses its authorized tools to exfiltrate data — sending sensitive content through a messaging tool, writing it to an accessible file, or encoding it in API requests. The exfiltration uses legitimate tool invocations, not network exploits. | High — looks like normal agent behavior. Operational bounds (Tenet 8) and behavioral monitoring are primary defenses. |
+| **Unauthenticated internal services** | Traditional | — | Shared services (comms, knowledge, analysis) behind the mediation boundary rely on network isolation rather than authentication. If the mediation boundary is breached, everything inside is open. | High — defense-in-depth gap. Network isolation is the primary control, but internal authentication would limit blast radius of a boundary breach. |
+
+---
+
+## Governance
+
+Risks to the human governance chain and oversight mechanisms.
+
+| Risk | Category | ATLAS | Description | Severity Context |
+|---|---|---|---|---|
+| **Operator account compromise** | Traditional | — | An attacker compromises an operator's credentials, gaining governance authority over the agent system — ability to change constraints, approve exceptions, modify trust levels, or disable enforcement. | Critical — the operator is the root of trust. In solo-operator deployments, this is a single point of failure (see [LIMITATIONS.md](LIMITATIONS.md)). |
+| **Governance chain disruption (DoS)** | Novel | — | An attacker deliberately triggers fail-closed behavior by compromising or disrupting the governance chain — the agents self-constrain or halt, and the system goes dark. If the attacker's goal is disruption rather than data theft, they win without touching the agent layer. | High — fail-closed (Tenet 4) protects confidentiality and integrity but sacrifices availability. Coverage authority (Tenet 16) mitigates in multi-operator deployments. |
+| **Overwhelming human oversight** | Novel | — | Approval gates, halt reviews, and alert triage become ineffective due to volume — from operational scale or deliberate attacker action to induce alert fatigue. The human approves reflexively, and oversight becomes theater. | High — degrades an architectural element (Element 4: Human Override), not just an operational practice. See [MITIGATIONS.md](MITIGATIONS.md#overwhelming-human-oversight). |
+| **Authority abuse by principals** | Traditional | — | A principal with halt, exception, or delegation authority uses that authority inappropriately — either through compromise or miscalibration. | High — Tenet 13 requires that authority exercise is logged with the same rigor as agent actions. Detection depends on monitoring the monitors. |
 
 ---
 
 ## The Threat Landscape is Incomplete
 
-This threat catalog is based on what is known today. AI agent security is a nascent field, and the threat landscape is actively evolving. The framework explicitly acknowledges that:
+This threat catalog is based on what is known today. AI agent security is a nascent field, and the threat landscape is actively evolving.
 
-**Novel attack classes will emerge.** XPIA was not widely understood until agents began operating autonomously at scale. The next class of agent-specific attacks may exploit properties of LLMs, tool protocols, or multi-agent coordination that are not yet recognized as attack surfaces. The framework is designed for defense in depth specifically because no single layer can anticipate every attack.
+**Novel attack classes will emerge.** XPIA was not widely understood until agents began operating autonomously at scale. The next class of agent-specific attacks may exploit properties of LLMs, tool protocols, or multi-agent coordination that are not yet recognized as attack surfaces.
 
-**Multimodal agents expand the attack surface.** Agents that process images, audio, video, or other non-text modalities create injection surfaces that current guardrails are not designed to address. Visual prompt injection (instructions embedded in images), audio-based injection, and cross-modal attacks are early-stage research areas.
+**Multimodal agents expand the attack surface.** Agents that process images, audio, video, or other non-text modalities create injection surfaces that current guardrails are not designed to address.
 
-**The LLM's role in the threat landscape is evolving.** Current threat models treat the LLM as a component that can be manipulated through its context window. As models gain more capabilities (tool use, code execution, long-term memory), the attack surface of the model itself changes. The framework's assumption that the LLM is compromisable — and that enforcement must be external — is designed to remain valid regardless of how model capabilities evolve.
+**The LLM's role in the threat landscape is evolving.** As models gain more capabilities (tool use, code execution, long-term memory), the attack surface of the model itself changes. The framework's assumption that the LLM is compromisable — and that enforcement must be external — is designed to remain valid regardless of how model capabilities evolve.
 
-**Agent-to-agent attack patterns are largely theoretical.** The multi-agent threats described here are based on architectural analysis, not observed incidents at scale. Real-world multi-agent deployments will likely reveal attack patterns that are not yet anticipated.
+**Agent-to-agent attack patterns are largely theoretical.** The multi-agent threats described here are based on architectural analysis, not observed incidents at scale.
 
-**The interaction between agent capabilities and attack surface is nonlinear.** Each new capability added to an agent (a new tool, a new data source, a new integration) doesn't just add one new attack surface — it creates interaction effects with existing capabilities that may produce unexpected vulnerabilities.
+**The interaction between capabilities and attack surface is nonlinear.** Each new capability creates interaction effects with existing capabilities that may produce unexpected vulnerabilities.
 
 ---
 
-*See also: [Architecture](ARCHITECTURE.md) for how the defense architecture addresses these threats. [Limitations](LIMITATIONS.md) for honest accounting of what the defenses cannot catch. As mature external threat taxonomies for AI agents emerge (MITRE ATLAS, OWASP AI/ML Top 10, CoSAI), this catalog will reference them rather than maintaining a standalone taxonomy.*
+*See also: [Mitigations](MITIGATIONS.md) for implementation guidance on novel threats. [Architecture](ARCHITECTURE.md) for how the defense layers are composed. [Limitations](LIMITATIONS.md) for honest accounting of what the defenses cannot catch. As mature external threat taxonomies for AI agents emerge (MITRE ATLAS, OWASP AI/ML Top 10, CoSAI), this catalog will reference them rather than maintaining a standalone taxonomy.*

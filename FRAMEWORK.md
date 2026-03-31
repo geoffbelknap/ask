@@ -16,6 +16,8 @@ When an organization hires a human employee, it provisions a managed device, gra
 
 This gives a better starting position than traditional workforce security. But "better" does not mean "solved." Agents will be tricked. Exploits will succeed. Controls will have gaps. The framework is designed around that reality — measuring success not by the absence of incidents, but by the speed and quality of detection, response, and learning when incidents inevitably occur.
 
+AI agent security sits at the intersection of established enterprise security and genuinely new attack classes. Conflating the two is dangerous in both directions: treating traditional threats as novel leads to reinventing solutions that already exist; treating novel threats as traditional leads to applying the wrong controls. The framework's position: **use proven solutions for proven problems, and invest engineering effort in the problems that are actually new.** The [threat catalog](THREATS.md) categorizes each risk by novelty to help practitioners make this distinction.
+
 ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The tenets define *what must be true*, not *how to build it*.
 
 ---
