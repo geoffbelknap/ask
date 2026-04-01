@@ -20,7 +20,7 @@ NIST's Center for AI Standards and Innovation (CAISI) [launched the AI Agent Sta
 
 **Relationship to ASK.** The NCCoE concept paper's areas of interest — agent identification, authorization, delegation, tamper-proof logging, and prompt injection — correspond closely to ASK's principal model, mediation layer, audit log, and XPIA threat treatment. The standards it considers implementing (SPIFFE/SPIRE for workload identity, NGAC for fine-grained access control, SCIM for identity lifecycle) are candidate technologies for ASK's enforcer credential management and principal model identity lifecycle. ASK addresses the architectural properties that must hold; the NCCoE project would demonstrate specific technology implementations that satisfy those properties.
 
-The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that ASK's Security tenets (17–19) and multi-agent architecture address.
+The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that ASK's Data Integrity and Multi-Agent tenets (21, 23, 24) and multi-agent architecture address.
 
 ### NIST Cybersecurity Framework Profile for AI (NISTIR 8596)
 
@@ -32,7 +32,7 @@ The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that 
 
 The foundational zero trust reference. The principle that no entity is inherently trusted, all access is verified, and breach is assumed.
 
-**Relationship to ASK.** ASK applies zero trust principles to AI agents rather than human users. Tenets 5 (no blind trust), 15 (trust is earned and monitored continuously), and 18 (unknown entities default to zero trust) are direct applications. The NCCoE concept paper references SP 800-207 as a relevant guideline for agent authorization.
+**Relationship to ASK.** ASK applies zero trust principles to AI agents rather than human users. Tenets 6 (all trust is explicit and auditable), 17 (trust is earned and monitored continuously), and 23 (unverified entities default to zero trust) are direct applications. The NCCoE concept paper references SP 800-207 as a relevant guideline for agent authorization.
 
 ### NIST SP 800-63-4 — Digital Identity Guidelines
 
@@ -58,9 +58,9 @@ A [seven-layer threat classification taxonomy](https://cloudsecurityalliance.org
 
 ### MITRE ATLAS (Adversarial Threat Landscape for AI Systems)
 
-Threat taxonomy for AI systems that informs ASK's threat model.
+A [threat taxonomy](https://atlas.mitre.org) for AI systems maintained by MITRE, extending the ATT&CK framework to adversarial machine learning. Includes agent-specific techniques (AML.T0051 LLM Prompt Injection, AML.T0058 AI Agent Context Poisoning, AML.T0068 AI Agent Tool Credential Harvesting, AML.T0071 AI Supply Chain Rug Pull, and others).
 
-**Relationship to ASK.** ATLAS provides the broader adversarial landscape; ASK's [THREATS.md](THREATS.md) focuses on threats specific to agent runtime security.
+**Relationship to ASK.** ASK's [threat catalog](THREATS.md) cross-references ATLAS technique IDs throughout — every risk in the catalog that maps to an ATLAS technique includes the AML.Txxxx identifier. ATLAS provides the broader adversarial taxonomy; ASK's catalog focuses on the runtime enforcement perspective. Practitioners should use both: ATLAS for understanding adversary behavior, ASK for understanding what architectural properties defend against it.
 
 ### CoSAI MCP Security White Paper (2026)
 
@@ -124,4 +124,4 @@ These are established security patterns that ASK applies to the novel domain of 
 
 ---
 
-*This document is updated as the landscape evolves. For ASK's own known gaps and open research problems, see [LIMITATIONS.md](LIMITATIONS.md). For the threat model, see [THREATS.md](THREATS.md).*
+*This document is updated as the landscape evolves. For ASK's own known gaps and open research problems, see [LIMITATIONS.md](LIMITATIONS.md). For the threat catalog, see [THREATS.md](THREATS.md). For regulatory framework mappings (EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, SEC), see [REGULATORY.md](REGULATORY.md).*
