@@ -135,6 +135,85 @@ Layer 7: Continuous Monitoring
 
 ---
 
+## Implementation Guidance from the Framework
+
+The following patterns are referenced by the framework tenets but are implementation-level concerns. They provide concrete guidance for building ASK-conforming systems.
+
+### Startup Sequence: Enforcement Before Existence
+
+The agent never exists, even briefly, in an unenforced state. A conforming startup sequence follows this order:
+
+1. **Verify** — manifests, body hash, policy chain. Nothing starts until verification passes.
+2. **Enforce** — bring enforcement infrastructure up first (workspace, network isolation, mediation layer, gateway, audit). Enforcement is active before the agent exists.
+3. **Constrain** — mount constraints into the enforced environment, read-only. Compute effective policy.
+4. **Validate** — check workspace requirements (tool compatibility). Already under enforcement.
+5. **Load identity** — integrity check, seed + memory. Security monitor already watching.
+6. **Start the Body** — runtime inside the enforcement boundary, no path to enforcement infrastructure.
+7. **Construct session** — constraints + identity + session context assembled. Agent becomes aware inside an already-enforced session.
+
+### Constraint Concepts
+
+The Constraints layer must declare the agent's capabilities and behavioral parameters. The specific file format, field names, and storage mechanism are implementation choices. An ASK-conforming implementation must support these semantic concepts:
+
+**Required:**
+
+| Concept | Description |
+|---|---|
+| Agent identity | Unique identifier for this agent |
+| Role | The agent's functional role |
+| Trust tier | Tier determining capability envelope |
+| Model access | Which LLM models the agent may use |
+| Resource limits | Budget caps, rate limits |
+| Behavioral parameters | Risk tolerance, escalation threshold, irreversible action policy |
+| Tool access | Which tools are allowed, which are denied |
+| Runtime pattern | Interactive or autonomous |
+
+**Required for some deployments:**
+
+| Concept | When Needed |
+|---|---|
+| Delegation rules | Only for agents that delegate to other agents |
+| Web access | Only when web access is enabled |
+| Service grants | Only when the agent accesses external services beyond LLM |
+
+### Filesystem Mapping
+
+The framework requires semantic separation between operator-controlled constraints and agent-controlled identity. One valid layout:
+
+```
+constraints/                 ← read-only, operator-owned, version-controlled
+├── (config file)            ← tier, permissions, model prefs, behavioral constraints
+└── (rules file)             ← operational rules (operator-authored)
+
+identity/                    ← writable, agent-owned, security-monitor-audited
+├── (persona file)           ← personality, tone, vibe (stylistic only)
+└── memory/                  ← learned facts, user preferences, working notes
+
+session/                     ← ephemeral, not persisted (destroyed on session reset)
+```
+
+### Service Credential Lifecycle
+
+Agents frequently need access to external services (GitHub, search engines, databases) beyond the LLM. The framework requires that service credentials follow the same mediation pattern as all other external access:
+
+**Grant.** An operator grants an agent access to a named service. The real credential is stored in infrastructure secrets outside the agent's reach. The agent receives a scoped token that identifies the grant but cannot be used directly against the service.
+
+**Mediation.** When the agent makes a request to a granted service, the mediation layer intercepts the request, verifies the grant is active, swaps the agent's scoped token for the real credential, and forwards the request. The agent never sees, handles, or stores real service credentials.
+
+**Revocation.** An operator can revoke a service grant at any time. Revocation takes effect immediately. No agent restart is required.
+
+This pattern extends Tenet 3 (mediation is complete) to service credentials and Tenet 7 (least privilege) to dynamic service access.
+
+### Agent-Facing Framework Context
+
+An ASK-conforming implementation should communicate framework awareness to the agent itself — through read-only documentation in its workspace — covering why its constraints exist, what enforcement mechanisms are active, and how to recognize security threats. The purpose is not to rely on the agent's cooperation for security (enforcement is always external), but to make the agent a better participant in its own governance.
+
+### Workspace Activity Register
+
+When multiple agents share a workspace environment, a read-only activity register provides ambient awareness without direct communication. Agents observe the register but cannot write to it. When the register is unavailable, the conflict resolution default applies: yield and flag (Tenet 22).
+
+---
+
 ## Single-Agent Topology
 
 ### Architectural Requirements
