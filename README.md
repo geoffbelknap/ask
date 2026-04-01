@@ -31,7 +31,6 @@ ASK defines what must be true — architecturally, operationally, and organizati
 → [AGENT-CONTEXT.md](AGENT-CONTEXT.md) — Structured for system prompt injection. Gives an AI agent the operational knowledge to design and review ASK-compliant architectures.
 
 **Verify an implementation**
-→ [AGENT-CHECKLIST.md](AGENT-CHECKLIST.md) — Section-by-section verification checklist. Produces a clear pass/fail for every tenet and architectural requirement.
 
 **Understand the landscape**
 → [RELATED-WORK.md](RELATED-WORK.md) — How ASK relates to NIST standards, OWASP, MAESTRO, A2A, MCP security research, and industry findings.
@@ -46,7 +45,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── THREATS.md             ← Threat catalog: traditional, novel, and hybrid threats
 ├── ARCHITECTURE.md        ← Technical guide: enforcement layers, topology, scaling
 ├── AGENT-CONTEXT.md       ← Optimized for system prompt injection
-├── AGENT-CHECKLIST.md     ← Verification checklist
+├── MITIGATIONS.md         ← Implementation guidance for novel threats
 │
 ├── examples/
 │   ├── README.md                ← Example index and configuration reference

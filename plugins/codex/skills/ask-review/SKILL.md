@@ -205,7 +205,7 @@ For compliance reviews, always produce:
 ## Reference Files
 
 For detailed checklists and cognitive model deep dives, see:
-- `references/checklist.md` — Full implementation verification checklist with testing guide
+- `references/checklist.md` — Verification testing guide: concrete tests for each enforcement property
 - `references/cognitive-model.md` — Constraints/Session/Identity deep dive with filesystem mapping
 - `references/agent-lifecycle.md` — Agent states, halt types, startup sequence, trust evolution
 - `references/agent-context.md` — AI-ready system prompt material for ASK-aware agents
