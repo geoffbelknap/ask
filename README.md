@@ -28,7 +28,6 @@ ASK defines what must be true — architecturally, operationally, and organizati
 → [ARCHITECTURE.md](ARCHITECTURE.md) — Enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
 
 **Feed context to an agent building ASK systems**
-→ [AGENT-CONTEXT.md](AGENT-CONTEXT.md) — Structured for system prompt injection. Gives an AI agent the operational knowledge to design and review ASK-compliant architectures.
 
 **Check regulatory alignment**
 → [REGULATORY.md](REGULATORY.md) — Mapping of ASK tenets to EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, and SEC AI Guidance. Working document — contributions welcome.
@@ -45,7 +44,6 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── FRAMEWORK.md           ← Complete theory: elements, tenets, cognitive model, lifecycle
 ├── THREATS.md             ← Threat catalog: traditional, novel, and hybrid threats
 ├── ARCHITECTURE.md        ← Technical guide: enforcement layers, topology, scaling
-├── AGENT-CONTEXT.md       ← Optimized for system prompt injection
 ├── MITIGATIONS.md         ← Implementation guidance for novel threats
 ├── REGULATORY.md          ← Regulatory mapping: EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, SEC
 │

@@ -831,7 +831,7 @@ The framework requires human override (Element 4) and operator observability, bu
 
 At Scale 1 (single agent), the operator interface can be CLI commands: shell access to management containers, log file reads, and direct config file edits. At Scale 3 (enterprise), it requires a management dashboard, centralized log viewer, alerting integration, and role-based access for multiple operators.
 
-The management interface must be on a separate network path from agent containers (AGENT-CONTEXT.md Architectural Rule 8). No agent can reach the operator's management tools.
+The management interface must be on a separate network path from agent containers. No agent can reach the operator's management tools.
 
 ### Sidecar Resource Overhead
 

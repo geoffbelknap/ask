@@ -1,0 +1,16 @@
+{
+  "name": "ask",
+  "owner": {
+    "name": "Geoff Belknap"
+  },
+  "description": "ASK — Security framework for AI agent systems",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "name": "ask-framework",
+      "description": "ASK compliance reviewer, architecture designer, and threat analyst",
+      "version": "3.0.0",
+      "source": "./plugins/claude-code"
+    }
+  ]
+}
