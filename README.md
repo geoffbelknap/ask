@@ -30,7 +30,8 @@ ASK defines what must be true — architecturally, operationally, and organizati
 **Feed context to an agent building ASK systems**
 → [AGENT-CONTEXT.md](AGENT-CONTEXT.md) — Structured for system prompt injection. Gives an AI agent the operational knowledge to design and review ASK-compliant architectures.
 
-**Verify an implementation**
+**Check regulatory alignment**
+→ [REGULATORY.md](REGULATORY.md) — Mapping of ASK tenets to EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, and SEC AI Guidance. Working document — contributions welcome.
 
 **Understand the landscape**
 → [RELATED-WORK.md](RELATED-WORK.md) — How ASK relates to NIST standards, OWASP, MAESTRO, A2A, MCP security research, and industry findings.
@@ -46,6 +47,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── ARCHITECTURE.md        ← Technical guide: enforcement layers, topology, scaling
 ├── AGENT-CONTEXT.md       ← Optimized for system prompt injection
 ├── MITIGATIONS.md         ← Implementation guidance for novel threats
+├── REGULATORY.md          ← Regulatory mapping: EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, SEC
 │
 ├── examples/
 │   ├── README.md                ← Example index and configuration reference

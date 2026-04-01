@@ -1120,37 +1120,37 @@ footer {
 <section id="regulatory">
   <div class="section-label fade-up">Regulatory landscape</div>
   <h2 class="section-heading fade-up">ASK and the regulatory regimes that matter.</h2>
-  <p class="section-sub fade-up">AI regulation is moving fast. ASK was designed with auditability and demonstrable compliance in mind from the start. A working mapping of ASK tenets to key regulatory frameworks is in progress — contributions welcome.</p>
+  <p class="section-sub fade-up">AI regulation is moving fast. ASK was designed with auditability and demonstrable compliance in mind from the start. Full tenet-by-tenet mappings are available in <a href="https://github.com/geoffbelknap/ask/blob/main/REGULATORY.md" style="color:var(--teal-dark);">REGULATORY.md</a> — contributions welcome.</p>
   <div class="reg-grid fade-up">
     <div class="reg-card">
       <div class="reg-name">EU AI Act</div>
-      <div class="reg-desc">High-risk system requirements: human oversight, transparency, audit logs, risk management documentation. Tenets 2, 7, 11, 13 directly map.</div>
-      <div class="reg-status mapped">● Mapping in progress</div>
+      <div class="reg-desc">Articles 9, 12–15: risk management, record-keeping, transparency, human oversight, cybersecurity. ASK exceeds the Act's logging and halt requirements.</div>
+      <div class="reg-status mapped">● Mapped</div>
     </div>
     <div class="reg-card">
       <div class="reg-name">NIST AI RMF</div>
-      <div class="reg-desc">Govern, Map, Measure, Manage. ASK's enforcement model maps cleanly to the Govern function. The four elements cover Map and Measure requirements.</div>
-      <div class="reg-status mapped">● Mapping in progress</div>
-    </div>
-    <div class="reg-card">
-      <div class="reg-name">SEC AI Guidance</div>
-      <div class="reg-desc">Financial firms using AI require documentation, oversight, and explainability. Tenet 10 (constraint history) and Tenet 2 (audit trail) are directly relevant.</div>
-      <div class="reg-status progress">● Planned</div>
-    </div>
-    <div class="reg-card">
-      <div class="reg-name">HIPAA</div>
-      <div class="reg-desc">Audit trails, access controls, data residency, minimum necessary access. Tenets 7, 2, and 27 address core obligations.</div>
-      <div class="reg-status progress">● Planned</div>
-    </div>
-    <div class="reg-card">
-      <div class="reg-name">GDPR</div>
-      <div class="reg-desc">Data sovereignty, right to explanation, data minimization. The mediation layer and knowledge access controls (Tenet 27) directly address data residency obligations.</div>
-      <div class="reg-status progress">● Planned</div>
+      <div class="reg-desc">All four functions (Govern, Map, Measure, Manage) mapped. ASK's strongest alignment is with MEASURE 2.7 (security/resilience) and MANAGE 2.4 (deactivation).</div>
+      <div class="reg-status mapped">● Mapped</div>
     </div>
     <div class="reg-card">
       <div class="reg-name">SOC 2 Type II</div>
-      <div class="reg-desc">The enterprise procurement standard. ASK's audit and enforcement model directly supports SOC 2 evidence gathering — logs are structural, not configurable.</div>
-      <div class="reg-status progress">● Planned</div>
+      <div class="reg-desc">All five Trust Services Criteria covered. ASK's audit architecture produces structural evidence — logs are a guaranteed byproduct, not a configurable feature.</div>
+      <div class="reg-status mapped">● Mapped</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-name">HIPAA</div>
+      <div class="reg-desc">Access controls, audit controls, integrity, transmission security, authentication. Honest gap: ASK provides breach detection infrastructure but not notification procedures.</div>
+      <div class="reg-status mapped">● Mapped</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-name">GDPR</div>
+      <div class="reg-desc">All six data protection principles addressed. Honest gap: right to erasure creates tension with immutable audit logs — implementations must reconcile.</div>
+      <div class="reg-status mapped">● Mapped</div>
+    </div>
+    <div class="reg-card">
+      <div class="reg-name">SEC AI Guidance</div>
+      <div class="reg-desc">Documentation, human oversight, explainability, conflicts of interest, vendor risk. ASK's audit trail and governance hierarchy directly address SEC concerns.</div>
+      <div class="reg-status mapped">● Mapped</div>
     </div>
   </div>
   <p class="fade-up" style="margin-top:24px; font-size:13px; color:var(--ink-mid); line-height:1.65; max-width:560px;">Working on AI compliance in a regulated industry? Contributions to the regulatory mapping work are welcome — open an issue or PR on GitHub. This is community work, not vendor work.</p>
