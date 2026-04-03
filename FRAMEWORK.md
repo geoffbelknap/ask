@@ -57,6 +57,8 @@ Every trust relationship in the system — between principals, between agents, b
 **Tenet 7 — Least privilege.**
 Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires. This applies to network access, filesystem access, LLM model access, tool access, and governance authority. The agent does not receive access it doesn't need for its defined role.
 
+*An agent's workspace is its own. The minimum a role requires typically includes full use of the tools and resources within that workspace — reading, writing, executing, and using available capabilities. Least privilege applies at the boundary between the agent and the platform, other agents, and external systems — not within the agent's own operational space. An employee given a laptop has full use of it; they don't request permission to open each application. Policy may further constrain workspace access for specific roles, but the default is practical and boundary-focused. Workspace freedom does not override other tenets: the agent still cannot exceed its constraints (Tenet 1), self-elevate trust (Tenet 17), circumvent enforcement (Tenet 4), or access other governance domains (Tenet 21).*
+
 **Tenet 8 — Operations are bounded.**
 Authorization defines what an agent can access. Operational bounds define how that access is exercised — volume, rate, duration, concurrency, and retention are constrained, not unlimited by default. An agent operating within its authorized scope but outside its operational bounds is distinguishable from normal operation and actionable.
 
