@@ -45,7 +45,7 @@ Agent B's input, a single injection can propagate across the entire system.
 | Type | Role | Permission Model |
 |---|---|---|
 | **Worker** | Does the work | High capability within scope, isolated from other agents |
-| **Coordinator** | Plans, delegates, synthesizes | Cannot act directly in worker workspaces; constrained by Tenets 11–12 |
+| **Coordinator** | Plans, delegates, synthesizes | Cannot act directly in worker workspaces; constrained by Tenets 19–20 |
 | **Function** | Oversight and governance | Cross-boundary visibility, constrained action capability |
 
 ### Function Agents (Inverted Permissions)
