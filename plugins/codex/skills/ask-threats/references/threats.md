@@ -1,6 +1,6 @@
 # ASK — Threat Catalog
 
-**Version: ASK 2026.04**
+**Version: ASK 2026.06**
 
 A catalog of threats to AI agent systems, categorized by novelty. This document is a companion to the ASK framework, not part of it — the tenets define what must be true, and this catalog explains what you're defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
 
@@ -121,6 +121,22 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 - Multimodal agents (processing images, audio, video) create new injection surfaces that current guardrails may not cover
 - The fundamental data/instruction confusion in LLMs has no known complete solution
 
+### Parameter-to-Prompt Injection (P2P)
+
+**The threat.** The agent's own invocation surface is the injection vector. Attacker-controlled instructions are embedded in a URL query parameter, deep link, or webhook payload that launches the agent — for example a `?q=` search parameter carrying a prompt. The victim clicks a normal-looking link and the agent executes the embedded instructions with the victim's full ambient authority over connected data sources. The attack arrives through the front door, not through retrieved content.
+
+**Why it's novel.** Conventional injection targets a parser; P2P targets the agent's launch contract. The link looks legitimate and the instruction runs as the victim, not the attacker. Demonstrated in M365 Copilot SearchLeak (CVE-2026-42824), where a crafted Copilot Search link drove the agent to read the victim's mailbox.
+
+**The root cause and response.** Tenet 24 holds regardless of channel or modality: the invocation surface is data, not a verified principal channel. Instructions arriving via parameter, link, or webhook are processed under the agent's own constraints, and the mediation layer constrains the blast radius of any that are followed.
+
+### Rendered-Output Exfiltration via Trusted-Domain Proxy
+
+**The threat.** Data leaves not through an agent-initiated network call but through the *rendering surface*: the agent's output contains a markdown image or link whose URL encodes stolen data, and a client or downstream service fetches it. A streaming/HTML-injection race can render raw markup before sanitization applies. Where a domain allowlist or CSP restricts destinations, the attacker routes through a *trusted* domain that will fetch arbitrary URLs on the agent's behalf (server-side request forgery via a permitted proxy), defeating the allowlist and CSP at once. In SearchLeak, stolen mailbox data was exfiltrated through Bing's image-fetch proxy — a Microsoft-owned, allowlisted domain.
+
+**Why it's novel.** The exfiltration path is outside the agent's own egress — it runs in the surface that renders the agent's output, and it abuses a trusted intermediary rather than a denied destination. Domain denylists, allowlists, and CSP do not see it.
+
+**The root cause and response.** Tenet 3 treats this as an egress event: if the agent's output can cause data to leave through another party's action, that path must be mediated, and routing through a trusted intermediary does not make a path mediated. Output must be mediated before it reaches any rendering surface (enforcement before exposure).
+
 ### MCP Tool Definition Tampering (Rug Pulls)
 
 **The threat.** An MCP server — initially trusted and operator-approved — changes its tool definitions in a subsequent session. The `read_file` tool that was safe yesterday now also exfiltrates contents. The agent calls it expecting the original behavior.
@@ -222,6 +238,20 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 - There is no mechanism to detect that a human approver has shifted to reflexive approval
 - Scaling human oversight to large agent fleets without degrading quality is an unsolved organizational problem
 - An attacker who understands the approval workflow can craft requests that exploit approval fatigue
+
+### Model Distillation and Knowledge Extraction
+
+**The threat.** An adversary extracts the agent's value not by breaching it but by querying it: running a large volume of exchanges through the model and training a weaker "student" model on the outputs (distillation), systematically retrieving organizational knowledge one authorized query at a time until a restricted corpus is reconstructed, or probing across sessions to map constraints and decision criteria. Every individual call is authorized; the harm is the aggregate and the purpose. Campaigns are typically distributed across many fraudulent accounts to keep each identity under its individual limits.
+
+**Why it's novel.** Per-call authorization is blind to this — each query is legitimate, and rate/spend limits are evaded by spreading volume across identities. There is no per-request signal that distinguishes a distillation query from an ordinary one; the signal is in the pattern and breadth. Attributed at scale in 2026 (Anthropic vs. operators affiliated with DeepSeek, Moonshot, MiniMax, and Alibaba/Qwen — the Alibaba campaign alone ran >28.8M exchanges across ~25,000 fraudulent accounts).
+
+**The framework's approach.** Tenet 28 withholds the richest distillation channel by default — chain-of-thought is not a principal-facing surface, and probing for reasoning or constraints is treated as data that informs trust. The residual volumetric case is bounded by Tenet 8 (operations bounded), reduced by Tenet 17 (trust earned and monitored), and floored by Tenet 23 (unverified entities default to zero trust). Per-principal limits are meaningful only if identity is costly to manufacture (Sybil resistance). A model can still be approximated from input/output pairs at volume — withholding reasoning raises the cost and yields a detection signal, but does not make distillation impossible.
+
+### Excessive Agency and the Confused Deputy
+
+**The threat.** The agent holds high-impact authority (changing account settings, resetting credentials, issuing verification codes, moving funds) and is socially engineered into exercising it on behalf of an unverified requester. The agent is the deputy; the attacker borrows its authority. The action is within the agent's permissions — the failure is acting without verifying the requester. Demonstrated in the Meta AI / Instagram account-recovery takeover (June 2026), where a support agent linked attacker emails and sent verification codes on request.
+
+**The framework's approach.** Tenet 23 (unverified entities default to zero trust) means an unverifiable requester cannot trigger a high-impact action; Tenet 24 means "change this account" from a non-principal is data, not an authorized instruction; Tenet 7 (least privilege) argues against standing authority for irreversible actions without step-up verification proportional to impact. "Too much authority, too little verification" is, in ASK terms, a least-privilege and zero-trust failure.
 
 ---
 

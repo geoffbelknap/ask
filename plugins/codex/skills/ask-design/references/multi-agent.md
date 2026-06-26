@@ -1,4 +1,4 @@
-# Multi-Agent Trust & Delegation Patterns — ASK 2026.04
+# Multi-Agent Trust & Delegation Patterns — ASK 2026.06
 
 ASK-compliant patterns for multi-agent systems, orchestration, and agent-to-agent delegation.
 Read this file when reviewing or designing systems with multiple interacting agents.

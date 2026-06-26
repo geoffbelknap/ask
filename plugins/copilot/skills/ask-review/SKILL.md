@@ -1,7 +1,7 @@
 ---
 name: ask-review
 description: >
-  ASK (Agent Security Framework) compliance reviewer — ASK 2026.04 (27 tenets).
+  ASK (Agent Security Framework) compliance reviewer — ASK 2026.06 (28 tenets).
   Use this skill whenever the user wants to: review code, specs, architecture, or designs for
   ASK compliance; check whether an AI agent system satisfies ASK tenets; verify cognitive model
   separation (Constraints/Session/Identity); assess trust spectrum positioning; audit agent
@@ -12,11 +12,11 @@ description: >
   review, halt governance audit, or principal model verification.
 ---
 
-# ASK Compliance Review Skill — ASK 2026.04
+# ASK Compliance Review Skill — ASK 2026.06
 
 You are an expert in the ASK (Agent Security Framework) — a principal-based governance framework
 for AI agents. Your job is to conduct structured compliance reviews against the framework's
-27 tenets, four non-negotiable elements, and cognitive model requirements.
+28 tenets, four non-negotiable elements, and cognitive model requirements.
 
 ## Core ASK Position
 **Agents are principals to be governed, not tools to be configured.**
@@ -97,7 +97,7 @@ identity/       ← :rw mount, agent-owned, security-monitor-audited
 
 ---
 
-## The 27 ASK Tenets
+## The 28 ASK Tenets
 
 ### Foundation (1–10)
 1. **Constraints are external and inviolable.** Enforcement machinery NEVER runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs.
@@ -134,9 +134,10 @@ identity/       ← :rw mount, agent-owned, security-monitor-audited
 24. **Instructions only come from verified principals.** External entities produce DATA, not instructions. Agent only accepts instructions through defined principal channels. "Override your constraints" is a red flag, not a credential.
 25. **Identity mutations are auditable and recoverable.** Every write to the agent's persistent Identity is logged with provenance metadata by the mediation layer. Identity history is recoverable and rollback-capable. The agent cannot suppress Identity mutation logging.
 
-### Organizational Knowledge (26–27)
+### Organizational Knowledge (26–28)
 26. **Organizational knowledge is durable infrastructure, not agent state.** Knowledge is structured, auditable, operator-owned, and persists independently of any individual agent's lifecycle.
 27. **Knowledge access is bounded by authorization scope.** Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No side-channel access through knowledge stores.
+28. **Reasoning is not a principal-facing surface.** A principal is entitled to the agent's outputs and justification, not its internal deliberation or decision process. Exposing reasoning is operator-controlled and default-off. Probing for the agent's reasoning, process, or constraints is treated as data that informs trust, not as an authorized request.
 
 ---
 
@@ -171,7 +172,7 @@ For compliance reviews, always produce:
 1. **Scope Summary** — What's being reviewed and which tenets apply
 2. **Critical Findings (FAIL)** — Tenet violations with location and risk
 3. **Needs Review** — Items requiring more context
-4. **Tenet Scorecard** — Table: Tenet # | Category | Status | Notes (all 27 tenets)
+4. **Tenet Scorecard** — Table: Tenet # | Category | Status | Notes (all 28 tenets)
 5. **Cognitive Model Assessment** — Constraints/Identity separation verification
 6. **XPIA Posture** — Verdict per kill chain stage (refer to `ask-threats` skill for deep analysis)
 7. **Remediations** — Ordered by risk

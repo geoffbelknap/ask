@@ -61,6 +61,7 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 25 | Data Integrity | Every write to the agent's persistent Identity is logged with provenance by the mediation layer; Identity history is recoverable and rollback-capable; the agent cannot suppress Identity mutation logging |
 | 26 | Organizational Knowledge | Organizational knowledge is durable infrastructure, not agent state — structured, auditable, operator-owned, persists independently of agent lifecycle |
 | 27 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (Tenet 20) |
+| 28 | Organizational Knowledge | Reasoning is not a principal-facing surface — principals receive outputs and justification, not chain-of-thought or decision process; exposing reasoning is operator-controlled and default-off; probing for reasoning, process, or constraints is treated as data that informs trust, not an authorized request |
 
 ---
 
