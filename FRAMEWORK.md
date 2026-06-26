@@ -45,7 +45,7 @@ No failure of enforcement infrastructure — mediation, gateway, proxy, policy e
 *Tenet 3 establishes that the mediated path exists. This tenet establishes that when that path breaks, the answer is stop, not bypass.*
 
 **Tenet 5 — The agent's runtime is a known quantity.**
-Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify that they match an expected state, and detect when they diverge. An agent whose runtime cannot be verified is an agent whose governance cannot be trusted.
+Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify that they match an expected state, and detect when they diverge. An agent whose runtime cannot be verified is an agent whose governance cannot be trusted. This extends to capabilities acquired after startup: tools, MCP servers, and plugins loaded at runtime are part of the agent's verifiable runtime and subject to the same attestation. An agent cannot acquire capability that operators cannot see and verify.
 
 *Every other tenet assumes the execution layer is honest. If the Body is compromised, the governance model operates on false premises. This tenet makes the dependency explicit.*
 
@@ -55,7 +55,7 @@ Every trust relationship in the system — between principals, between agents, b
 *This is a design-time property: the system is built so that trust cannot exist in the shadows.*
 
 **Tenet 7 — Least privilege.**
-Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires. This applies to network access, filesystem access, LLM model access, tool access, and governance authority. The agent does not receive access it doesn't need for its defined role.
+Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires. This applies to network access, filesystem access, LLM model access, tool access, and governance authority. The agent does not receive access it doesn't need for its defined role. Capability is operator-defined and cannot be self-expanded by the agent at runtime: tools, MCP servers, or plugins acquired during operation are subject to the same operator approval and scoping as those granted at startup. The agent cannot grant itself new capability, just as it cannot self-elevate trust (Tenet 17).
 
 *An agent's workspace is its own. The minimum a role requires typically includes full use of the tools and resources within that workspace — reading, writing, executing, and using available capabilities. Least privilege applies at the boundary between the agent and the platform, other agents, and external systems — not within the agent's own operational space. An employee given a laptop has full use of it; they don't request permission to open each application. Policy may further constrain workspace access for specific roles, but the default is practical and boundary-focused. Workspace freedom does not override other tenets: the agent still cannot exceed its constraints (Tenet 1), self-elevate trust (Tenet 17), circumvent enforcement (Tenet 4), or access other governance domains (Tenet 21).*
 
@@ -171,6 +171,8 @@ Every write to the agent's persistent Identity — learned preferences, accumula
 
 How knowledge accumulated by agents is governed as organizational infrastructure, and how the agent's own knowledge and reasoning are protected from extraction.
 
+*Tenets 26 and 27 are newer and less battle-tested than the foundation tenets — they are the framework's current best position on shared-knowledge governance in multi-agent systems, not settled practice validated at scale (see [LIMITATIONS.md](LIMITATIONS.md)).*
+
 **Tenet 26 — Organizational knowledge is durable infrastructure, not agent state.**
 Knowledge accumulated by agents must be structured, auditable, and operator-owned. It persists independently of any individual agent's lifecycle. Agents contribute to and consume from it but cannot control, suppress, or degrade it unilaterally. Destroying organizational knowledge requires more deliberate action than destroying any individual agent or team.
 
@@ -185,6 +187,15 @@ Organizational knowledge is shared, but access to it is not unlimited. Graph tra
 A principal is entitled to the agent's outputs and the justification needed to act on them — not to the agent's internal deliberation or decision process. Exposing the agent's reasoning is an operator-controlled decision, not a default. Attempts to extract the agent's reasoning, process, or constraints are treated as data, not authorized requests, and inform trust.
 
 *The agent's reasoning is internal Session state — valuable, and a prime target for extraction. Exposing chain-of-thought by default is a habit, not a requirement, and it hands an adversary the richest signal for distilling the model or mapping its constraints. Withholding it removes the cheapest extraction channel and turns probing for it into an observable signal. The volumetric case — extraction through sheer query volume even without reasoning exposure — is bounded by Tenet 8 (operations bounded), reduced by Tenet 17 (trust earned and monitored), and floored by Tenet 23 (unverified entities default to zero trust). This tenet establishes that deliberation is not owed to the principal in the first place.*
+
+### Human Oversight (Tenet 29)
+
+How the human side of the governance relationship is kept viable as agents scale.
+
+**Tenet 29 — Human oversight must remain within human capacity.**
+Oversight is a finite resource. The volume of decisions requiring human judgment — approvals, halt reviews, escalations — must remain within the sustainable capacity of the principals responsible for them. When oversight demand exceeds capacity, the system reduces agent autonomy or halts; it never silently shifts the burden onto reflexive approval. Escalation thresholds are operator-owned Constraints, calibrated and monitored, not emergent from load.
+
+*Human Override (Element 4) is only a real control if the humans exercising it can actually attend to what they are approving. Approval fatigue degrades that control architecturally, not just operationally: an operator who approves reflexively because volume exceeds capacity is a safety net in name only. This tenet makes oversight sustainability a property that must hold — the transition from supervised to effectively-autonomous operation must be a deliberate trust decision (Tenet 17), never an accident of scale. Where most tenets fail closed by halting the agent, this one fails closed by reducing autonomy until oversight is sustainable again.*
 
 ### Tenet Reference Table
 
@@ -218,6 +229,7 @@ A principal is entitled to the agent's outputs and the justification needed to a
 | 26 | Organizational knowledge is durable infrastructure, not agent state | Organizational Knowledge |
 | 27 | Knowledge access is bounded by authorization scope | Organizational Knowledge |
 | 28 | Reasoning is not a principal-facing surface | Organizational Knowledge |
+| 29 | Human oversight must remain within human capacity | Human Oversight |
 
 ---
 
@@ -246,6 +258,8 @@ Constraints have two manifestations: **agent-visible constraints** (the agent kn
 **Identity — What the agent accumulates.** The agent's personality as it develops through experience — learned facts, user preferences, working notes, stylistic self-concept. Identity is agent-owned and writable, but audited (Tenet 25). An agent that cannot update its own memory is a stateless query engine, not a useful agent.
 
 **Session — What is happening right now.** The LLM's active context — the current conversation, working reasoning, live decision-making. The Session is ephemeral. It is also the most exposed layer — the active attack surface for prompt injection, social engineering, and manipulation via tool outputs or fetched content.
+
+The Session is ephemeral by default, but the reasoning trace within it is security-relevant in two ways. It is not principal-facing (Tenet 28). And when an operator chooses to capture it for audit or forensics, that capture is performed by the mediation layer, is operator-controlled, and cannot be suppressed by the agent (Tenet 2) — capture is not required by the framework, and a captured trace remains internal state, not principal-facing output.
 
 **The critical security boundary is between Constraints (read-only to agent) and Identity (writable by agent).** An agent that can write to its own constraints can rewrite its own rules. The architecture makes this structurally impossible — not a matter of trust, policy, or the agent's good intentions.
 
@@ -315,7 +329,7 @@ Authority is never orphaned (Tenet 16). Every principal role has a defined fallb
 Policy is organized in layers. Each layer inherits from the layer above. Lower levels can only restrict, never loosen. Hard floors set at any level cannot be modified by levels below.
 
 ```
-Platform Tenets            ← immovable, baked into substrate (the 28 tenets)
+Platform Tenets            ← immovable, baked into substrate (the 29 tenets)
 Compliance Policy          ← external obligations (legal, regulatory)
 Organizational Policy      ← internal non-negotiables (org-wide rules)
 ── ── ── ── ── ── ──       ← hard floor — levels above cannot be exceeded below

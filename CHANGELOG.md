@@ -9,12 +9,16 @@ ASK uses date-based versioning. Tenet numbers reflect reading order and may chan
 ## ASK 2026.06
 
 ### Framework
-- New tenet:
+- New tenets:
   - Tenet 28: Reasoning is not a principal-facing surface — principals receive outputs and justification, not chain-of-thought or decision process; exposing reasoning is operator-controlled and default-off; probing for reasoning, process, or constraints is treated as data that informs trust, not as an authorized request
+  - Tenet 29: Human oversight must remain within human capacity — oversight load must stay within sustainable human capacity; when it exceeds capacity the system reduces autonomy or halts rather than degrading to reflexive approval; escalation thresholds are operator-owned Constraints. New "Human Oversight" category.
 - Revised tenets (framing sharpened to keep the invariant mechanism-neutral):
   - Tenet 3 (Mediation is complete): egress now explicitly includes indirect paths — if the agent's output can cause data to leave through another party's action, that path must be mediated; routing through a trusted intermediary does not make a path mediated
+  - Tenet 5 (Runtime is a known quantity): extends to runtime-acquired capability — tools, MCP servers, and plugins loaded after startup are subject to the same attestation; an agent cannot acquire capability operators cannot verify
+  - Tenet 7 (Least privilege): capability is operator-defined and cannot be self-expanded at runtime — runtime-acquired tools/servers/plugins get the same approval and scoping as startup grants (capability analog of Tenet 17)
   - Tenet 24 (Instructions only come from verified principals): instruction-like text is data regardless of the channel it arrives on or the form it takes; the agent's own invocation surface is not a verified principal channel
-- 28 tenets across 6 categories (was 27)
+- Cognitive model: clarified that the Session reasoning trace, when captured for audit, is mediation-written and agent-unsuppressable (Tenet 2) while remaining non-principal-facing (Tenet 28); added a maturity note that Tenets 26–27 are less battle-tested than the foundation tenets
+- 29 tenets across 7 categories (was 27 across 6)
 
 ### Threat Model
 - New threat catalog section: Model & Knowledge Extraction
@@ -25,9 +29,13 @@ ASK uses date-based versioning. Tenet numbers reflect reading order and may chan
   - Parameter-to-prompt injection (P2P) — the agent's invocation surface (URL parameter, deep link, webhook) as the injection vector (M365 Copilot SearchLeak, CVE-2026-42824)
   - Rendered-output exfiltration via trusted-domain proxy — data leaving through the rendering surface and a trusted intermediary (SearchLeak Bing image-proxy SSRF)
   - Excessive agency / confused deputy — high-impact authority exercised for an unverified requester (Meta AI / Instagram account-recovery takeover)
+  - Cross-modal / multimodal injection — instructions hidden in images, audio, video, or rendered screens that text-oriented guardrails do not inspect (computer-use / browser / voice agents)
 
 ### Mitigations
 - New section: Model Distillation and Reasoning Exposure — withhold reasoning by default, treat probing as data, bound and monitor volume, resist identity fragmentation
+
+### Limitations
+- Added: indirect egress through trusted intermediaries is hard to fully mediate; withholding reasoning raises but does not eliminate distillation cost; partial automation (authorization-scope tagging) narrows but does not eliminate Tenet 20's human-review burden
 
 ---
 
