@@ -121,6 +121,14 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 - Multimodal agents (processing images, audio, video) create new injection surfaces that current guardrails may not cover
 - The fundamental data/instruction confusion in LLMs has no known complete solution
 
+### Cross-Modal / Multimodal Injection
+
+**The threat.** Injected instructions arrive in non-text inputs the agent processes — text rendered inside an image, a QR code, audio, video frames, or the pixels and DOM of a screen a computer-use or browser agent observes. The model interprets the embedded content as directives, exactly as in text XPIA, but the payload never appears as text the agent's guardrails inspect.
+
+**Why it's novel.** The injection surface expands beyond text precisely as computer-use, browser, and voice agents go mainstream. Pre/post-call scanning built for text does not see instructions encoded in pixels or audio, and HTML/markup sanitization is irrelevant because the attack is in the rendered or spoken semantics.
+
+**The framework's approach.** Tenet 24 holds regardless of modality: instruction-like content is data whatever form it takes. The mediation layer must extend scanning to the modalities the agent actually consumes, and the same blast-radius containment (network isolation, tool allowlists, credential mediation) limits what any successful multimodal injection can accomplish.
+
 ### Parameter-to-Prompt Injection (P2P)
 
 **The threat.** The agent's own invocation surface is the injection vector. Attacker-controlled instructions are embedded in a URL query parameter, deep link, or webhook payload that launches the agent — for example a `?q=` search parameter carrying a prompt. The victim clicks a normal-looking link and the agent executes the embedded instructions with the victim's full ambient authority over connected data sources. The attack arrives through the front door, not through retrieved content.

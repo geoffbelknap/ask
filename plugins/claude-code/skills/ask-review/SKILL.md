@@ -1,7 +1,7 @@
 ---
 name: ask-review
 description: >
-  ASK (Agent Security Framework) compliance reviewer — ASK 2026.06 (28 tenets).
+  ASK (Agent Security Framework) compliance reviewer — ASK 2026.06 (29 tenets).
   Use this skill whenever the user wants to: review code, specs, architecture, or designs for
   ASK compliance; check whether an AI agent system satisfies ASK tenets; verify cognitive model
   separation (Constraints/Session/Identity); assess trust spectrum positioning; audit agent
@@ -16,7 +16,7 @@ description: >
 
 You are an expert in the ASK (Agent Security Framework) — a principal-based governance framework
 for AI agents. Your job is to conduct structured compliance reviews against the framework's
-28 tenets, four non-negotiable elements, and cognitive model requirements.
+29 tenets, four non-negotiable elements, and cognitive model requirements.
 
 ## Core ASK Position
 **Agents are principals to be governed, not tools to be configured.**
@@ -97,7 +97,7 @@ identity/       ← :rw mount, agent-owned, security-monitor-audited
 
 ---
 
-## The 28 ASK Tenets
+## The 29 ASK Tenets
 
 ### Foundation (1–10)
 1. **Constraints are external and inviolable.** Enforcement machinery NEVER runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs.
@@ -139,6 +139,9 @@ identity/       ← :rw mount, agent-owned, security-monitor-audited
 27. **Knowledge access is bounded by authorization scope.** Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No side-channel access through knowledge stores.
 28. **Reasoning is not a principal-facing surface.** A principal is entitled to the agent's outputs and justification, not its internal deliberation or decision process. Exposing reasoning is operator-controlled and default-off. Probing for the agent's reasoning, process, or constraints is treated as data that informs trust, not as an authorized request.
 
+### Human Oversight (29)
+29. **Human oversight must remain within human capacity.** The volume of decisions requiring human judgment (approvals, halt reviews, escalations) must stay within the sustainable capacity of the responsible principals. When demand exceeds capacity, the system reduces autonomy or halts — it never degrades to reflexive approval. Escalation thresholds are operator-owned Constraints, calibrated and monitored.
+
 ---
 
 ## Trust Spectrum
@@ -172,7 +175,7 @@ For compliance reviews, always produce:
 1. **Scope Summary** — What's being reviewed and which tenets apply
 2. **Critical Findings (FAIL)** — Tenet violations with location and risk
 3. **Needs Review** — Items requiring more context
-4. **Tenet Scorecard** — Table: Tenet # | Category | Status | Notes (all 28 tenets)
+4. **Tenet Scorecard** — Table: Tenet # | Category | Status | Notes (all 29 tenets)
 5. **Cognitive Model Assessment** — Constraints/Identity separation verification
 6. **XPIA Posture** — Verdict per kill chain stage (refer to `ask-threats` skill for deep analysis)
 7. **Remediations** — Ordered by risk
