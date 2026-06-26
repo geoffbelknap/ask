@@ -1,4 +1,4 @@
-# ASK Cognitive Model — ASK 2026.04
+# ASK Cognitive Model — ASK 2026.06
 
 The cognitive model defines what an agent is, how it decomposes, and where the critical
 security boundaries lie. Read this file when reviewing whether Constraints/Session/Identity

@@ -79,7 +79,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ## Versioning
 
-ASK uses date-based versioning: **ASK 2026.04** (the current version).
+ASK uses date-based versioning: **ASK 2026.06** (the current version).
 
 Tenet numbers reflect reading order within the framework document and may change between versions when tenets are reorganized. Reference tenets by name for stability across versions. The changelog documents all numbering changes between versions.
 
