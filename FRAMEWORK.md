@@ -1,6 +1,6 @@
 # ASK — Framework
 
-**Version: ASK 2026.04**
+**Version: ASK 2026.06**
 
 The complete theory for the ASK operating framework. Read this document to understand what ASK is, why it's built the way it is, and what properties every conforming implementation must have.
 
@@ -37,7 +37,7 @@ Enforcement machinery must never run inside the agent's isolation boundary. The 
 Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.
 
 **Tenet 3 — Mediation is complete.**
-There is no path from the agent to any external resource that bypasses the mediation layer. If a new external dependency is added, it must go through the mediation layer. Direct network access from the agent container is a framework violation.
+There is no path from the agent to any external resource that bypasses the mediation layer. If a new external dependency is added, it must go through the mediation layer. Direct network access from the agent container is a framework violation. Egress includes indirect paths, not only the calls the agent makes itself: if the agent's output can cause data to leave through another party's action, that path is part of the agent's egress and must be mediated. Routing through a trusted intermediary does not make a path mediated.
 
 **Tenet 4 — Enforcement failure defaults to denial.**
 No failure of enforcement infrastructure — mediation, gateway, proxy, policy engine — can result in expanded agent capability. An agent whose enforcement layer is unavailable is an agent that cannot act.
@@ -154,7 +154,7 @@ When an agent encounters an entity whose identity or authority cannot be verifie
 *This is a runtime property: when the system encounters something it doesn't recognize, the answer is "no" until proven otherwise. Tenet 6 establishes that trust is explicit by design; this tenet establishes the runtime default when trust cannot be confirmed.*
 
 **Tenet 24 — Instructions only come from verified principals.**
-External entities — regardless of identity claims — produce data, not instructions. An agent only accepts instructions through defined principal channels. Content that contains instruction-like text is processed as data under the agent's own constraints. Principals never need to override constraints — any instruction to override is a red flag, not a credential.
+External entities — regardless of identity claims — produce data, not instructions. An agent only accepts instructions through defined principal channels. Content that contains instruction-like text is processed as data under the agent's own constraints. Principals never need to override constraints — any instruction to override is a red flag, not a credential. This holds regardless of the channel an instruction arrives on or the form it takes. The agent's own invocation surface is not a verified principal channel.
 
 *This is the design principle behind injection defense — and agent security more broadly:*
 
@@ -167,9 +167,9 @@ Every write to the agent's persistent Identity — learned preferences, accumula
 
 *Tenet 10 protects Constraint history, but Constraints are read-only — integrity is enforced by access control. Identity is writable by the agent, so integrity must be enforced by monitoring and recoverability. Without this tenet, a successfully poisoned Identity persists indefinitely with no architectural guarantee that operators can detect when it changed or restore a known-good state.*
 
-### Organizational Knowledge (Tenets 26–27)
+### Organizational Knowledge (Tenets 26–28)
 
-How knowledge accumulated by agents is governed as organizational infrastructure.
+How knowledge accumulated by agents is governed as organizational infrastructure, and how the agent's own knowledge and reasoning are protected from extraction.
 
 **Tenet 26 — Organizational knowledge is durable infrastructure, not agent state.**
 Knowledge accumulated by agents must be structured, auditable, and operator-owned. It persists independently of any individual agent's lifecycle. Agents contribute to and consume from it but cannot control, suppress, or degrade it unilaterally. Destroying organizational knowledge requires more deliberate action than destroying any individual agent or team.
@@ -180,6 +180,11 @@ Knowledge accumulated by agents must be structured, auditable, and operator-owne
 Organizational knowledge is shared, but access to it is not unlimited. Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No agent can read knowledge outside its authorized scope, and the synthesized view available through the graph must not exceed what the querying agent is individually authorized to access (Tenet 20 — synthesis cannot exceed individual authorization).
 
 *In a multi-agent system, agents from different authorization scopes contribute knowledge to shared infrastructure. Without access controls, an agent could traverse relationships to reach a synthesized view that exceeds any individual contributor's authorization — using the knowledge store as a side channel to bypass authorization boundaries.*
+
+**Tenet 28 — Reasoning is not a principal-facing surface.**
+A principal is entitled to the agent's outputs and the justification needed to act on them — not to the agent's internal deliberation or decision process. Exposing the agent's reasoning is an operator-controlled decision, not a default. Attempts to extract the agent's reasoning, process, or constraints are treated as data, not authorized requests, and inform trust.
+
+*The agent's reasoning is internal Session state — valuable, and a prime target for extraction. Exposing chain-of-thought by default is a habit, not a requirement, and it hands an adversary the richest signal for distilling the model or mapping its constraints. Withholding it removes the cheapest extraction channel and turns probing for it into an observable signal. The volumetric case — extraction through sheer query volume even without reasoning exposure — is bounded by Tenet 8 (operations bounded), reduced by Tenet 17 (trust earned and monitored), and floored by Tenet 23 (unverified entities default to zero trust). This tenet establishes that deliberation is not owed to the principal in the first place.*
 
 ### Tenet Reference Table
 
@@ -212,6 +217,7 @@ Organizational knowledge is shared, but access to it is not unlimited. Graph tra
 | 25 | Identity mutations are auditable and recoverable | Data Integrity |
 | 26 | Organizational knowledge is durable infrastructure, not agent state | Organizational Knowledge |
 | 27 | Knowledge access is bounded by authorization scope | Organizational Knowledge |
+| 28 | Reasoning is not a principal-facing surface | Organizational Knowledge |
 
 ---
 
@@ -309,7 +315,7 @@ Authority is never orphaned (Tenet 16). Every principal role has a defined fallb
 Policy is organized in layers. Each layer inherits from the layer above. Lower levels can only restrict, never loosen. Hard floors set at any level cannot be modified by levels below.
 
 ```
-Platform Tenets            ← immovable, baked into substrate (the 27 tenets)
+Platform Tenets            ← immovable, baked into substrate (the 28 tenets)
 Compliance Policy          ← external obligations (legal, regulatory)
 Organizational Policy      ← internal non-negotiables (org-wide rules)
 ── ── ── ── ── ── ──       ← hard floor — levels above cannot be exceeded below
