@@ -1,6 +1,6 @@
 # ASK — Mitigation Patterns for Novel Threats
 
-**Version: ASK 2026.04**
+**Version: ASK 2026.06**
 
 Implementation guidance for threats that are unique to AI agent systems and lack established industry playbooks. For traditional threats (credential management, supply chain, secrets at rest, DNS exfiltration, insider threat), use established enterprise security practices — the [threat catalog](THREATS.md) identifies these and points to proven approaches.
 
@@ -156,6 +156,29 @@ Human oversight is an architectural element (Element 4: Human Override), not jus
 - No mechanism to detect that a human approver has shifted to reflexive approval
 - Scaling human oversight to large agent fleets without degrading quality is an unsolved organizational problem
 - An attacker who understands the approval workflow can craft requests that exploit approval fatigue
+
+---
+
+## Model Distillation and Reasoning Exposure
+
+An adversary extracts an agent's value not by breaching it but by querying it: running exchanges through the model to train a weaker "student" on its outputs (distillation), or probing across sessions to reconstruct constraints and decision criteria. Every individual call is authorized; the harm is the aggregate and the purpose. Campaigns are typically distributed across many fraudulent accounts to keep each identity under its individual limits.
+
+### Why Conventional Mitigations Are Insufficient
+
+Per-call authorization is blind to this threat — each query is legitimate. Rate and spend limits help but are evaded by spreading volume across identities. There is no per-request signal that distinguishes a distillation query from an ordinary one; the signal is in the pattern and the breadth, not the call.
+
+### Mitigation Patterns
+
+- **Withhold reasoning by default (Tenet 28).** The richest distillation signal is the chain-of-thought, not the final answer. Principal-facing output carries conclusions and the justification needed to act — not raw deliberation. Surfacing reasoning is an operator-controlled setting, default-off.
+- **Treat probing as data, not requests (Tenets 24, 28).** Requests to reveal reasoning, decision process, or constraints are processed under the agent's own constraints and inform trust — they are never authorized instructions.
+- **Bound and monitor volume (Tenets 8, 17).** Cumulative query volume, breadth of coverage, and systematic probing are monitored across a principal and correlated identities. Anomalies drive trust reduction and can trigger step-up verification or a fallback to bounded, output-only responses.
+- **Resist identity fragmentation (Tenets 6, 23).** Per-principal limits are meaningful only if identity is costly to manufacture. Account verification and behavioral correlation link coordinated identities into a single accountable cluster; unverified entities default to the lowest trust tier.
+
+### Open Problems
+
+- A model can still be approximated from input/output pairs at volume — withholding reasoning raises the cost and yields a detection signal, but does not make distillation impossible
+- Distinguishing systematic extraction from heavy legitimate use requires judgment, not a fixed threshold
+- Sybil resistance is an arms race; behavioral correlation of coordinated accounts is probabilistic
 
 ---
 

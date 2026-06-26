@@ -1,6 +1,6 @@
 # ASK — Regulatory Mapping
 
-**Version: ASK 2026.04**
+**Version: ASK 2026.06**
 
 How ASK tenets map to regulatory frameworks relevant to AI agent systems. This is a working document — mappings are provided as guidance, not legal advice. Contributions from practitioners working in regulated industries are welcome.
 

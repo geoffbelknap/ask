@@ -6,6 +6,31 @@ ASK uses date-based versioning. Tenet numbers reflect reading order and may chan
 
 ---
 
+## ASK 2026.06
+
+### Framework
+- New tenet:
+  - Tenet 28: Reasoning is not a principal-facing surface — principals receive outputs and justification, not chain-of-thought or decision process; exposing reasoning is operator-controlled and default-off; probing for reasoning, process, or constraints is treated as data that informs trust, not as an authorized request
+- Revised tenets (framing sharpened to keep the invariant mechanism-neutral):
+  - Tenet 3 (Mediation is complete): egress now explicitly includes indirect paths — if the agent's output can cause data to leave through another party's action, that path must be mediated; routing through a trusted intermediary does not make a path mediated
+  - Tenet 24 (Instructions only come from verified principals): instruction-like text is data regardless of the channel it arrives on or the form it takes; the agent's own invocation surface is not a verified principal channel
+- 28 tenets across 6 categories (was 27)
+
+### Threat Model
+- New threat catalog section: Model & Knowledge Extraction
+  - Model distillation / capability extraction — training a weaker model on the agent's outputs; aggregate of authorized calls, distributed across Sybil accounts (motivated by the 2026 Anthropic attributions against DeepSeek, Moonshot, MiniMax, and Alibaba/Qwen)
+  - Knowledge-base distillation — reconstructing a restricted corpus through many individually-authorized retrievals
+  - Constraint / behavioral profile extraction — extraction-by-aggregation of the visible Constraints layer
+- New threat entries:
+  - Parameter-to-prompt injection (P2P) — the agent's invocation surface (URL parameter, deep link, webhook) as the injection vector (M365 Copilot SearchLeak, CVE-2026-42824)
+  - Rendered-output exfiltration via trusted-domain proxy — data leaving through the rendering surface and a trusted intermediary (SearchLeak Bing image-proxy SSRF)
+  - Excessive agency / confused deputy — high-impact authority exercised for an unverified requester (Meta AI / Instagram account-recovery takeover)
+
+### Mitigations
+- New section: Model Distillation and Reasoning Exposure — withhold reasoning by default, treat probing as data, bound and monitor volume, resist identity fragmentation
+
+---
+
 ## ASK 2026.04
 
 ### Framework — Tenet Overhaul
