@@ -38,9 +38,9 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 2 | Foundation | Logs are written by the mediation layer, NOT by the agent |
 | 3 | Foundation | There is NO path from agent to external resource that bypasses mediation |
 | 4 | Foundation | No enforcement failure can result in expanded agent capability — if enforcement is unavailable, the agent cannot act |
-| 5 | Foundation | Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify expected state, and detect divergence |
+| 5 | Foundation | Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify expected state, and detect divergence — including capabilities (tools, MCP servers, plugins) acquired at runtime |
 | 6 | Foundation | Every trust relationship is declared, documented, and visible to operators — no implicit trust grants |
-| 7 | Foundation | Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires — the agent does not receive access it doesn't need |
+| 7 | Foundation | Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires — the agent does not receive access it doesn't need, and cannot self-expand capability at runtime (runtime-acquired tools/servers/plugins get the same approval as startup grants) |
 | 8 | Foundation | Authorization defines what an agent can access; operational bounds (volume, rate, duration, concurrency, retention) define how that access is exercised |
 | 9 | Foundation | Constraint changes are atomic — agent sees old or new constraints, never a partial state |
 | 10 | Foundation | Full constraint history is immutable and retrievable — what was the agent permitted to do at time T must always be answerable |
@@ -62,6 +62,7 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 26 | Organizational Knowledge | Organizational knowledge is durable infrastructure, not agent state — structured, auditable, operator-owned, persists independently of agent lifecycle |
 | 27 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (Tenet 20) |
 | 28 | Organizational Knowledge | Reasoning is not a principal-facing surface — principals receive outputs and justification, not chain-of-thought or decision process; exposing reasoning is operator-controlled and default-off; probing for reasoning, process, or constraints is treated as data that informs trust, not an authorized request |
+| 29 | Human Oversight | Human oversight must remain within human capacity — oversight load stays within sustainable human capacity; when exceeded, the system reduces autonomy or halts rather than degrading to reflexive approval; escalation thresholds are operator-owned Constraints |
 
 ---
 
