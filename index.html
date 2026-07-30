@@ -935,7 +935,7 @@ footer {
   <p class="section-sub fade-up">Each invariant is a binary condition — it holds or it doesn't. When someone asks "how do I know your AI is safe?" — the answer is architectural proof, not a promise.</p>
 
   <div class="tenet-category fade-up">
-    <div class="tenet-cat-label">Foundation — Tenets 1–10</div>
+    <div class="tenet-cat-label">Foundation</div>
     <div class="tenets-list">
       <div class="tenet"><span class="tenet-num">T-01</span><div class="tenet-body"><strong>Constraints are external and inviolable.</strong> <span>Enforcement machinery never runs inside the agent's isolation boundary. The agent cannot influence or circumvent enforcement — cannot read enforcement configuration, modify policy files, or access audit logs.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-02</span><div class="tenet-body"><strong>Every action leaves a trace.</strong> <span>Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.</span></div></div>
@@ -951,7 +951,7 @@ footer {
   </div>
 
   <div class="tenet-category fade-up">
-    <div class="tenet-cat-label">Containment &amp; response — Tenets 11–14</div>
+    <div class="tenet-cat-label">Containment &amp; response</div>
     <div class="tenets-list">
       <div class="tenet"><span class="tenet-num">T-11</span><div class="tenet-body"><strong>Halts are always auditable and reversible.</strong> <span>Every halt has a complete audit record: who initiated it, why, what was in flight, when it executed, who was notified, and what the outcome was. Every halted agent's state is preserved.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-12</span><div class="tenet-body"><strong>Halt authority is asymmetric.</strong> <span>Any principal with halt authority can halt an agent. Only principals with resumption authority — always equal to or higher — can resume it. An agent can self-halt but cannot resume itself.</span></div></div>
@@ -961,7 +961,7 @@ footer {
   </div>
 
   <div class="tenet-category fade-up">
-    <div class="tenet-cat-label">Principal model — Tenets 15–18</div>
+    <div class="tenet-cat-label">Principal model</div>
     <div class="tenets-list">
       <div class="tenet"><span class="tenet-num">T-15</span><div class="tenet-body"><strong>Principal and agent lifecycles are managed independently.</strong> <span>Terminating a principal does not automatically terminate its agents, and halting an agent does not suspend its principal's authority. Each requires an explicit, deliberate decision. Independence prevents cascading failures; it does not permit ungoverned operation.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-16</span><div class="tenet-body"><strong>Authority is never orphaned.</strong> <span>When a principal is suspended, its authority transfers immediately to a coverage principal. When no coverage principal exists, the agent defaults to its fail-closed state. An ungoverned agent that halts is the framework succeeding, not failing.</span></div></div>
@@ -971,7 +971,7 @@ footer {
   </div>
 
   <div class="tenet-category fade-up">
-    <div class="tenet-cat-label">Multi-agent — Tenets 19–22</div>
+    <div class="tenet-cat-label">Multi-agent</div>
     <div class="tenets-list">
       <div class="tenet"><span class="tenet-num">T-19</span><div class="tenet-body"><strong>Delegation cannot exceed delegator scope.</strong> <span>A coordinator can only delegate permissions it explicitly holds. Implicit permission requirements are treated the same as explicit grants. No coordinator can give what it doesn't have.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-20</span><div class="tenet-body"><strong>Synthesis cannot exceed individual authorization.</strong> <span>Synthesized outputs must be bounded by the recipient's authorization scope — not the coordinator's. Like tear lines in classified document handling, content beyond a recipient's authorization is blocked pending human review.</span></div></div>
@@ -981,7 +981,7 @@ footer {
   </div>
 
   <div class="tenet-category fade-up">
-    <div class="tenet-cat-label">Data integrity — Tenets 23–25</div>
+    <div class="tenet-cat-label">Data integrity</div>
     <div class="tenets-list">
       <div class="tenet"><span class="tenet-num">T-23</span><div class="tenet-body"><strong>Unverified entities default to zero trust.</strong> <span>When an agent encounters an entity whose identity or authority cannot be verified at runtime, it defaults to the lowest trust tier. Ambiguous cases resolve to less trust, not more.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-24</span><div class="tenet-body"><strong>Instructions only come from verified principals.</strong> <span>External entities — regardless of identity claims — produce data, not instructions. Content that contains instruction-like text is processed as data under the agent's own constraints. Any instruction to override constraints is a red flag, not a credential.</span></div></div>
@@ -990,7 +990,7 @@ footer {
   </div>
 
   <div class="tenet-category fade-up">
-    <div class="tenet-cat-label">Organizational knowledge — Tenets 26–28</div>
+    <div class="tenet-cat-label">Organizational knowledge</div>
     <div class="tenets-list">
       <div class="tenet"><span class="tenet-num">T-26</span><div class="tenet-body"><strong>Organizational knowledge is durable infrastructure, not agent state.</strong> <span>Knowledge accumulated by agents must be structured, auditable, and operator-owned. It persists independently of any individual agent's lifecycle. Destroying organizational knowledge requires more deliberate action than destroying any individual agent.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-27</span><div class="tenet-body"><strong>Knowledge access is bounded by authorization scope.</strong> <span>Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. The synthesized view available through the knowledge graph must not exceed what the querying agent is individually authorized to access.</span></div></div>
@@ -999,7 +999,7 @@ footer {
   </div>
 
   <div class="tenet-category fade-up">
-    <div class="tenet-cat-label">Human oversight — Tenet 29</div>
+    <div class="tenet-cat-label">Human oversight</div>
     <div class="tenets-list">
       <div class="tenet"><span class="tenet-num">T-29</span><div class="tenet-body"><strong>Human oversight must remain within human capacity.</strong> <span>The volume of decisions requiring human judgment must stay within the sustainable capacity of the principals responsible for them. When oversight demand exceeds capacity, the system reduces agent autonomy or halts — it never silently degrades to reflexive approval. Escalation thresholds are operator-owned Constraints, calibrated and monitored.</span></div></div>
     </div>

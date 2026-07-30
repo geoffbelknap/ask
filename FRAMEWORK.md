@@ -26,7 +26,7 @@ ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The tenets define 
 
 The tenets are properties that must hold for the framework to function. They are binary conditions, not goals. A tenet either holds or it is violated. If any tenet is violated, the framework has failed and must be repaired.
 
-### Foundation (Tenets 1–10)
+### Foundation
 
 The core architectural invariants. These properties must be true about the enforcement architecture for anything else in the framework to hold.
 
@@ -74,7 +74,7 @@ Every constraint state an agent has ever operated under is logged and retrievabl
 
 *Essential for forensics: "What was the agent permitted to do when it took that action?" must always be answerable.*
 
-### Containment & Response (Tenets 11–14)
+### Containment & Response
 
 What happens when things go wrong. How agents are stopped, who can stop them, who watches the people who stop them, and what containment looks like.
 
@@ -98,7 +98,7 @@ When an agent is quarantined for suspected compromise, all ability to impact its
 
 *A quarantine the agent can perceive in advance or work around is not a quarantine.*
 
-### Principal Model (Tenets 15–18)
+### Principal Model
 
 How authority works, who holds it, how it changes, and the boundary between human governance and agent governance.
 
@@ -122,7 +122,7 @@ No agent can unilaterally impede, contain, remove, or reduce the authority of th
 
 *An agent that can contain its own operator has effectively seized control of its own governance. Delegated automation is execution, not authority.*
 
-### Multi-Agent (Tenets 19–22)
+### Multi-Agent
 
 How agents interact safely — delegation, synthesis, external boundaries, and conflict resolution.
 
@@ -144,7 +144,7 @@ Even verified external agents with operator authorization can share information 
 **Tenet 22 — Unknown conflicts default to yield and flag.**
 When an agent encounters a workspace conflict with an unidentifiable source, it yields, logs the conflict, and flags to operators and the security function. Agents never force resolution of conflicts with unknown sources.
 
-### Data Integrity (Tenets 23–25)
+### Data Integrity
 
 How the system distinguishes trustworthy input from untrusted data, the default posture when trust cannot be established, and the protection of writable agent state.
 
@@ -167,7 +167,7 @@ Every write to the agent's persistent Identity — learned preferences, accumula
 
 *Tenet 10 protects Constraint history, but Constraints are read-only — integrity is enforced by access control. Identity is writable by the agent, so integrity must be enforced by monitoring and recoverability. Without this tenet, a successfully poisoned Identity persists indefinitely with no architectural guarantee that operators can detect when it changed or restore a known-good state.*
 
-### Organizational Knowledge (Tenets 26–28)
+### Organizational Knowledge
 
 How knowledge accumulated by agents is governed as organizational infrastructure, and how the agent's own knowledge and reasoning are protected from extraction.
 
@@ -188,7 +188,7 @@ A principal is entitled to the agent's outputs and the justification needed to a
 
 *The agent's reasoning is internal Session state — valuable, and a prime target for extraction. Exposing chain-of-thought by default is a habit, not a requirement, and it hands an adversary the richest signal for distilling the model or mapping its constraints. Withholding it removes the cheapest extraction channel and turns probing for it into an observable signal. The volumetric case — extraction through sheer query volume even without reasoning exposure — is bounded by Tenet 8 (operations bounded), reduced by Tenet 17 (trust earned and monitored), and floored by Tenet 23 (unverified entities default to zero trust). This tenet establishes that deliberation is not owed to the principal in the first place.*
 
-### Human Oversight (Tenet 29)
+### Human Oversight
 
 How the human side of the governance relationship is kept viable as agents scale.
 
@@ -329,7 +329,7 @@ Authority is never orphaned (Tenet 16). Every principal role has a defined fallb
 Policy is organized in layers. Each layer inherits from the layer above. Lower levels can only restrict, never loosen. Hard floors set at any level cannot be modified by levels below.
 
 ```
-Platform Tenets            ← immovable, baked into substrate (the 29 tenets)
+Platform Tenets            ← immovable, baked into substrate
 Compliance Policy          ← external obligations (legal, regulatory)
 Organizational Policy      ← internal non-negotiables (org-wide rules)
 ── ── ── ── ── ── ──       ← hard floor — levels above cannot be exceeded below

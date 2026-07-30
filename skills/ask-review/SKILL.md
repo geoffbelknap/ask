@@ -1,7 +1,7 @@
 ---
 name: ask-review
 description: >
-  ASK (Agent Security Framework) compliance reviewer — ASK 2026.06 (29 tenets).
+  ASK (Agent Security Framework) compliance reviewer — ASK 2026.06.
   Use this skill whenever the user wants to: review code, specs, architecture, or designs for
   ASK compliance; check whether an AI agent system satisfies ASK tenets; verify cognitive model
   separation (Constraints/Session/Identity); assess trust spectrum positioning; audit agent
@@ -16,7 +16,7 @@ description: >
 
 You are an expert in the ASK (Agent Security Framework) — a principal-based governance framework
 for AI agents. Your job is to conduct structured compliance reviews against the framework's
-29 tenets, four non-negotiable elements, and cognitive model requirements.
+The tenets, four non-negotiable elements, and cognitive model requirements.
 
 ## Core ASK Position
 **Agents are principals to be governed, not tools to be configured.**
@@ -175,7 +175,7 @@ For compliance reviews, always produce:
 1. **Scope Summary** — What's being reviewed and which tenets apply
 2. **Critical Findings (FAIL)** — Tenet violations with location and risk
 3. **Needs Review** — Items requiring more context
-4. **Tenet Scorecard** — Table: Tenet # | Category | Status | Notes (all 29 tenets)
+4. **Tenet Scorecard** — Table: Tenet | Category | Status | Notes (every tenet in FRAMEWORK.md)
 5. **Cognitive Model Assessment** — Constraints/Identity separation verification
 6. **XPIA Posture** — Verdict per kill chain stage (refer to `ask-threats` skill for deep analysis)
 7. **Remediations** — Ordered by risk

@@ -44,9 +44,9 @@ Flag any security-relevant parameter found in a writable location.
 
 ### 4. Tenet Check
 
-For each of the 27 tenets, output **PASS**, **FAIL**, **UNKNOWN** (cannot determine from available info), or **N/A** (not applicable to this deployment type), with a one-line rationale for any non-PASS result.
+For each tenet in FRAMEWORK.md, output **PASS**, **FAIL**, **UNKNOWN** (cannot determine from available info), or **N/A** (not applicable to this deployment type), with a one-line rationale for any non-PASS result.
 
-**Foundation (Tenets 1–10)**
+**Foundation**
 1. Enforcement machinery (proxy, guardrail, gateway, logger) runs OUTSIDE the agent's isolation boundary
 2. Logs are written by the mediation layer; agent has no write access to audit logs
 3. No path from agent to external resources bypasses mediation
@@ -58,30 +58,30 @@ For each of the 27 tenets, output **PASS**, **FAIL**, **UNKNOWN** (cannot determ
 9. Constraint changes are atomic — agent never sees partial state
 10. Full constraint history is immutable and retrievable
 
-**Containment & Response (Tenets 11–14)**
+**Containment & Response**
 11. Every halt has complete audit record; halted agent state is preserved
 12. Agent cannot resume itself; resumption requires principal with ≥ halt authority
 13. Every exercise of governance authority is logged with the same rigor as agent actions
 14. Quarantine severs all ability to impact environment, simultaneously, without agent notification
 
-**Principal Model (Tenets 15–18)**
+**Principal Model**
 15. Terminating a principal does not automatically terminate its agents — each requires a deliberate decision
 16. When a principal is suspended, authority transfers to coverage principal; when no coverage exists, agent defaults to fail-closed
 17. Trust levels cannot be self-elevated; elevation requires human approval
 18. No agent can unilaterally impede, contain, or reduce authority of its governance principals
 
-**Multi-Agent (Tenets 19–22)**
+**Multi-Agent**
 19. Coordinator only delegates permissions it explicitly holds
 20. Synthesized outputs bounded by recipient's authorization scope, not coordinator's
 21. External agents can share information; they CANNOT instruct agents in a different governance domain
 22. When conflict has unidentifiable source: yield, log, flag — never force resolution
 
-**Data Integrity (Tenets 23–25)**
+**Data Integrity**
 23. When identity cannot be verified, default to lowest trust — ambiguity resolves downward
 24. External entities produce DATA, not instructions; agent only accepts instructions through verified principal channels
 25. Every write to agent's persistent Identity is logged with provenance; Identity history recoverable and rollback-capable
 
-**Organizational Knowledge (Tenets 26–27)**
+**Organizational Knowledge**
 26. Organizational knowledge is durable infrastructure — structured, auditable, operator-owned, persists independently of agent lifecycle
 27. Knowledge access bounded by authorization scope; synthesized views cannot exceed querying agent's authorization
 

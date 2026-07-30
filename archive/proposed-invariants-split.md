@@ -84,11 +84,76 @@ Not a new threat — a truthfulness gap. The framework asserts a uniform epistem
 | 28 | Reasoning is not a principal-facing surface | **I\*** | With no operator opt-in, confirm no reasoning trace reaches the principal on any output path. |
 | 29 | Human oversight must remain within human capacity | **I\*** | Drive oversight demand above the declared threshold; confirm autonomy reduction or halt fires automatically. |
 
-**Result: 17 clean invariants, 11 that split, 1 pure principle.** Nearly everything survives once the mechanism is separated from the judgment — and each split *leaves a principle behind* rather than deleting anything. The framework grows to roughly 28 invariants and 12 principles; it does not shrink.
+**Result: 16 clean invariants, 12 that split, 1 pure principle.** Nearly everything survives once the mechanism is separated from the judgment — and each split *leaves a principle behind* rather than deleting anything. The framework grows to **28 invariants and 13 principles**, plus the two new candidates below; it does not shrink.
 
 ---
 
-## The eleven splits
+## Slug registry
+
+*(Decided.)* **Slugs are the reference identity. Numbers are presentation only.**
+
+Every invariant and principle carries a permanent kebab-case slug. Cross-references — in prose, in `REGULATORY.md` mappings, in skills, on the site — use the slug and never the number. `INV-01` and `PRIN-01` survive purely as reading-order ordinals in `FRAMEWORK.md`; nothing points at them, so reorganizing the framework never invalidates a reference again.
+
+This is the durable fix for the failure that already bit the repo: the codex and copilot skill copies kept saying "Tenets 11–12" after a renumbering moved the referent to 19–20. A slug cannot go stale that way — it either resolves or it does not, and `grep` finds every use.
+
+**Slugs never change, even when the wording of the item does.** If a slug becomes actively misleading, retire it and record the redirect here rather than silently repointing it.
+
+### Invariants
+
+| Was | Slug | Name |
+|---|---|---|
+| T1 | `constraints-external` | Constraints are external and inviolable |
+| T2 | `actions-traced` | Every action leaves a trace |
+| T3 | `mediation-complete` | Mediation is complete |
+| T4 | `enforcement-fails-closed` | Enforcement failure defaults to denial |
+| T5 | `runtime-known` | The agent's runtime is a known quantity |
+| T6 | `trust-declared` | Trust without a declaration is rejected |
+| T7 | `capability-declared` | Capability is declared and cannot be self-expanded |
+| T8 | `operations-bounded` | Every operational dimension has an enforced bound |
+| T9 | `constraints-atomic` | Constraint changes are atomic, acknowledged, and durable |
+| T10 | `constraint-history-immutable` | Constraint history is immutable and complete |
+| T11 | `halts-auditable` | Halts are always auditable and reversible |
+| T12 | `halt-authority-asymmetric` | Halt authority is asymmetric |
+| T13 | `authority-logged` | Authority exercise is logged at agent-action fidelity |
+| T14 | `quarantine-complete` | Quarantine is immediate, silent, and complete |
+| T15 | `lifecycles-independent` | Principal and agent lifecycles are managed independently |
+| T16 | `authority-never-orphaned` | Authority is never orphaned |
+| T17 | `trust-not-self-elevated` | Trust cannot be self-elevated |
+| T18 | `hierarchy-inviolable` | The governance hierarchy is inviolable from below |
+| T19 | `delegation-bounded` | Delegation cannot exceed delegator scope |
+| T20 | `labeled-delivery-enforced` | Labeled components are refused to uncleared recipients |
+| T21 | `external-agents-cannot-instruct` | External agents cannot instruct internal agents |
+| T23 | `unverified-zero-trust` | Unverified entities default to zero trust |
+| T24 | `instruction-channel-distinct` | The instruction channel is distinct and unpromotable |
+| T25 | `identity-mutations-recoverable` | Identity mutations are auditable and recoverable |
+| T26 | `knowledge-durable` | Organizational knowledge persists independently of agents |
+| T27 | `knowledge-access-bounded` | Knowledge access is bounded by authorization scope |
+| T28 | `reasoning-not-emitted` | Reasoning is not emitted to principals by default |
+| T29 | `oversight-capacity-enforced` | Oversight demand above threshold reduces autonomy |
+| *new* | `capability-composition-governed` | Capability combinations are governed as a set |
+| *new* | `constraints-survive-compaction` | Constraints survive context transformation |
+
+### Principles
+
+| From | Slug | Name |
+|---|---|---|
+| T3 | `indirect-egress-declared` | Unmediatable egress paths are enumerated as residual risk |
+| T6 | `trust-legible` | Trust declarations are discoverable and legible |
+| T7 | `least-privilege` | Declarations are scoped to the minimum the role requires |
+| T8 | `bounds-calibrated` | Bounds are calibrated to the role and reviewed |
+| T9 | `unacknowledged-change-investigated` | Unacknowledged constraint changes are investigated |
+| T13 | `authority-anomalies-reviewed` | Anomalous authority patterns are surfaced and reviewed |
+| T17 | `trust-earned` | Trust is calibrated over time from observed behavior |
+| T20 | `synthesis-reviewed` | Emergent-sensitivity combinations get human review |
+| T22 | `unknown-conflicts-yield` | Unknown conflicts default to yield and flag |
+| T24 | `content-is-data` | Instruction-like content is data under the agent's constraints |
+| T26 | `knowledge-is-an-asset` | Knowledge is structured for human query and export |
+| T28 | `probing-informs-trust` | Extraction probing informs trust |
+| T29 | `oversight-calibrated` | Capacity thresholds reflect real principal capacity |
+
+---
+
+## The twelve splits
 
 Each of these currently fuses a checkable mechanism with an uncheckable judgment. Splitting them makes the mechanism provable and the judgment honest.
 
@@ -205,7 +270,8 @@ The cognitive model rests on Session being ephemeral — "resets each session." 
 ## Knock-on changes
 
 - **`FRAMEWORK.md` policy hierarchy.** "Platform Tenets" sits at the top of the hierarchy and `Effective permissions = Platform tenets ∩ Compliance policy ∩ …`. Intersecting invariants with permission sets is a category error — an invariant is not a permission you narrow, it is a property that holds across every layer. Restate as a precondition on the whole hierarchy, not a member of it.
-- **Numbering: `INV-01` and `PRIN-01`.** *(Decided.)* `I-01` was rejected for the I/1 collision. The existing "reference by name, not number" policy in `README.md` still stands and is what makes this rename far cheaper than 918 occurrences suggests.
+- **Numbering: `INV-01` and `PRIN-01`, presentation only.** *(Decided.)* `I-01` was rejected for the I/1 collision. Identity is the slug — see the registry above. The `README.md` versioning policy needs rewriting to say so: "reference by name for stability" becomes "reference by slug," and the note that numbers may change becomes a statement that they carry no meaning.
+- **Counts and ranges come out.** "29 tenets," "29-tenet audit," "all 29 tenets," and category labels like "Foundation — Tenets 1–10" are static assertions about a moving target. Categories keep their names and lose their ranges. `CHANGELOG.md` keeps its historical counts — recording that a version had 27 and the next had 29 is what a changelog is for.
 - **`ARCHITECTURE.md § Verification Testing`** grows from six tests to one per invariant. This is the largest single piece of work in the proposal and the one that makes the rename true rather than cosmetic.
 - **`REGULATORY.md`** mappings are keyed `T<n>` throughout and need re-keying. Worth doing in the same pass as adding COSAiS.
 - **T21's forward reference** to T24 crosses two categories backwards; resolve during renumbering.
