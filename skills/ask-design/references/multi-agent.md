@@ -71,7 +71,7 @@ Every agent treats every other agent's output as untrusted external input.
 Agent A ──output──▶ [Guardrail] ──▶ [Enforcer B] ──▶ Agent B
                          │               │
                     Scan for          Validate against
-                    injection         B's Mind/Gateway
+                    injection         B's policy/Gateway
 ```
 
 **When to use:** Most multi-agent deployments. Start here unless you have strong reason not to.
@@ -86,7 +86,7 @@ Agents in the same trust domain can exchange data with reduced (but not zero) gu
 Agent A ──output──▶ [Enforcer] ──verify identity──▶ [Enforcer B] ──▶ Agent B
                         │                               │
                    Verify A's identity            Validate output
-                   Check A's Mind tier            matches A's scope
+                   Check A's tier          matches A's scope
                    Attest output scope
 ```
 
@@ -102,7 +102,7 @@ but subordinates cannot escalate to the orchestrator's tier.
 ```
                     ┌─────────────┐
                     │ Orchestrator │  (elevated tier)
-                    │   + Mind     │
+                    │   + Config   │
                     │   + Enforcer │
                     └──────┬──────┘
                            │
@@ -110,7 +110,7 @@ but subordinates cannot escalate to the orchestrator's tier.
               ▼            ▼            ▼
         ┌──────────┐ ┌──────────┐ ┌──────────┐
         │ Agent A  │ │ Agent B  │ │ Agent C  │  (restricted tier)
-        │ + Mind   │ │ + Mind   │ │ + Mind   │
+        │ + Config │ │ + Config │ │ + Config │
         │ + Enforcer│ │+ Enforcer│ │+ Enforcer│
         └──────────┘ └──────────┘ └──────────┘
 ```
@@ -197,7 +197,7 @@ Orchestrators are high-value targets because they typically have the broadest sc
 
 ### Orchestrator Hardening Checklist
 
-- [ ] Orchestrator has its own Mind with explicit scope (not implicit "everything")
+- [ ] Orchestrator has its own constraints configuration with explicit scope (not implicit "everything")
 - [ ] Orchestrator's Enforcer is at least as strict as subordinate Enforcers
 - [ ] Orchestrator treats all subordinate output as untrusted (guardrails applied)
 - [ ] Orchestrator cannot be instructed by subordinates to change its own config

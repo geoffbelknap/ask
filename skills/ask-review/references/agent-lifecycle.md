@@ -189,10 +189,10 @@ Reduction: can be immediate if triggered by security finding.
 All constraint changes are **atomic** — the agent never sees a partial state (Tenet 9).
 
 **Acknowledgment means:**
-- The Body (runtime) confirms new constraints have been loaded
+- The Runtime confirms new constraints have been loaded
 - Runtime-level mechanism, not LLM-level
-- Body reads updated `mind.yaml`, applies parameters, logs structured acknowledgment with constraint state hash
-- If Body fails to acknowledge within timeout, enforcement layer halts the agent (unknown constraint state)
+- The Runtime reads the updated constraints configuration, applies parameters, and logs a structured acknowledgment with the constraint state hash
+- If the Runtime fails to acknowledge within the timeout, the enforcement layer halts the agent (unknown constraint state)
 - Protocol is implementation-defined but must be verifiable by enforcement layer, not self-reported by LLM reasoning
 
 ---

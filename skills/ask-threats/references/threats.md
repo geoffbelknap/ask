@@ -189,7 +189,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 - **Identity writes are audited and recoverable (Tenet 25).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — the operator can reconstruct state at any point and roll back. The agent can write to its Identity, but it cannot do so silently.
 - **Identity write pattern monitoring.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
 - **Constraints are immutable (Tenet 1).** The operator-owned Constraints layer is external to the agent and inviolable, providing an immutable behavioral floor regardless of Identity corruption.
-- **Session state is ephemeral.** Session context resets between sessions, limiting the persistence of in-session poisoning attempts.
+- **Context is rebuilt each turn.** Context does not accumulate across sessions, limiting the persistence of in-session poisoning attempts.
 
 **Open problems.**
 - Detecting semantic drift in natural-language state requires judgment, not just pattern matching

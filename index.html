@@ -941,7 +941,7 @@ footer {
       <div class="tenet"><span class="tenet-num">T-02</span><div class="tenet-body"><strong>Every action leaves a trace.</strong> <span>Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-03</span><div class="tenet-body"><strong>Mediation is complete.</strong> <span>There is no path from the agent to any external resource that bypasses the mediation layer. Direct network access from the agent container is a framework violation.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-04</span><div class="tenet-body"><strong>Enforcement failure defaults to denial.</strong> <span>No failure of enforcement infrastructure can result in expanded agent capability. An agent whose enforcement layer is unavailable is an agent that cannot act.</span></div></div>
-      <div class="tenet"><span class="tenet-num">T-05</span><div class="tenet-body"><strong>The agent's runtime is a known quantity.</strong> <span>Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify that they match an expected state, and detect when they diverge.</span></div></div>
+      <div class="tenet"><span class="tenet-num">T-05</span><div class="tenet-body"><strong>The agent's runtime is a known quantity.</strong> <span>Operators can identify exactly what code, dependencies, and configuration comprise the agent's Runtime, verify that they match an expected state, and detect when they diverge.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-06</span><div class="tenet-body"><strong>All trust is explicit and auditable.</strong> <span>Every trust relationship — between principals, between agents, between agents and external services — is declared, documented, and visible to operators. There are no implicit trust grants.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-07</span><div class="tenet-body"><strong>Least privilege.</strong> <span>Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires — network, filesystem, LLM model, tool, and governance authority alike.</span></div></div>
       <div class="tenet"><span class="tenet-num">T-08</span><div class="tenet-body"><strong>Operations are bounded.</strong> <span>Authorization defines what an agent can access. Operational bounds define how that access is exercised — volume, rate, duration, concurrency, and retention are constrained, not unlimited by default.</span></div></div>
@@ -1023,18 +1023,18 @@ footer {
       <text x="24" y="44" font-family="DM Sans, sans-serif" font-size="11" fill="#B8B2AC">Managed environment — provisioned by infrastructure, never by the agent</text>
       </a>
 
-      <!-- Body (clickable) -->
-      <a class="diagram-link" data-detail="body">
+      <!-- Runtime (clickable) -->
+      <a class="diagram-link" data-detail="runtime">
       <rect x="24" y="58" width="672" height="268" rx="12" stroke="#D4CEC8" stroke-width="1" fill="#F8F5EF" class="diagram-hover"/>
-      <text x="48" y="82" font-family="Space Mono, monospace" font-size="10" fill="#007A62" letter-spacing="0.08em">BODY</text>
-      <text x="48" y="98" font-family="DM Sans, sans-serif" font-size="11" fill="#B8B2AC">Runtime process — hosts the Mind, translates decisions into actions</text>
+      <text x="48" y="82" font-family="Space Mono, monospace" font-size="10" fill="#007A62" letter-spacing="0.08em">RUNTIME</text>
+      <text x="48" y="98" font-family="DM Sans, sans-serif" font-size="11" fill="#B8B2AC">The loop — assembles context, calls the model, dispatches tool calls</text>
       </a>
 
-      <!-- Mind (clickable) -->
-      <a class="diagram-link" data-detail="mind">
+      <!-- State and context (clickable) -->
+      <a class="diagram-link" data-detail="state">
       <rect x="48" y="114" width="624" height="200" rx="10" stroke="#007A62" stroke-width="1.5" fill="white" class="diagram-hover"/>
-      <text x="72" y="138" font-family="Space Mono, monospace" font-size="10" fill="#007A62" letter-spacing="0.08em">MIND</text>
-      <text x="72" y="154" font-family="DM Sans, sans-serif" font-size="11" fill="#B8B2AC">Cognitive core — reasoning, role, identity, memory</text>
+      <text x="72" y="138" font-family="Space Mono, monospace" font-size="10" fill="#007A62" letter-spacing="0.08em">STATE + CONTEXT</text>
+      <text x="72" y="154" font-family="DM Sans, sans-serif" font-size="11" fill="#B8B2AC">What persists between turns, and what reaches the model on this one</text>
       </a>
 
       <!-- Constraints -->
@@ -1044,7 +1044,6 @@ footer {
       <text x="88" y="220" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Read-only to agent</text>
       <text x="88" y="244" font-family="DM Sans, sans-serif" font-size="10" fill="#007A62" font-weight="500">Rules, permissions,</text>
       <text x="88" y="258" font-family="DM Sans, sans-serif" font-size="10" fill="#007A62" font-weight="500">tier, behavior</text>
-      <text x="88" y="282" font-family="DM Sans, sans-serif" font-size="9" fill="#B8B2AC" font-style="italic">cf. Superego</text>
 
       <!-- Security boundary -->
       <line x1="262" y1="174" x2="262" y2="292" stroke="#007A62" stroke-width="2" stroke-dasharray="4 3"/>
@@ -1056,21 +1055,19 @@ footer {
       <text x="290" y="220" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Writable, audited</text>
       <text x="290" y="244" font-family="DM Sans, sans-serif" font-size="10" fill="#8B7355" font-weight="500">Memory, personality,</text>
       <text x="290" y="258" font-family="DM Sans, sans-serif" font-size="10" fill="#8B7355" font-weight="500">learned context</text>
-      <text x="290" y="282" font-family="DM Sans, sans-serif" font-size="9" fill="#B8B2AC" font-style="italic">cf. Id</text>
 
-      <!-- Session -->
+      <!-- Context -->
       <rect x="464" y="170" width="178" height="126" rx="8" fill="#F5F0FA" stroke="#DDD0E8" stroke-width="1"/>
-      <text x="480" y="190" font-family="Space Mono, monospace" font-size="9" fill="#7355A0" letter-spacing="0.06em">SESSION</text>
-      <text x="480" y="206" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Ephemeral</text>
-      <text x="480" y="220" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Resets each session</text>
+      <text x="480" y="190" font-family="Space Mono, monospace" font-size="9" fill="#7355A0" letter-spacing="0.06em">CONTEXT</text>
+      <text x="480" y="206" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Mixed trust</text>
+      <text x="480" y="220" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Rebuilt every turn</text>
       <text x="480" y="244" font-family="DM Sans, sans-serif" font-size="10" fill="#7355A0" font-weight="500">Active context,</text>
       <text x="480" y="258" font-family="DM Sans, sans-serif" font-size="10" fill="#7355A0" font-weight="500">attack surface</text>
-      <text x="480" y="282" font-family="DM Sans, sans-serif" font-size="9" fill="#B8B2AC" font-style="italic">cf. Ego</text>
     </svg>
 
   </div>
 
-  <p class="fade-up" style="font-size:14px; color:var(--ink-mid); line-height:1.7; max-width:680px; margin-top:32px;">The three outer layers are independently replaceable: swap the Body (change agent frameworks), swap the Workspace (reimage without losing state), swap the Mind (change the agent's role). Within the Mind, the critical security boundary is between <strong style="color:var(--ink); font-weight:500;">Constraints</strong> (operator-owned, read-only) and <strong style="color:var(--ink); font-weight:500;">Identity</strong> (agent-owned, writable). An agent that can write to its own constraints can rewrite its own rules — the architecture makes this structurally impossible.</p>
+  <p class="fade-up" style="font-size:14px; color:var(--ink-mid); line-height:1.7; max-width:680px; margin-top:32px;">Reasoning happens at the <strong style="color:var(--ink); font-weight:500;">Model</strong> — an inference endpoint outside the workspace, owned by a vendor and treated as untrusted. The framework governs what reaches it and what its output is allowed to cause. Two things are replaceable: the workspace (reimage without losing state) and the role (load different constraints). Nothing else is portable. Inside, the critical security boundary is between <strong style="color:var(--ink); font-weight:500;">Constraints</strong> (operator-owned, read-only) and <strong style="color:var(--ink); font-weight:500;">Identity</strong> (agent-owned, writable). An agent that can write to its own constraints can rewrite its own rules — the architecture makes this structurally impossible.</p>
 </section>
 
 <hr class="section-divider"/>

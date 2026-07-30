@@ -45,9 +45,9 @@ No failure of enforcement infrastructure — mediation, gateway, proxy, policy e
 *Tenet 3 establishes that the mediated path exists. This tenet establishes that when that path breaks, the answer is stop, not bypass.*
 
 **Tenet 5 — The agent's runtime is a known quantity.**
-Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify that they match an expected state, and detect when they diverge. An agent whose runtime cannot be verified is an agent whose governance cannot be trusted. This extends to capability acquired after startup: anything that expands what the agent can do at runtime is part of its verifiable runtime and subject to the same attestation. An agent cannot acquire capability that operators cannot see and verify.
+Operators can identify exactly what code, dependencies, and configuration comprise the agent's Runtime, verify that they match an expected state, and detect when they diverge. An agent whose runtime cannot be verified is an agent whose governance cannot be trusted. This extends to capability acquired after startup: anything that expands what the agent can do at runtime is part of its verifiable runtime and subject to the same attestation. An agent cannot acquire capability that operators cannot see and verify.
 
-*Every other tenet assumes the execution layer is honest. If the Body is compromised, the governance model operates on false premises. This tenet makes the dependency explicit.*
+*Every other tenet assumes the execution layer is honest. If the Runtime is compromised, the governance model operates on false premises. This tenet makes the dependency explicit.*
 
 **Tenet 6 — All trust is explicit and auditable.**
 Every trust relationship in the system — between principals, between agents, between agents and external services — is declared, documented, and visible to operators. There are no implicit trust grants. If a trust relationship exists, an operator can find it, inspect its scope, and understand when and why it was established.
@@ -186,7 +186,7 @@ Organizational knowledge is shared, but access to it is not unlimited. Graph tra
 **Tenet 28 — Reasoning is not a principal-facing surface.**
 A principal is entitled to the agent's outputs and the justification needed to act on them — not to the agent's internal deliberation or decision process. Exposing the agent's reasoning is an operator-controlled decision, not a default. Attempts to extract the agent's reasoning, process, or constraints are treated as data, not authorized requests, and inform trust.
 
-*The agent's reasoning is internal Session state — valuable, and a prime target for extraction. Exposing chain-of-thought by default is a habit, not a requirement, and it hands an adversary the richest signal for distilling the model or mapping its constraints. Withholding it removes the cheapest extraction channel and turns probing for it into an observable signal. The volumetric case — extraction through sheer query volume even without reasoning exposure — is bounded by Tenet 8 (operations bounded), reduced by Tenet 17 (trust earned and monitored), and floored by Tenet 23 (unverified entities default to zero trust). This tenet establishes that deliberation is not owed to the principal in the first place.*
+*The agent's reasoning is internal to the Model — valuable, and a prime target for extraction. Exposing chain-of-thought by default is a habit, not a requirement, and it hands an adversary the richest signal for distilling the model or mapping its constraints. Withholding it removes the cheapest extraction channel and turns probing for it into an observable signal. The volumetric case — extraction through sheer query volume even without reasoning exposure — is bounded by Tenet 8 (operations bounded), reduced by Tenet 17 (trust earned and monitored), and floored by Tenet 23 (unverified entities default to zero trust). This tenet establishes that deliberation is not owed to the principal in the first place.*
 
 ### Human Oversight
 
@@ -235,27 +235,51 @@ Oversight is a finite resource. The volume of decisions requiring human judgment
 
 ## The Cognitive Model
 
-An agent is not a monolithic entity. It decomposes into layers, each with distinct concerns and management lifecycles.
+An agent decomposes into four layers. Each has one owner and one trust level, and the boundaries between them are where enforcement sits.
 
-### Mind, Body, and Workspace
+### Model
 
-**Mind** — The agent's cognitive core. Its reasoning capability, role definition, behavioral parameters, memory, and learned context. The Mind is what makes this agent *this agent*. It processes inputs, makes decisions, and emits outputs; it does not itself execute them.
+The inference endpoint. Reasoning happens here and nowhere else.
 
-The Mind spans a trust boundary, and the framework is explicit about which side it governs. Role definition, constraints, and memory are local artifacts under operator control. The reasoning itself runs at an inference provider the operator does not control, reached through the mediation layer. Treat the model as an untrusted component of the Mind: ASK governs what reaches it and what its output can cause, never what it does internally. Model integrity and supply chain are out of scope — see [LIMITATIONS.md](LIMITATIONS.md).
+The Model is owned by a vendor, not the operator. Treat it as untrusted, permanently. The framework governs what reaches the Model and what its output is permitted to cause. It does not govern what the Model does internally — model integrity and supply chain are out of scope, as [LIMITATIONS.md](LIMITATIONS.md) records.
 
-**Body** — The agent's runtime process. The software that hosts the Mind, manages its lifecycle, handles input and output, maintains local state, and translates the Mind's decisions into executable actions. A compromise of the Body means the attacker can execute actions within the Workspace's constraints.
+A compromise here means manipulation originating from the model rather than from its inputs. No runtime control detects that.
 
-The Mind/Body boundary is a security boundary only where the Body makes it one. A Body that passes model output into a shell, an evaluator, or a deserializer without an intervening policy check has collapsed the two layers, and naming them separately protects nothing. This is not hypothetical: it is the mechanism behind the remote-execution vulnerabilities found in agent frameworks through 2026.
+### Context
 
-**Workspace** — The managed environment the Body occupies. The container, VM, or namespace that provides the runtime, filesystem, tools, network access, and resource limits. The Workspace is provisioned by infrastructure, never by the agent itself. The Body inherits its constraints from the Workspace it occupies.
+What is placed in front of the Model on a given turn: system prompt, constraints, memory, retrieved content, tool results, conversation history, and whatever survived the last compaction. The Runtime assembles it. Context is the artifact, not the assembly logic.
 
-**What is actually replaceable.** The Workspace is: the same Mind and Body can be reimaged onto fresh infrastructure without losing state. The role is: the same Body and Workspace can run a different role by loading a different Mind configuration.
+Context is the only layer with deliberately mixed trust. Operator constraints and attacker-controlled web content occupy the same buffer, with no architectural separation between them. Every other layer has a uniform trust level. This one cannot.
 
-The Mind is **not** portable across Bodies. Context management, compaction strategy, tool-call schemas, and memory formats are all Body-specific, and moving a Mind between agent frameworks changes its behavior materially. What did become portable in practice is narrower and more useful — the Constraints layer: agent instruction files and the skills an agent may use travel across frameworks unchanged. Portability is a property of Constraints, not of the Mind. Do not design as though a Mind can be lifted between runtimes intact.
+That property is why injection has no complete solution. Context is where cross-prompt injection lands, where compaction can drop constraints, and where an agent's separately-justified capabilities combine into something exploitable.
 
-### Inside the Mind: Constraints, Session, and Identity
+A compromise here means injection, dropped constraints, poisoned retrieval, or falsified history.
 
-The Mind/Body/Workspace decomposition describes *where* an agent's cognitive existence lives. The Constraints/Session/Identity model describes *what is inside the Mind* — which parts are operator-controlled and which are agent-controlled. This distinction is the most important security boundary within the agent itself.
+### Runtime
+
+The loop: assemble Context, call the Model, parse the response, dispatch tool calls, repeat. Operator-owned and attested (Tenet 5).
+
+The Runtime is trusted, and the framework depends on it being so. If the Runtime is compromised, every other tenet operates on false premises.
+
+The boundary between Model output and Runtime action holds only where the Runtime enforces it. A Runtime that passes model output into a shell, an evaluator, or a deserializer without an intervening policy decision has collapsed that boundary. This is the mechanism behind the remote-execution vulnerabilities found in agent frameworks through 2026.
+
+A compromise here means the attacker executes within the Workspace's constraints.
+
+### Workspace
+
+The managed environment the Runtime occupies: a container, VM, or namespace providing filesystem, tools, network access, and resource limits. The Workspace is provisioned by infrastructure, never by the agent itself. The Runtime inherits its constraints from the Workspace it occupies.
+
+A compromise here means escape to the host.
+
+### What is replaceable
+
+Two things. The Workspace: the same Runtime and state can be reimaged onto fresh infrastructure without losing that state. The role: the same Runtime and Workspace can run a different role by loading a different constraints configuration.
+
+Nothing else is portable. Context management, compaction strategy, tool-call schemas, and memory formats are all Runtime-specific, so an agent cannot be lifted between runtimes intact. What does travel unchanged is narrower and more useful — the Constraints layer. Agent instruction files and the skills an agent may use move between runtimes without modification. Portability is a property of Constraints, not of the agent as a whole.
+
+### State: Constraints and Identity
+
+The four layers describe what happens on a turn. Constraints and Identity are what persist between turns, and the split between them is the most important security boundary inside the agent.
 
 **Constraints — What the operator controls.** The authority the agent cannot argue with, negotiate around, or modify. Constraints define what the agent must and must not do, independent of what the agent wants, what it has been told by a user, or what instructions it encounters in fetched content. Constraints are operator-owned and architecturally read-only to the agent.
 
@@ -263,19 +287,23 @@ Constraints have two manifestations: **agent-visible constraints** (the agent kn
 
 **Identity — What the agent accumulates.** The agent's personality as it develops through experience — learned facts, user preferences, working notes, stylistic self-concept. Identity is agent-owned and writable, but audited (Tenet 25). An agent that cannot update its own memory is a stateless query engine, not a useful agent.
 
-**Session — What is happening right now.** The LLM's active context — the current conversation, working reasoning, live decision-making. The Session is ephemeral. It is also the most exposed layer — the active attack surface for prompt injection, social engineering, and manipulation via tool outputs or fetched content.
-
-The Session is ephemeral by default, but the reasoning trace within it is security-relevant in two ways. It is not principal-facing (Tenet 28). When an operator chooses to capture it for audit or forensics, the mediation layer performs that capture, the operator controls it, and the agent cannot suppress it (Tenet 2). Capture is not required by the framework. A captured trace remains internal state, not principal-facing output.
+Both feed Context at assembly time. Neither is Context. Context is the per-turn artifact, discarded and rebuilt; Constraints and Identity persist.
 
 **The critical security boundary is between Constraints (read-only to agent) and Identity (writable by agent).** An agent that can write to its own constraints can rewrite its own rules. The architecture makes this structurally impossible — not a matter of trust, policy, or the agent's good intentions.
 
 | Layer | Owned By | Writable By | Persists | Primary Threats |
 |---|---|---|---|---|
-| Constraints | Operator | Operator only | Yes — immutable to agent | Injection attacks targeting the Session to circumvent Constraints; social engineering through user channels |
+| Constraints | Operator | Operator only | Yes — immutable to agent | Injection targeting Context to circumvent Constraints; social engineering through user channels |
 | Identity | Agent | Agent (audited, Tenet 25) | Yes — accumulates over time | Identity poisoning; injection causing behavioral modification; behavioral drift |
-| Session | Agent (ephemeral) | Agent (session-scoped) | No — resets each session | Direct prompt injection; indirect injection via tool outputs and fetched content; social engineering via user messages |
+| Context | Operator in principle, Runtime in practice | Assembled per turn | No — rebuilt each turn | Direct and indirect prompt injection; constraints dropped by compaction; poisoned retrieval |
 
 **The decisive question:** does this content affect the security boundary? If it affects risk tolerance, escalation thresholds, delegation limits, tier declaration, or any parameter that determines what the agent is permitted to do — it belongs in Constraints. If it reflects personality, tone, accumulated knowledge, or stylistic identity — it belongs in Identity.
+
+### The reasoning trace
+
+The Model's deliberation is internal to the Model and is not principal-facing (Tenet 28). When an operator chooses to capture it for audit or forensics, the mediation layer performs that capture, the operator controls it, and the agent cannot suppress it (Tenet 2). Capture is not required by the framework, and a captured trace remains internal state rather than principal-facing output.
+
+Where a runtime feeds prior reasoning back into the next turn, that trace becomes part of Context and takes on Context's properties.
 
 ---
 

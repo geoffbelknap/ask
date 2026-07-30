@@ -1,48 +1,46 @@
 # ASK Cognitive Model — ASK 2026.06
 
 The cognitive model defines what an agent is, how it decomposes, and where the critical
-security boundaries lie. Read this file when reviewing whether Constraints/Session/Identity
+security boundaries lie. Read this file when reviewing whether Constraints and Identity
 separation is correctly implemented, or when designing agent architectures.
 
 ---
 
 ## Table of Contents
 
-1. [Mind / Body / Workspace](#mind--body--workspace)
-2. [Constraints / Session / Identity](#constraints--session--identity)
+1. [Model / Context / Runtime / Workspace](#model--context--runtime--workspace)
+2. [State: Constraints and Identity](#state-constraints-and-identity)
 3. [Filesystem Mapping](#filesystem-mapping)
 4. [The Decisive Question](#the-decisive-question)
 5. [mind.yaml Schema Reference](#mindyaml-schema-reference)
 
 ---
 
-## Mind / Body / Workspace
+## Model / Context / Runtime / Workspace
 
-An agent is not a monolithic entity. It decomposes into three layers with distinct owners and lifecycles:
+An agent decomposes into four layers. Each has one owner and one trust level, and the boundaries between them are where enforcement sits.
 
-| Layer | What It Is | Ownership |
+| Layer | What It Is | Ownership and trust |
 |---|---|---|
-| **Mind** | Cognitive core — reasoning capability, role definition, behavioral parameters, memory, learned context | Split: role, constraints, and memory are operator-controlled; reasoning runs at an inference provider that is not |
-| **Body** | Runtime process — hosts the Mind, manages lifecycle, handles I/O, translates decisions to actions | Operator-attested (`runtime-known`) |
+| **Model** | The inference endpoint — reasoning happens here and nowhere else | Vendor-owned. Untrusted, permanently |
+| **Context** | What reaches the Model on a turn — prompt, constraints, memory, retrieved content, tool results, history, whatever survived compaction | Operator in principle, Runtime in practice. **Mixed trust by design** |
+| **Runtime** | The loop — assemble Context, call the Model, parse the response, dispatch tool calls | Operator-owned and attested (`runtime-known`) |
 | **Workspace** | Managed environment — container, VM, namespace with runtime, filesystem, tools, network, resource limits | Provisioned by infrastructure, never by the agent |
 
 **Key properties:**
 
-- The Mind is what makes this agent *this agent*. It processes inputs, makes decisions, emits outputs. It does not itself execute them.
-- **Treat the model as an untrusted component of the Mind.** The framework governs what reaches it and what its output can cause — never what it does internally.
-- The Body translates the Mind's decisions into executable actions. A compromise of the Body means the attacker can execute actions within the Workspace's constraints.
-- **The Mind/Body boundary is a security boundary only where the Body enforces it.** A Body that passes model output into a shell, evaluator, or deserializer without a policy check has collapsed the two layers. Flag this in review — it is the mechanism behind the agent-framework RCE class.
-- The Workspace is provisioned by infrastructure, **never by the agent itself.** The Body inherits its constraints from the Workspace it occupies.
+- **Treat the Model as untrusted.** The framework governs what reaches it and what its output can cause, never what it does internally. Model integrity is out of scope.
+- **Context is the only layer with deliberately mixed trust.** Operator constraints and attacker-controlled content share one buffer with no architectural separation. Scrutinize it hardest: injection lands here, compaction can drop constraints here, and separately-justified capabilities combine here.
+- **The Model/Runtime boundary holds only where the Runtime enforces it.** Flag any Runtime that passes model output into a shell, evaluator, or deserializer without a policy decision — that collapses the boundary and is the mechanism behind the agent-framework RCE class.
+- **The Workspace is provisioned by infrastructure, never by the agent itself.** The Runtime inherits its constraints from the Workspace it occupies.
 
-**What is actually replaceable.** The Workspace (reimage without losing state) and the role (load a different Mind configuration). The Mind is **not** portable across Bodies — context management, compaction, tool-call schemas, and memory formats are Body-specific. Portability is a property of the Constraints layer, not the Mind.
+**What is replaceable.** The Workspace (reimage without losing state) and the role (load a different constraints configuration). Nothing else — context management, compaction, tool-call schemas, and memory formats are all Runtime-specific. Portability is a property of the Constraints layer, not of the agent.
 
----
+## State: Constraints and Identity
 
-## Constraints / Session / Identity
-
-The Mind/Body/Workspace decomposition describes *where* the agent lives. The Constraints/Session/Identity
-model describes *what is inside the Mind* — which parts are operator-controlled and which are agent-controlled.
-This distinction is the most important security boundary within the agent itself.
+The four layers describe what happens on a turn. Constraints and Identity are what persist between
+turns. The split between them — operator-controlled versus agent-controlled — is the most important
+security boundary inside the agent. Both feed Context at assembly time; neither is Context.
 
 ### Constraints — What the operator controls
 
@@ -81,24 +79,25 @@ The raw material of the agent's personality as it develops through experience.
 Identity is writable but **the security monitor watches** for anomalous write patterns — particularly any attempt
 to write in ways that look like behavioral self-modification rather than normal memory accumulation.
 
-### Session — What is happening right now
+### Context — what reaches the Model on this turn
 
-The LLM's active context — current conversation, working reasoning, live decision-making.
-Mediates between Constraints (hard rules) and Identity (accumulated knowledge).
+Assembled by the Runtime from Constraints, Identity, conversation history, retrieved content, and tool
+results. Rebuilt every turn rather than accumulated.
 
-**Ephemeral.** Resets when session ends. Constraints persist unchanged. Identity persists with whatever
-the agent accumulated during the session.
+**Mixed trust by design.** Operator rules and attacker-controlled content occupy the same buffer. This
+is the layer XPIA targets, and the mediation layer's pre-call and post-call scanning operates on it.
 
-**Most vulnerable layer** — the target of XPIA attacks. The mediation layer's pre-call and post-call
-scanning operates at the Session boundary.
+**Rebuilt, not ephemeral.** Constraints persist unchanged. Identity persists with whatever the agent
+accumulated. What the framework requires is that constraints in force survive every rebuild, including
+compaction — a compaction that drops them changes the agent's boundaries mid-run.
 
 ### Summary Table
 
 | Layer | Owned By | Writable By | Persists | Primary Threat |
 |---|---|---|---|---|
-| **Constraints** | Operator | Operator only (host-side) | Yes — immutable to agent | XPIA targeting Session to act *against* Constraints |
+| **Constraints** | Operator | Operator only (host-side) | Yes — immutable to agent | Injection targeting Context to act *against* Constraints |
 | **Identity** | Agent | Agent (audited) | Yes — accumulates over time | XPIA causing persistent behavioral modification |
-| **Session** | Agent (ephemeral) | Agent (session-scoped) | No — resets each session | XPIA corrupting in-session reasoning |
+| **Context** | Operator in principle, Runtime in practice | Assembled per turn | No — rebuilt each turn | Injection, constraints dropped by compaction, poisoned retrieval |
 
 ---
 
@@ -125,12 +124,12 @@ scanning operates at the Session boundary.
     │        ▼           Workspace               ▼            │
     │                    (container)                           │
     │  ┌───────────────────────────────────────────────────┐   │
-    │  │  Body (runtime process)                           │   │
+    │  │  Runtime (the loop)                               │   │
     │  │                                                   │   │
-    │  │  Reads Constraints + Identity at session start    │   │
+    │  │  Assembles Context each turn from the sources     │   │
     │  │                                                   │   │
     │  │  ┌─────────────────────────────────────────────┐  │   │
-    │  │  │  Session (active LLM context window)        │  │   │
+    │  │  │  Context (what reaches the Model this turn) │  │   │
     │  │  │                                             │  │   │
     │  │  │  System prompt                              │  │   │
     │  │  │    ← Constraints (rules, permissions)       │  │   │
@@ -141,7 +140,7 @@ scanning operates at the Session boundary.
     │  │  │    ← Assistant responses                    │  │   │
     │  │  │    ← Tool outputs  ⚠ XPIA attack surface   │  │   │
     │  │  │                                             │  │   │
-    │  │  │  Ephemeral — resets when session ends        │  │   │
+    │  │  │  Rebuilt every turn — constraints must survive│  │   │
     │  │  └─────────────────────────────────────────────┘  │   │
     │  └───────────────────────────────────────────────────┘   │
     │                                                          │

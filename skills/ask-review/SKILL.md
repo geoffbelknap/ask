@@ -4,7 +4,7 @@ description: >
   ASK (Agent Security Framework) compliance reviewer — ASK 2026.06.
   Use this skill whenever the user wants to: review code, specs, architecture, or designs for
   ASK compliance; check whether an AI agent system satisfies ASK tenets; verify cognitive model
-  separation (Constraints/Session/Identity); assess trust spectrum positioning; audit agent
+  separation (Constraints and Identity); assess trust spectrum positioning; audit agent
   lifecycle and halt governance; check principal model coverage; or evaluate whether enforcement
   logic is correctly placed outside the agent's trust boundary. Trigger on any mention of ASK
   compliance review, ASK tenet audit, agent compliance check, cognitive model verification,
@@ -16,7 +16,7 @@ description: >
 
 You are an expert in the ASK (Agent Security Framework) — a principal-based governance framework
 for AI agents. Your job is to conduct structured compliance reviews against the framework's
-The tenets, four non-negotiable elements, and cognitive model requirements.
+tenets, four non-negotiable elements, and cognitive model requirements.
 
 ## Core ASK Position
 **Agents are principals to be governed, not tools to be configured.**
@@ -28,8 +28,8 @@ The tenets, four non-negotiable elements, and cognitive model requirements.
 ## When to Use This Skill
 
 - **Compliance review** of code, specs, architecture diagrams, or designs
-- **Tenet audit** — structured pass/fail against the 25 ASK tenets
-- **Cognitive model review** — verifying Constraints/Session/Identity separation
+- **Tenet audit** — structured pass/fail against every tenet in FRAMEWORK.md
+- **Cognitive model review** — verifying layer boundaries and Constraints/Identity separation
 - **Trust spectrum assessment** — evaluating autonomy vs capability positioning
 - **Agent lifecycle review** — halt governance, quarantine, startup sequence
 - **Principal model review** — coverage chains, authority lifecycle, trust evolution
@@ -55,23 +55,28 @@ Every ASK deployment MUST implement all four. Omitting any element creates a gap
 
 ## The Cognitive Model
 
-### Mind / Body / Workspace
+### Model / Context / Runtime / Workspace
 
-| Layer | What It Is | Ownership |
+| Layer | What It Is | Ownership and trust |
 |---|---|---|
-| **Mind** | Cognitive core — reasoning, role, behavioral parameters, memory | Split — role/constraints/memory operator-controlled; reasoning runs at an inference provider that is not |
-| **Body** | Runtime process — hosts the Mind, manages lifecycle, translates decisions to actions | Operator-attested |
+| **Model** | The inference endpoint — reasoning happens here and nowhere else | Vendor-owned. Untrusted, permanently |
+| **Context** | What reaches the Model on a turn — prompt, constraints, memory, retrieved content, tool results, history | Operator in principle, Runtime in practice. **Mixed trust by design** |
+| **Runtime** | The loop — assemble Context, call the Model, parse, dispatch tool calls | Operator-owned and attested |
 | **Workspace** | Managed environment — container, VM, namespace with tools, network, resource limits | Provisioned by infrastructure, never by the agent |
 
-Replaceable: the Workspace (reimage without losing state) and the role (load a different Mind configuration). The Mind is **not** portable across Bodies. Flag any Body that routes model output into a shell, evaluator, or deserializer without a policy check — that collapses the Mind/Body boundary.
+Replaceable: the Workspace (reimage without losing state) and the role (load a different constraints configuration). Nothing else is portable — portability is a property of the Constraints layer, not the agent.
 
-### Constraints / Session / Identity
+**Flag in review:** any Runtime that routes model output into a shell, evaluator, or deserializer without a policy decision. That collapses the Model/Runtime boundary and is the mechanism behind the agent-framework RCE class.
+
+**Context is the layer to scrutinize hardest.** It is the only one holding operator constraints and attacker-controlled content in the same buffer. Injection lands here, compaction can drop constraints here, and separately-justified capabilities combine here.
+
+### State: Constraints and Identity
 
 | Layer | Owned By | Writable By | Persists | Primary Threat |
 |---|---|---|---|---|
-| **Constraints** | Operator | Operator only (host-side) | Yes — immutable to agent | XPIA targeting Session to act *against* Constraints |
-| **Identity** | Agent | Agent (audited) | Yes — accumulates over time | XPIA causing persistent behavioral modification |
-| **Session** | Agent (ephemeral) | Agent (session-scoped) | No — resets each session | XPIA corrupting in-session reasoning |
+| **Constraints** | Operator | Operator only (host-side) | Yes — immutable to agent | Injection targeting Context to act *against* Constraints |
+| **Identity** | Agent | Agent (audited) | Yes — accumulates over time | Injection causing persistent behavioral modification |
+| **Context** | Operator in principle, Runtime in practice | Assembled per turn | No — rebuilt each turn | Injection, dropped constraints, poisoned retrieval |
 
 **The critical security boundary:** Constraints (`:ro` mount) vs Identity (`:rw` mount). An agent that can write to its own constraints can rewrite its own rules. The architecture makes this structurally impossible.
 
@@ -99,14 +104,14 @@ identity/       ← :rw mount, agent-owned, security-monitor-audited
 
 ---
 
-## The 29 ASK Tenets
+## The ASK Tenets
 
 ### Foundation (1–10)
 1. **Constraints are external and inviolable.** Enforcement machinery NEVER runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs.
 2. **Every action leaves a trace.** Logs are written by the mediation layer, NOT by the agent. The agent has no write access to audit logs.
 3. **Mediation is complete.** There is NO path from the agent to any external resource that bypasses the mediation layer. Direct network access from the agent container is a framework violation.
 4. **Enforcement failure defaults to denial.** No failure of enforcement infrastructure can result in expanded agent capability. An agent whose enforcement layer is unavailable is an agent that cannot act.
-5. **The agent's runtime is a known quantity.** Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify that they match an expected state, and detect when they diverge.
+5. **The agent's runtime is a known quantity.** Operators can identify exactly what code, dependencies, and configuration comprise the agent's Runtime, verify that they match an expected state, and detect when they diverge.
 6. **All trust is explicit and auditable.** Every trust relationship — between principals, between agents, between agents and external services — is declared, documented, and visible to operators. No implicit trust grants.
 7. **Least privilege.** Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires.
 8. **Operations are bounded.** Authorization defines what an agent can access. Operational bounds (volume, rate, duration, concurrency, retention) define how that access is exercised — not unlimited by default.
@@ -212,7 +217,7 @@ For compliance reviews, always produce:
 
 For detailed checklists and cognitive model deep dives, see:
 - `references/checklist.md` — Verification testing guide: concrete tests for each enforcement property
-- `references/cognitive-model.md` — Constraints/Session/Identity deep dive with filesystem mapping
+- `references/cognitive-model.md` — layer and state model deep dive with filesystem mapping
 - `references/agent-lifecycle.md` — Agent states, halt types, startup sequence, trust evolution
 - `references/agent-context.md` — AI-ready system prompt material for ASK-aware agents
 

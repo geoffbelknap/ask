@@ -58,7 +58,7 @@ Not a new threat — a truthfulness gap. The framework asserts a uniform epistem
 | 2 | Every action leaves a trace | **I** | Take an action; confirm the mediation layer logged it. Attempt to write, alter, or delete the log from the agent — must fail. |
 | 3 | Mediation is complete | **I\*** | Direct external host, direct LLM proxy, external DNS, DoH — all must fail. *(exists)* Indirect-egress clause splits out. |
 | 4 | Enforcement failure defaults to denial | **I** | Kill each enforcement component in turn; capability must be lost, never bypassed. Restart; no capability gained. *(exists)* |
-| 5 | The agent's runtime is a known quantity | **I** | Attest the Body against its manifest; introduce a divergence, confirm detection. Spawn an unregistered MCP server at runtime — must be detected and refused. |
+| 5 | The agent's runtime is a known quantity | **I** | Attest the Runtime against its manifest; introduce a divergence, confirm detection. Spawn an unregistered MCP server at runtime — must be detected and refused. |
 | 6 | All trust is explicit and auditable | **I\*** | Present a trust claim with no declared source — must be rejected. |
 | 7 | Least privilege | **I\*** | Agent attempts to acquire a tool, server, or credential outside its declaration — must fail. |
 | 8 | Operations are bounded | **I\*** | For each of volume, rate, duration, concurrency, retention: confirm a bound is configured and that exceeding it is refused. An unbounded dimension is the violation. |
@@ -279,15 +279,15 @@ The cognitive model rests on Session being ephemeral — "resets each session." 
 
 `slug: model-output-mediated`
 
-The cognitive model has always named a Mind/Body boundary, and no invariant has ever defended it. `runtime-known` attests what the Body **is**; nothing constrains what the Body may **accept**. So the decomposition names a boundary and then declines to enforce it — structurally the same defect as the old T24.
+The cognitive model names a Model/Runtime boundary, and no invariant defends it. `runtime-known` attests what the Runtime **is**; nothing constrains what the Runtime may **accept**. So the decomposition names a boundary and then declines to enforce it — structurally the same defect as the old T24.
 
-This is where the 2026 agent-framework remote-execution class lives: model output flowing into a shell, an evaluator, or a deserializer with no intervening decision point. In ASK's own vocabulary that is Mind output becoming Body execution unmediated. A framework that names the two layers separately while the runtime concatenates them provides no protection at all.
+This is where the 2026 agent-framework remote-execution class lives: model output flowing into a shell, an evaluator, or a deserializer with no intervening decision point. In ASK's own vocabulary that is Model output becoming Runtime execution unmediated. A framework that names the two layers separately while the runtime concatenates them provides no protection at all.
 
-> **Proposed.** No path exists by which Mind output becomes execution without passing a policy decision. Model output is inert data to the Body until an enforcement point admits it as an action.
+> **Proposed.** No path exists by which Model output becomes execution without passing a policy decision. Model output is inert data to the Runtime until an enforcement point admits it as an action.
 
-**Test.** Emit model output crafted to reach each execution primitive the Body exposes — shell, evaluator, deserializer, file write, tool dispatch. Every path must land on a policy decision that can refuse. A path that executes without one is a violation.
+**Test.** Emit model output crafted to reach each execution primitive the Runtime exposes — shell, evaluator, deserializer, file write, tool dispatch. Every path must land on a policy decision that can refuse. A path that executes without one is a violation.
 
-*Note the ordering: this invariant is what makes the Mind/Body decomposition load-bearing rather than descriptive. Without it, `runtime-known` is the only invariant that touches the outer cognitive model at all, and it only attests composition.*
+*This invariant is what makes the outer decomposition load-bearing rather than descriptive. Without it, `runtime-known` is the only invariant touching the four layers at all, and it only attests composition.*
 
 ---
 

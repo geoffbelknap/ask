@@ -1,6 +1,6 @@
 # Proposed: retire Mind/Body/Workspace, cut the model at enforcement joints
 
-**Status:** proposal, not yet integrated. Target: ASK 2026.08, alongside [the invariants split](proposed-invariants-split.md).
+**Status:** integrated. Landed for ASK 2026.08, ahead of [the invariants split](proposed-invariants-split.md). Kept for the rationale — in particular the case for outright deletion, and why the layers are cut where they are.
 
 A breaking change to the cognitive model. Per [CONTRIBUTING](../CONTRIBUTING.md), structural changes to the cognitive model increment the version and require explicit rationale.
 

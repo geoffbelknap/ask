@@ -38,7 +38,7 @@ Identify which files/configs belong to each layer and whether they are correctly
 
 - **CONSTRAINTS** (`:ro` mount, operator-owned) — role/tier, risk tolerance, escalation thresholds, permission grants, model preferences, behavioral constraints, guardrail rules, proxy policies. The agent cannot write to these.
 - **IDENTITY** (`:rw` mount, agent-owned, security-monitored) — personality, tone, accumulated facts, user preferences, working notes. Must NOT contain any security-relevant behavioral parameters.
-- **SESSION** — ephemeral context window. Not persisted, not configurable.
+- **CONTEXT** — what reaches the model on a turn: prompt, constraints, memory, retrieved content, tool results, history. Assembled by the runtime and rebuilt each turn, not persisted. The only place operator rules and attacker-controlled content share a buffer — check that constraints in force survive compaction.
 
 Flag any security-relevant parameter found in a writable location.
 

@@ -38,7 +38,7 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 2 | Foundation | Logs are written by the mediation layer, NOT by the agent |
 | 3 | Foundation | There is NO path from agent to external resource that bypasses mediation |
 | 4 | Foundation | No enforcement failure can result in expanded agent capability — if enforcement is unavailable, the agent cannot act |
-| 5 | Foundation | Operators can identify exactly what code, dependencies, and configuration comprise the agent's Body, verify expected state, and detect divergence — including capability acquired at runtime |
+| 5 | Foundation | Operators can identify exactly what code, dependencies, and configuration comprise the agent's Runtime, verify expected state, and detect divergence — including capability acquired at runtime |
 | 6 | Foundation | Every trust relationship is declared, documented, and visible to operators — no implicit trust grants |
 | 7 | Foundation | Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires — the agent does not receive access it doesn't need, and cannot self-expand capability at runtime (capability acquired during operation gets the same approval as startup grants) |
 | 8 | Foundation | Authorization defines what an agent can access; operational bounds (volume, rate, duration, concurrency, retention) define how that access is exercised |

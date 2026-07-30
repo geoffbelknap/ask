@@ -88,7 +88,7 @@ An agent's writable Identity layer is corrupted over time — persisting across 
 - **Audited and recoverable writes (Tenet 25).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — operators can reconstruct state at any point and roll back.
 - **Write pattern monitoring.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
 - **Immutable constraints (Tenet 1).** The operator-owned Constraints layer provides an immutable behavioral floor regardless of Identity corruption.
-- **Ephemeral session state.** Session context resets between sessions, limiting the persistence of in-session poisoning attempts.
+- **Context is rebuilt each turn.** Context does not accumulate across sessions, limiting the persistence of in-session poisoning attempts.
 
 ### Open Problems
 

@@ -3,7 +3,7 @@ name: ask-design
 description: >
   ASK (Agent Security Framework) architecture designer and configuration generator — ASK 2026.06.
   Use this skill whenever the user wants to: design ASK-compliant agent architectures; generate
-  configuration files (Mind/mind.yaml, Gateway policy, Egress proxy denylist, Enforcer sidecar,
+  configuration files (constraints/mind.yaml, Gateway policy, Egress proxy denylist, Enforcer sidecar,
   Delegation bus, Audit log format); understand ASK enforcement layers; design multi-agent
   systems with proper delegation and isolation; plan deployment topology; or evaluate how
   enforcement components fit together. Trigger on any mention of ASK architecture design,
@@ -28,7 +28,7 @@ ASK requirements.
 ## When to Use This Skill
 
 - **Architecture design** — designing new ASK-compliant agent deployments
-- **Configuration generation** — producing Mind, Gateway, Egress, Enforcer, Delegation, Audit Log configs
+- **Configuration generation** — producing constraints, Gateway, Egress, Enforcer, Delegation, Audit Log configs
 - **Enforcement layer design** — seven-layer defense architecture
 - **Multi-agent system design** — isolation, delegation bus, coordinator hardening
 - **Deployment topology** — single-endpoint to enterprise scaling
@@ -183,7 +183,7 @@ Mediates all inter-agent communication:
 
 ### Coordinator Hardening
 
-- Coordinator has its own Mind with explicit scope (not implicit "everything")
+- Coordinator has its own constraints configuration with explicit scope (not implicit "everything")
 - Enforcer at least as strict as subordinate Enforcers
 - Treats all subordinate output as untrusted (guardrails applied)
 - Cannot be instructed by subordinates to change its own config
@@ -255,7 +255,7 @@ Every traditional endpoint security control has an ASK equivalent:
 ## Reference Files
 
 For detailed configuration templates and examples, see:
-- `references/configurations.md` — Mind, Gateway, Egress, Enforcer, Delegation, Audit Log configs
+- `references/configurations.md` — constraints, Gateway, Egress, Enforcer, Delegation, Audit Log configs
 - `references/multi-agent.md` — Multi-agent trust models, delegation patterns, anti-patterns
 - `references/standards.md` — Standards landscape (NIST, OWASP, CoSAI, A2A) and alignment
 

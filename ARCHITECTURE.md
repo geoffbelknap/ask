@@ -108,7 +108,7 @@ The agent never exists, even briefly, in an unenforced state. A conforming start
 3. **Constrain** — mount constraints into the enforced environment, read-only. Compute effective policy.
 4. **Validate** — check workspace requirements (tool compatibility). Already under enforcement.
 5. **Load identity** — integrity check, seed + memory. Security monitor already watching.
-6. **Start the Body** — runtime inside the enforcement boundary, no path to enforcement infrastructure.
+6. **Start the Runtime** — inside the enforcement boundary, with no path to enforcement infrastructure.
 7. **Construct session** — constraints + identity + session context assembled. Agent becomes aware inside an already-enforced session.
 
 ### Constraint Concepts
@@ -274,7 +274,7 @@ The database is a shared service on the mediation network. It requires authentic
 
 The framework defines human principals but does not prescribe a specific authentication mechanism. An implementation must address:
 
-**How users authenticate to agents.** In the interactive runtime, users connect via SSH, TUI, or API. The authentication mechanism is deployment-specific — SSH keys, OAuth tokens, API keys, or SSO. The requirement is that the agent's runtime (Body) can identify which authenticated human principal is issuing instructions.
+**How users authenticate to agents.** In the interactive runtime, users connect via SSH, TUI, or API. The authentication mechanism is deployment-specific — SSH keys, OAuth tokens, API keys, or SSO. The requirement is that the agent's Runtime can identify which authenticated human principal is issuing instructions.
 
 **How user identity flows through the mediation layer.** The enforcer should include the authenticated user's identity in audit log entries so that actions can be attributed to the human who initiated them, not just to the agent that executed them. This is essential for Tenet 2 (every action leaves a trace) in multi-user deployments.
 

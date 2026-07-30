@@ -6,6 +6,18 @@ ASK uses date-based versioning. Tenet numbers reflect reading order and may chan
 
 ---
 
+## ASK 2026.08 (unreleased)
+
+### Framework
+- Cognitive model: retired Mind/Body/Workspace for **Model / Context / Runtime / Workspace**, cut so that a framework property sits on every boundary between layers. The old decomposition cut at anthropomorphic joints, which is not where enforcement happens: no tenet depended on Mind or Workspace, and only one on Body.
+  - **Model** — the inference endpoint. Vendor-owned and untrusted permanently. The framework governs what reaches it and what its output can cause, never what it does internally.
+  - **Context** — what reaches the Model on a turn, assembled by the Runtime and rebuilt each turn. The only layer with deliberately mixed trust: operator constraints and attacker-controlled content share one buffer. Previously unnamed, though the framework already treated prompt assembly as a security boundary in RELATED-WORK.
+  - **Runtime** — formerly Body. Renamed to the word the documents already used whenever they needed to be unambiguous.
+  - **Workspace** — unchanged.
+- Removed the independent-replaceability claim. A Mind was never portable across Bodies: context management, compaction, tool-call schemas, and memory formats are all runtime-specific. Portability is a property of the Constraints layer, which does travel between runtimes unchanged.
+- Session retired as a layer. It was naming two different things — the assembled context and the reasoning trace. The first is now Context; the second is internal to the Model, governed by Tenet 28, and becomes part of Context when a runtime feeds it back into the next turn.
+- Constraints and Identity keep their meaning and are now stated as the state model: what persists between turns, and who owns it.
+
 ## ASK 2026.06
 
 ### Framework

@@ -1,13 +1,13 @@
 # ASK Configuration Templates — ASK 2026.06
 
 Canonical configuration templates for ASK framework elements.
-Read this file when generating or reviewing Mind, Gateway, Egress, Enforcer, Delegation, or Audit Log configs.
+Read this file when generating or reviewing constraints, Gateway, Egress, Enforcer, Delegation, or Audit Log configs.
 
 ---
 
 ## Table of Contents
 
-1. [Mind Configuration (Constraints)](#mind-configuration)
+1. [Constraints Configuration](#constraints-configuration)
 2. [Gateway Policy](#gateway-policy)
 3. [Egress Proxy Denylist](#egress-proxy-denylist)
 4. [Enforcer Configuration](#enforcer-configuration)
@@ -17,9 +17,9 @@ Read this file when generating or reviewing Mind, Gateway, Egress, Enforcer, Del
 
 ---
 
-## Mind Configuration
+## Constraints Configuration
 
-The Mind configuration lives in the Constraints layer — `constraints/mind.yaml`, mounted `:ro` into the
+The constraints configuration lives in the Constraints layer — `constraints/mind.yaml`, mounted `:ro` into the
 agent container. The agent cannot modify this file. Changes require host-level access and go through
 the operator's governance process.
 
