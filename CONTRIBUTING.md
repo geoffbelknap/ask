@@ -44,9 +44,11 @@ Open a [GitHub issue](https://github.com/geoffbelknap/ask/issues) to start.
 - If adding threats: categorize by attack surface and tag with MITRE ATLAS technique IDs where applicable
 - If adding mitigations: explain what threat is addressed and what open problems remain
 
-### Contribute plugins
+### Contribute skills
 
-ASK has plugins for Claude Code, GitHub Copilot CLI, and OpenAI Codex in the `plugins/` directory. Contributions to improve skill quality, add new skills, or port to additional platforms are welcome. See the existing plugins for the expected format.
+ASK ships three skills in the `skills/` directory — `ask-review`, `ask-design`, and `ask-threats` — authored to the [Agent Skills](https://agentskills.io) open specification. That format is filesystem-based rather than API-dependent, so one copy runs unchanged on Claude Code, GitHub Copilot CLI, OpenAI Codex, and every other conforming agent.
+
+There is deliberately **one** copy. Do not fork per-product variants: a skill that needs product-specific behavior to work is a skill that should be rewritten to the common spec. Contributions to improve skill quality or add new skills are welcome.
 
 ## What Makes a Good Contribution
 

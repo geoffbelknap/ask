@@ -209,5 +209,5 @@ The cognitive model rests on Session being ephemeral — "resets each session." 
 - **`ARCHITECTURE.md § Verification Testing`** grows from six tests to one per invariant. This is the largest single piece of work in the proposal and the one that makes the rename true rather than cosmetic.
 - **`REGULATORY.md`** mappings are keyed `T<n>` throughout and need re-keying. Worth doing in the same pass as adding COSAiS.
 - **T21's forward reference** to T24 crosses two categories backwards; resolve during renumbering.
-- **Plugin trees.** All three carry "29 tenets" in frontmatter and a "Tenet Scorecard — all 29 tenets" output format. They are near-identical triplicates; collapsing them to a source plus a build step before the sweep would prevent this recurring.
+- **Skills.** ~~All three plugin trees carry "29 tenets" in frontmatter and a "Tenet Scorecard" output format.~~ **Resolved ahead of this proposal:** the three per-product trees collapsed to a single `skills/` directory on the [Agent Skills](https://agentskills.io) spec, so the sweep now touches one copy instead of three. The `29 tenets` strings in skill frontmatter and the scorecard output format still need updating with the rename.
 - **Landing page.** Finish the migration already begun: anchors, category labels, and card prefixes.

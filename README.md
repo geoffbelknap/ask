@@ -56,6 +56,11 @@ ASK defines what must be true — architecturally, operationally, and organizati
 │   ├── delegation-message.yaml  ← Sample delegation bus message format
 │   └── log-events.yaml          ← Sample audit log event format
 │
+├── skills/                ← Agent Skills (agentskills.io spec) — one copy, runs on any conforming agent
+│   ├── ask-review/              ← Compliance audit against the framework
+│   ├── ask-design/              ← Enforcement architecture and config generation
+│   └── ask-threats/             ← Threat model and XPIA analysis
+│
 ├── GLOSSARY.md            ← Terms
 ├── RELATED-WORK.md        ← External frameworks, standards, and research
 ├── LIMITATIONS.md         ← Known gaps and open questions
@@ -65,8 +70,10 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── CLAUDE.md              ← Project instructions for AI agents
 ├── LICENSE                ← CC BY 4.0
 │
-└── archive/
-    └── proposed-tenets-knowledge.md ← Proposed tenets (integrated into FRAMEWORK.md as Tenets 23–24)
+└── archive/               ← Proposals: pending, and integrated ones kept for provenance
+    ├── proposed-invariants-split.md    ← Pending: rename tenets to invariants, split the tier
+    ├── proposed-tenet-reasoning-exposure.md ← Integrated as Tenet 28
+    └── proposed-tenets-knowledge.md    ← Integrated as Tenets 26–27
 ```
 
 ---

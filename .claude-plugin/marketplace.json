@@ -10,7 +10,7 @@
       "name": "ask-framework",
       "description": "ASK compliance reviewer, architecture designer, and threat analyst",
       "version": "3.0.0",
-      "source": "./plugins/claude-code"
+      "source": "."
     }
   ]
 }
