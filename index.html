@@ -516,11 +516,6 @@ section {
 .install-cmd .cmd-prompt { color: var(--teal); }
 
 /* ─── DIAGRAM ────────────────────────────────────────────── */
-.diagram-wrapper {
-  max-width: 720px;
-  margin: 32px auto 0;
-}
-
 /* ─── TENETS ──────────────────────────────────────────────── */
 .tenet-category { margin-bottom: 40px; }
 .tenet-cat-label {
@@ -1012,60 +1007,7 @@ footer {
 <section id="cognitive">
   <div class="section-label fade-up">Cognitive model</div>
   <h2 class="section-heading fade-up">Don't read minds. Build them.</h2>
-  <p class="section-sub fade-up">An agent has state the operator controls (constraints), state the agent accumulates over time (identity), and state that lives only in the current session. ASK defines where these boundaries are and who owns each layer — because the security model depends on keeping them separate.</p>
-
-  <div class="diagram-wrapper fade-up">
-    <svg viewBox="0 0 720 340" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
-      <!-- Workspace (clickable) -->
-      <a class="diagram-link" data-detail="workspace">
-      <rect x="1" y="1" width="718" height="338" rx="16" stroke="#D4CEC8" stroke-width="1" fill="#FDFAF5" class="diagram-hover"/>
-      <text x="24" y="28" font-family="Space Mono, monospace" font-size="10" fill="#007A62" letter-spacing="0.08em">WORKSPACE</text>
-      <text x="24" y="44" font-family="DM Sans, sans-serif" font-size="11" fill="#B8B2AC">Managed environment — provisioned by infrastructure, never by the agent</text>
-      </a>
-
-      <!-- Runtime (clickable) -->
-      <a class="diagram-link" data-detail="runtime">
-      <rect x="24" y="58" width="672" height="268" rx="12" stroke="#D4CEC8" stroke-width="1" fill="#F8F5EF" class="diagram-hover"/>
-      <text x="48" y="82" font-family="Space Mono, monospace" font-size="10" fill="#007A62" letter-spacing="0.08em">RUNTIME</text>
-      <text x="48" y="98" font-family="DM Sans, sans-serif" font-size="11" fill="#B8B2AC">The loop — assembles context, calls the model, dispatches tool calls</text>
-      </a>
-
-      <!-- State and context (clickable) -->
-      <a class="diagram-link" data-detail="state">
-      <rect x="48" y="114" width="624" height="200" rx="10" stroke="#007A62" stroke-width="1.5" fill="white" class="diagram-hover"/>
-      <text x="72" y="138" font-family="Space Mono, monospace" font-size="10" fill="#007A62" letter-spacing="0.08em">STATE + CONTEXT</text>
-      <text x="72" y="154" font-family="DM Sans, sans-serif" font-size="11" fill="#B8B2AC">What persists between turns, and what reaches the model on this one</text>
-      </a>
-
-      <!-- Constraints -->
-      <rect x="72" y="170" width="178" height="126" rx="8" fill="#E1F5EE" stroke="#B8E8D8" stroke-width="1"/>
-      <text x="88" y="190" font-family="Space Mono, monospace" font-size="9" fill="#007A62" letter-spacing="0.06em">CONSTRAINTS</text>
-      <text x="88" y="206" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Operator-owned</text>
-      <text x="88" y="220" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Read-only to agent</text>
-      <text x="88" y="244" font-family="DM Sans, sans-serif" font-size="10" fill="#007A62" font-weight="500">Rules, permissions,</text>
-      <text x="88" y="258" font-family="DM Sans, sans-serif" font-size="10" fill="#007A62" font-weight="500">tier, behavior</text>
-
-      <!-- Security boundary -->
-      <line x1="262" y1="174" x2="262" y2="292" stroke="#007A62" stroke-width="2" stroke-dasharray="4 3"/>
-
-      <!-- Identity -->
-      <rect x="274" y="170" width="178" height="126" rx="8" fill="#FFF8F0" stroke="#E8DDD0" stroke-width="1"/>
-      <text x="290" y="190" font-family="Space Mono, monospace" font-size="9" fill="#8B7355" letter-spacing="0.06em">IDENTITY</text>
-      <text x="290" y="206" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Agent-owned</text>
-      <text x="290" y="220" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Writable, audited</text>
-      <text x="290" y="244" font-family="DM Sans, sans-serif" font-size="10" fill="#8B7355" font-weight="500">Memory, personality,</text>
-      <text x="290" y="258" font-family="DM Sans, sans-serif" font-size="10" fill="#8B7355" font-weight="500">learned context</text>
-
-      <!-- Context -->
-      <rect x="464" y="170" width="178" height="126" rx="8" fill="#F5F0FA" stroke="#DDD0E8" stroke-width="1"/>
-      <text x="480" y="190" font-family="Space Mono, monospace" font-size="9" fill="#7355A0" letter-spacing="0.06em">CONTEXT</text>
-      <text x="480" y="206" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Mixed trust</text>
-      <text x="480" y="220" font-family="DM Sans, sans-serif" font-size="10" fill="#6B6560">Rebuilt every turn</text>
-      <text x="480" y="244" font-family="DM Sans, sans-serif" font-size="10" fill="#7355A0" font-weight="500">Active context,</text>
-      <text x="480" y="258" font-family="DM Sans, sans-serif" font-size="10" fill="#7355A0" font-weight="500">attack surface</text>
-    </svg>
-
-  </div>
+  <p class="section-sub fade-up">An agent decomposes into four layers: the <strong style="color:var(--ink); font-weight:500;">model</strong> that reasons, the <strong style="color:var(--ink); font-weight:500;">context</strong> assembled in front of it, the <strong style="color:var(--ink); font-weight:500;">runtime</strong> that runs the loop, and the <strong style="color:var(--ink); font-weight:500;">workspace</strong> it executes in. ASK defines who owns each one and what must hold at every boundary between them — because that is where enforcement goes.</p>
 
   <p class="fade-up" style="font-size:14px; color:var(--ink-mid); line-height:1.7; max-width:680px; margin-top:32px;">Reasoning happens at the <strong style="color:var(--ink); font-weight:500;">Model</strong> — an inference endpoint outside the workspace, owned by a vendor and treated as untrusted. The framework governs what reaches it and what its output is allowed to cause. Two things are replaceable: the workspace (reimage without losing state) and the role (load different constraints). Nothing else is portable. Inside, the critical security boundary is between <strong style="color:var(--ink); font-weight:500;">Constraints</strong> (operator-owned, read-only) and <strong style="color:var(--ink); font-weight:500;">Identity</strong> (agent-owned, writable). An agent that can write to its own constraints can rewrite its own rules — the architecture makes this structurally impossible.</p>
 </section>
