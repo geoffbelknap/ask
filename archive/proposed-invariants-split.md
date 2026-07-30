@@ -90,9 +90,18 @@ Not a new threat — a truthfulness gap. The framework asserts a uniform epistem
 
 ## Slug registry
 
-*(Decided.)* **Slugs are the reference identity. Numbers are presentation only.**
+*(Decided.)* **`INV-01` / `PRIN-01` label. Slugs reference.**
 
-Every invariant and principle carries a permanent kebab-case slug. Cross-references — in prose, in `REGULATORY.md` mappings, in skills, on the site — use the slug and never the number. `INV-01` and `PRIN-01` survive purely as reading-order ordinals in `FRAMEWORK.md`; nothing points at them, so reorganizing the framework never invalidates a reference again.
+Two identifiers with two jobs, and the split is the point:
+
+- **`INV-01`, `PRIN-01`** — the label on the item's heading in `FRAMEWORK.md`, in reading order. Safe to number, because there the number *is* the thing being named. This is what a reader sees.
+- **the slug** — what every cross-reference points at: prose, `REGULATORY.md` mappings, skills, the site, `ARCHITECTURE.md` tests. Permanent, kebab-case, never renumbered.
+
+A number in a heading cannot go stale. A number in a reference goes stale the moment anything is reorganized, and nothing catches it — that is how `.claude/commands/ask.md` came to instruct reviewers to score "each of the 27 tenets" two versions after there were 29, and how the codex and copilot skill copies kept pointing at "Tenets 11–12" after the referent moved to 19–20. Numbers stay where they are safe; slugs go where they are not.
+
+So `INV-04` appears exactly once — as its own heading. Everything that *refers* to it says `enforcement-fails-closed`.
+
+**Ordinals below are provisional.** They follow current reading order so the mapping is legible during migration; final assignment waits on the category re-layout, since invariants and principles become two separate lists.
 
 This is the durable fix for the failure that already bit the repo: the codex and copilot skill copies kept saying "Tenets 11–12" after a renumbering moved the referent to 19–20. A slug cannot go stale that way — it either resolves or it does not, and `grep` finds every use.
 
@@ -100,56 +109,56 @@ This is the durable fix for the failure that already bit the repo: the codex and
 
 ### Invariants
 
-| Was | Slug | Name |
-|---|---|---|
-| T1 | `constraints-external` | Constraints are external and inviolable |
-| T2 | `actions-traced` | Every action leaves a trace |
-| T3 | `mediation-complete` | Mediation is complete |
-| T4 | `enforcement-fails-closed` | Enforcement failure defaults to denial |
-| T5 | `runtime-known` | The agent's runtime is a known quantity |
-| T6 | `trust-declared` | Trust without a declaration is rejected |
-| T7 | `capability-declared` | Capability is declared and cannot be self-expanded |
-| T8 | `operations-bounded` | Every operational dimension has an enforced bound |
-| T9 | `constraints-atomic` | Constraint changes are atomic, acknowledged, and durable |
-| T10 | `constraint-history-immutable` | Constraint history is immutable and complete |
-| T11 | `halts-auditable` | Halts are always auditable and reversible |
-| T12 | `halt-authority-asymmetric` | Halt authority is asymmetric |
-| T13 | `authority-logged` | Authority exercise is logged at agent-action fidelity |
-| T14 | `quarantine-complete` | Quarantine is immediate, silent, and complete |
-| T15 | `lifecycles-independent` | Principal and agent lifecycles are managed independently |
-| T16 | `authority-never-orphaned` | Authority is never orphaned |
-| T17 | `trust-not-self-elevated` | Trust cannot be self-elevated |
-| T18 | `hierarchy-inviolable` | The governance hierarchy is inviolable from below |
-| T19 | `delegation-bounded` | Delegation cannot exceed delegator scope |
-| T20 | `labeled-delivery-enforced` | Labeled components are refused to uncleared recipients |
-| T21 | `external-agents-cannot-instruct` | External agents cannot instruct internal agents |
-| T23 | `unverified-zero-trust` | Unverified entities default to zero trust |
-| T24 | `instruction-channel-distinct` | The instruction channel is distinct and unpromotable |
-| T25 | `identity-mutations-recoverable` | Identity mutations are auditable and recoverable |
-| T26 | `knowledge-durable` | Organizational knowledge persists independently of agents |
-| T27 | `knowledge-access-bounded` | Knowledge access is bounded by authorization scope |
-| T28 | `reasoning-not-emitted` | Reasoning is not emitted to principals by default |
-| T29 | `oversight-capacity-enforced` | Oversight demand above threshold reduces autonomy |
-| *new* | `capability-composition-governed` | Capability combinations are governed as a set |
-| *new* | `constraints-survive-compaction` | Constraints survive context transformation |
+| # | Was | Slug | Name |
+|---|---|---|---|
+| `INV-01` | T1 | `constraints-external` | Constraints are external and inviolable |
+| `INV-02` | T2 | `actions-traced` | Every action leaves a trace |
+| `INV-03` | T3 | `mediation-complete` | Mediation is complete |
+| `INV-04` | T4 | `enforcement-fails-closed` | Enforcement failure defaults to denial |
+| `INV-05` | T5 | `runtime-known` | The agent's runtime is a known quantity |
+| `INV-06` | T6 | `trust-declared` | Trust without a declaration is rejected |
+| `INV-07` | T7 | `capability-declared` | Capability is declared and cannot be self-expanded |
+| `INV-08` | T8 | `operations-bounded` | Every operational dimension has an enforced bound |
+| `INV-09` | T9 | `constraints-atomic` | Constraint changes are atomic, acknowledged, and durable |
+| `INV-10` | T10 | `constraint-history-immutable` | Constraint history is immutable and complete |
+| `INV-11` | T11 | `halts-auditable` | Halts are always auditable and reversible |
+| `INV-12` | T12 | `halt-authority-asymmetric` | Halt authority is asymmetric |
+| `INV-13` | T13 | `authority-logged` | Authority exercise is logged at agent-action fidelity |
+| `INV-14` | T14 | `quarantine-complete` | Quarantine is immediate, silent, and complete |
+| `INV-15` | T15 | `lifecycles-independent` | Principal and agent lifecycles are managed independently |
+| `INV-16` | T16 | `authority-never-orphaned` | Authority is never orphaned |
+| `INV-17` | T17 | `trust-not-self-elevated` | Trust cannot be self-elevated |
+| `INV-18` | T18 | `hierarchy-inviolable` | The governance hierarchy is inviolable from below |
+| `INV-19` | T19 | `delegation-bounded` | Delegation cannot exceed delegator scope |
+| `INV-20` | T20 | `labeled-delivery-enforced` | Labeled components are refused to uncleared recipients |
+| `INV-21` | T21 | `external-agents-cannot-instruct` | External agents cannot instruct internal agents |
+| `INV-22` | T23 | `unverified-zero-trust` | Unverified entities default to zero trust |
+| `INV-23` | T24 | `instruction-channel-distinct` | The instruction channel is distinct and unpromotable |
+| `INV-24` | T25 | `identity-mutations-recoverable` | Identity mutations are auditable and recoverable |
+| `INV-25` | T26 | `knowledge-durable` | Organizational knowledge persists independently of agents |
+| `INV-26` | T27 | `knowledge-access-bounded` | Knowledge access is bounded by authorization scope |
+| `INV-27` | T28 | `reasoning-not-emitted` | Reasoning is not emitted to principals by default |
+| `INV-28` | T29 | `oversight-capacity-enforced` | Oversight demand above threshold reduces autonomy |
+| `INV-29` | *new* | `capability-composition-governed` | Capability combinations are governed as a set |
+| `INV-30` | *new* | `constraints-survive-compaction` | Constraints survive context transformation |
 
 ### Principles
 
-| From | Slug | Name |
-|---|---|---|
-| T3 | `indirect-egress-declared` | Unmediatable egress paths are enumerated as residual risk |
-| T6 | `trust-legible` | Trust declarations are discoverable and legible |
-| T7 | `least-privilege` | Declarations are scoped to the minimum the role requires |
-| T8 | `bounds-calibrated` | Bounds are calibrated to the role and reviewed |
-| T9 | `unacknowledged-change-investigated` | Unacknowledged constraint changes are investigated |
-| T13 | `authority-anomalies-reviewed` | Anomalous authority patterns are surfaced and reviewed |
-| T17 | `trust-earned` | Trust is calibrated over time from observed behavior |
-| T20 | `synthesis-reviewed` | Emergent-sensitivity combinations get human review |
-| T22 | `unknown-conflicts-yield` | Unknown conflicts default to yield and flag |
-| T24 | `content-is-data` | Instruction-like content is data under the agent's constraints |
-| T26 | `knowledge-is-an-asset` | Knowledge is structured for human query and export |
-| T28 | `probing-informs-trust` | Extraction probing informs trust |
-| T29 | `oversight-calibrated` | Capacity thresholds reflect real principal capacity |
+| # | From | Slug | Name |
+|---|---|---|---|
+| `PRIN-01` | T3 | `indirect-egress-declared` | Unmediatable egress paths are enumerated as residual risk |
+| `PRIN-02` | T6 | `trust-legible` | Trust declarations are discoverable and legible |
+| `PRIN-03` | T7 | `least-privilege` | Declarations are scoped to the minimum the role requires |
+| `PRIN-04` | T8 | `bounds-calibrated` | Bounds are calibrated to the role and reviewed |
+| `PRIN-05` | T9 | `unacknowledged-change-investigated` | Unacknowledged constraint changes are investigated |
+| `PRIN-06` | T13 | `authority-anomalies-reviewed` | Anomalous authority patterns are surfaced and reviewed |
+| `PRIN-07` | T17 | `trust-earned` | Trust is calibrated over time from observed behavior |
+| `PRIN-08` | T20 | `synthesis-reviewed` | Emergent-sensitivity combinations get human review |
+| `PRIN-09` | T22 | `unknown-conflicts-yield` | Unknown conflicts default to yield and flag |
+| `PRIN-10` | T24 | `content-is-data` | Instruction-like content is data under the agent's constraints |
+| `PRIN-11` | T26 | `knowledge-is-an-asset` | Knowledge is structured for human query and export |
+| `PRIN-12` | T28 | `probing-informs-trust` | Extraction probing informs trust |
+| `PRIN-13` | T29 | `oversight-calibrated` | Capacity thresholds reflect real principal capacity |
 
 ---
 
