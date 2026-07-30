@@ -161,7 +161,7 @@ Human oversight is an architectural element (Element 4: Human Override), not jus
 
 ## Model Distillation and Reasoning Exposure
 
-An adversary extracts an agent's value not by breaching it but by querying it: running exchanges through the model to train a weaker "student" on its outputs (distillation), or probing across sessions to reconstruct constraints and decision criteria. Every individual call is authorized; the harm is the aggregate and the purpose. Campaigns are typically distributed across many fraudulent accounts to keep each identity under its individual limits.
+An adversary extracts an agent's value not by breaching it but by querying it. One route is distillation: running exchanges through the model to train a weaker "student" on its outputs. The other is probing across sessions to reconstruct constraints and decision criteria. Every individual call is authorized; the harm is the aggregate and the purpose. Campaigns are typically distributed across many fraudulent accounts to keep each identity under its individual limits.
 
 ### Why Conventional Mitigations Are Insufficient
 

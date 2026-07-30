@@ -46,7 +46,7 @@ Standards for digital identity verification, authentication, and federation.
 
 ### OWASP Top 10 for Agentic Applications (2026)
 
-A [threat catalog and mitigation playbook](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) for agentic AI systems, identifying ten risk categories (ASI01–ASI10) including agent goal hijack, tool misuse, identity and privilege abuse, supply chain risks, unexpected code execution, memory and context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation, and rogue agents. Developed through collaboration with 100+ industry experts.
+A [threat catalog and mitigation playbook](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) for agentic AI systems. It identifies ten risk categories (ASI01–ASI10): agent goal hijack, tool misuse, identity and privilege abuse, supply chain risks, unexpected code execution, memory and context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation, rogue agents. Developed through collaboration with 100+ industry experts.
 
 **Relationship to ASK.** OWASP enumerates threats and recommends mitigations across the full application stack; ASK defines the architectural properties that must hold at the runtime enforcement level. ASK's threat model ([THREATS.md](THREATS.md)) covers the agent runtime threats that overlap with OWASP's catalog; OWASP's coverage of application-level concerns (authentication flows, API security, user interface risks) addresses areas outside ASK's scope.
 

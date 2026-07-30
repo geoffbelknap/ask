@@ -92,12 +92,12 @@ Not a new threat — a truthfulness gap. The framework asserts a uniform epistem
 
 *(Decided.)* **`INV-01` / `PRIN-01` label. Slugs reference.**
 
-Two identifiers with two jobs, and the split is the point:
+Two identifiers with two jobs:
 
 - **`INV-01`, `PRIN-01`** — the label on the item's heading in `FRAMEWORK.md`, in reading order. Safe to number, because there the number *is* the thing being named. This is what a reader sees.
 - **the slug** — what every cross-reference points at: prose, `REGULATORY.md` mappings, skills, the site, `ARCHITECTURE.md` tests. Permanent, kebab-case, never renumbered.
 
-A number in a heading cannot go stale. A number in a reference goes stale the moment anything is reorganized, and nothing catches it — that is how `.claude/commands/ask.md` came to instruct reviewers to score "each of the 27 tenets" two versions after there were 29, and how the codex and copilot skill copies kept pointing at "Tenets 11–12" after the referent moved to 19–20. Numbers stay where they are safe; slugs go where they are not.
+A number in a heading cannot go stale. A number in a reference goes stale the moment anything is reorganized, and nothing catches it. Two examples are already in this repo. `.claude/commands/ask.md` instructs reviewers to score "each of the 27 tenets" two versions after there were 29. The codex and copilot skill copies kept pointing at "Tenets 11–12" after the referent moved to 19–20. Numbers stay where they are safe; slugs go where they are not.
 
 So `INV-04` appears exactly once — as its own heading. Everything that *refers* to it says `enforcement-fails-closed`.
 
@@ -223,7 +223,7 @@ Atomic delivery is testable. But the invariant is silent on what happens *after*
 
 The most important split in the proposal, because T24 is the item most exposed to a "this is hand-waving" attack — and ASK already concedes the point in its own rationale.
 
-Note that **T21 survives as a clean invariant while T24 does not**, and the difference is instructive: T21 is a property of *channels*, which are architectural. T24 as written is a property of *semantics*, which are not. Rewrite T24 on T21's model.
+**T21 survives as a clean invariant while T24 does not**, and the difference shows the way out: T21 is a property of *channels*, which are architectural. T24 as written is a property of *semantics*, which are not. Rewrite T24 on T21's model.
 
 - **Invariant.** The instruction channel is distinct and authenticated. Content arriving on any other channel — tool output, fetched content, invocation parameters, delegation returns, any modality — is admitted as data and can never be promoted to the instruction channel.
 - **Principle.** The agent treats instruction-like content as data under its own constraints. This is enforced by defense-in-depth containment, not by the model's ability to distinguish principals from non-principals at the token level.
@@ -247,7 +247,7 @@ The comparative clause ("more deliberate action than destroying any individual a
 
 ### T22 — the one with no invariant core
 
-"Unknown conflicts default to yield and flag" is an agent-side behavior. ASK's founding premise is that the agent is compromisable, so no agent behavior can be an invariant — a compromised agent simply does not yield. It stays a principle. The platform-side property that *would* be an invariant ("when the activity register is unavailable, conflicting writes are refused") is implementation-specific and belongs in `ARCHITECTURE.md`, not the framework.
+"Unknown conflicts default to yield and flag" is an agent-side behavior. ASK's founding premise is that the agent is compromisable, so no agent behavior can be an invariant. A compromised agent does not yield. It stays a principle. The platform-side property that *would* be an invariant ("when the activity register is unavailable, conflicting writes are refused") is implementation-specific and belongs in `ARCHITECTURE.md`, not the framework.
 
 ---
 
@@ -257,7 +257,7 @@ All three come from the field moving since 2026.06. All three are genuinely bina
 
 ### Candidate A — Capability combinations are governed, not just capabilities
 
-Every current item governs a capability in isolation. Nothing governs *combinations of individually-justified capabilities*. The field converged on the opposite view: the lethal trifecta (private data + untrusted content + outbound communication) is now the dominant design rule, CSA measured it in 98% of assessed production agents, and Meta formalized the defense as the Rule of Two.
+Every current item governs a capability in isolation. Nothing governs *combinations of individually-justified capabilities*. The field converged on the opposite view. The lethal trifecta — private data, untrusted content, and outbound communication — is now the dominant design rule. CSA measured it in 98% of assessed production agents, and Meta formalized the defense as the Rule of Two.
 
 ASK might argue T3 dissolves this — if egress is completely mediated, the third leg is safe. It does not: `LIMITATIONS.md` already concedes indirect egress through trusted intermediaries cannot be fully mediated, using SearchLeak as the example. Mediation narrows the trifecta; it does not close it.
 

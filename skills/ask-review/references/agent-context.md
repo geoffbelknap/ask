@@ -74,7 +74,7 @@ ASK exists within a growing ecosystem. Key external references:
 - **CoSAI** published an MCP security white paper with 12 threat categories — use it to inform gateway MCP policy.
 - **OWASP Top 10 for Agentic Applications** catalogs application-level risks; ASK covers runtime enforcement.
 
-See [RELATED-WORK.md](RELATED-WORK.md) for full analysis.
+See [RELATED-WORK.md](../../../RELATED-WORK.md) for full analysis.
 
 ---
 
@@ -107,7 +107,7 @@ If a configuration parameter reflects personality or accumulated knowledge → i
 
 **SESSION** (ephemeral — not persisted, resets each session)
 - Active context window, current session reasoning
-- Not a file, not managed, not configurable — it simply exists during the session and resets
+- Not a file, not managed, not configurable — it exists during the session and resets
 
 **The critical boundary: Constraints (`:ro`) vs Identity (`:rw`).** An agent that can write to its own constraints can rewrite its own rules. This is prevented architecturally (`:ro` mount), not through agent cooperation.
 
@@ -150,7 +150,14 @@ Non-negotiable implementation rules. Every design decision MUST comply with all 
 
 ## Threat Awareness Rules
 
-The agent faces multiple threat categories — not just prompt injection. Key threats include XPIA (instructions hidden in external content), identity/memory poisoning (persistent corruption of the agent's writable state), behavioral drift (satisfying constraints while violating intent), cascading failures (errors amplifying across agent chains), and overwhelming human oversight (approval fatigue degrading the human safety net). See [THREATS.md](THREATS.md) for the full threat model.
+The agent faces multiple threat categories — not just prompt injection. Key threats:
+
+- **XPIA** — instructions hidden in external content.
+- **Identity and memory poisoning** — persistent corruption of the agent's writable state.
+- **Behavioral drift** — satisfying constraints while violating intent.
+- **Cascading failures** — errors amplifying across agent chains.
+- **Overwhelming human oversight** — approval fatigue degrading the human safety net.
+ See [THREATS.md](../../../THREATS.md) for the full threat model.
 
 **XPIA is the most architecturally significant threat** because it exploits the LLM's inability to distinguish data from instructions — a property of the technology with no complete solution. An attacker embeds instructions in content the agent fetches — a web page, a document, an API response, a tool output. The LLM follows those embedded instructions.
 

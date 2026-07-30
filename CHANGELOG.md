@@ -17,7 +17,7 @@ ASK uses date-based versioning. Tenet numbers reflect reading order and may chan
   - Tenet 5 (Runtime is a known quantity): extends to runtime-acquired capability — tools, MCP servers, and plugins loaded after startup are subject to the same attestation; an agent cannot acquire capability operators cannot verify
   - Tenet 7 (Least privilege): capability is operator-defined and cannot be self-expanded at runtime — runtime-acquired tools/servers/plugins get the same approval and scoping as startup grants (capability analog of Tenet 17)
   - Tenet 24 (Instructions only come from verified principals): instruction-like text is data regardless of the channel it arrives on or the form it takes; the agent's own invocation surface is not a verified principal channel
-- Cognitive model: clarified that the Session reasoning trace, when captured for audit, is mediation-written and agent-unsuppressable (Tenet 2) while remaining non-principal-facing (Tenet 28); added a maturity note that Tenets 26–27 are less battle-tested than the foundation tenets
+- Cognitive model: clarified that the Session reasoning trace, when captured for audit, is mediation-written and agent-unsuppressable (Tenet 2) while remaining non-principal-facing (Tenet 28); added a maturity statement that Tenets 26–27 are less battle-tested than the foundation tenets
 - 29 tenets across 7 categories (was 27 across 6)
 
 ### Threat Model

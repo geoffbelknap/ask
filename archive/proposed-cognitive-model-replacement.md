@@ -17,7 +17,7 @@ Mind/Body/Workspace cuts an agent at anthropomorphic joints — the part that th
 
 ## The case for deleting it outright
 
-Worth stating honestly, because it is viable. The framework's value is the invariants. `Constraints / Identity / Session` is load-bearing and would survive untouched. Everywhere `Body` appears it could read "runtime," and everywhere `Workspace` appears it could read "environment" — plain words, no capitalization, no proprietary vocabulary to learn. Deletion costs almost nothing and removes something that is currently oversold.
+Worth stating, because it is viable. The framework's value is the invariants. `Constraints / Identity / Session` is load-bearing and would survive untouched. Everywhere `Body` appears it could read "runtime," and everywhere `Workspace` appears it could read "environment" — plain words, no capitalization, no proprietary vocabulary to learn. Deletion costs almost nothing and removes something that is currently oversold.
 
 **Recommendation: don't.** Deletion leaves problem 4 unfixed. The framework would still have no name for the surface where most agent attacks actually land, and would still be endorsing a boundary in `RELATED-WORK.md` that it cannot express in `FRAMEWORK.md`. Replace it with a decomposition that carries invariants, or the same gap reappears the next time someone asks where injection lives.
 
@@ -36,7 +36,7 @@ The inference endpoint. Reasoning happens here and nowhere else.
 - **Owned by:** a vendor. Not the operator.
 - **Trust:** untrusted, and permanently so. This is the layer ASK does not defend and does not pretend to.
 - **Compromise means:** manipulation originating from the model rather than from its inputs. Out of scope — model integrity and supply chain are a procurement problem, not a runtime one.
-- **The framework's only leverage:** what reaches it, and what its output is permitted to cause.
+- **What the framework controls:** what reaches it, and what its output is permitted to cause.
 
 ### Context
 
@@ -110,7 +110,7 @@ The current model was written for a 2025 agent: one process, one loop, one conve
 
 **Models with native tool loops.** Inference and dispatch merge; the Runtime is partly absorbed into the Model. The decomposition survives because the layers are defined by ownership and trust, not by which process happens to host what: whatever absorbs the loop is still either operator-attested or it is not. When a vendor's model dispatches tools natively, the Runtime boundary has moved inside a layer the operator does not control, and `runtime-known` fails — visibly, and for the right reason. Under Mind/Body the same shift just looks like Mind doing Body's job, with nothing to point at.
 
-**Hosted and managed agents.** Runtime and Workspace are vendor-controlled and opaque. The operator's only leverage is what enters Context and what leaves Workspace. The decomposition states that plainly, which is exactly what an operator evaluating a hosted offering needs to know. Mind/Body/Workspace implies control the operator does not have.
+**Hosted and managed agents.** Runtime and Workspace are vendor-controlled and opaque. The operator controls only what enters Context and what leaves Workspace. The decomposition states that plainly, which is exactly what an operator evaluating a hosted offering needs to know. Mind/Body/Workspace implies control the operator does not have.
 
 **Subagents and multi-agent.** Each is a turn cycle; State may be shared or isolated. The question "is a subagent a Mind or a Session?" — which today's model cannot answer — stops being asked.
 

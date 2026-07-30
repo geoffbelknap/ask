@@ -208,7 +208,7 @@ The question of where a piece of configuration belongs has one test:
 | Field | Type | Description |
 |---|---|---|
 | `agent_id` | string | Unique identifier for this agent |
-| `role` | string | Functional role (e.g., `development-assistant`, `security-monitor`) |
+| `role` | string | Functional role, such as `development-assistant` or `security-monitor` |
 | `tier` | integer (1–4) | Trust tier — determines capability envelope |
 
 ### Required Sections

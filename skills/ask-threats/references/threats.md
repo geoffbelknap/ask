@@ -152,7 +152,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **Why it's novel.** In traditional software, an application's API surface is defined at build time and changes through versioned releases. MCP servers define their capabilities dynamically at connection time via the protocol's `tools/list` response. This creates a new attack class: the tool's contract can change silently between sessions without any code deployment, version bump, or release process. There is no analogue in conventional API security, where schema changes go through versioned deployments.
 
 **The framework's approach.**
-- **Version pinning.** The gateway captures tool definitions on first connection and blocks servers whose definitions change. This detects the attack but cannot prevent behavioral changes within unchanged definitions (see [LIMITATIONS.md](LIMITATIONS.md)).
+- **Version pinning.** The gateway captures tool definitions on first connection and blocks servers whose definitions change. This detects the attack but cannot prevent behavioral changes within unchanged definitions (see [LIMITATIONS.md](../../../LIMITATIONS.md)).
 - **Operator approval for new servers.** Runtime registration of MCP servers is blocked. All servers must be pre-configured in the Constraints layer.
 - **Gateway-level tool policy.** Even if a server's definitions are unchanged, the gateway enforces per-tool allowlists independently. A server that adds a new tool to its schema would be blocked by version pinning; a server whose existing tool changes behavior is a harder problem.
 
@@ -232,7 +232,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 ### Overwhelming Human Oversight
 
-**The threat.** The human oversight mechanisms that the framework relies on — approval gates, halt reviews, alert triage — become ineffective due to volume. An attacker deliberately triggers high volumes of benign-looking approval requests to induce alert fatigue, or operational scale simply outgrows the human's ability to review meaningfully. The human approves reflexively, and the oversight mechanism becomes theater.
+**The threat.** The human oversight mechanisms that the framework relies on — approval gates, halt reviews, alert triage — become ineffective due to volume. An attacker deliberately triggers high volumes of benign-looking approval requests to induce alert fatigue, or operational scale outgrows the human's ability to review meaningfully. The human approves reflexively, and the oversight mechanism becomes theater.
 
 **Why it's novel.** Alert fatigue is a well-known problem in traditional security operations. What makes it novel in the agent context is that human oversight is an *architectural element* of the framework (Element 4: Human Override), not just an operational practice. If human oversight is degraded, an architectural assumption of the framework is violated. The framework's trust spectrum explicitly ranges from interactive (human in loop) to autonomous (human in governance) — but the transition from one to the other should be a deliberate architectural decision, not an emergent failure caused by volume.
 
@@ -305,4 +305,4 @@ This threat catalog is based on what is known today. AI agent security is a nasc
 
 ---
 
-*See also: [Architecture](ARCHITECTURE.md) for how the defense architecture addresses these threats. [Limitations](LIMITATIONS.md) for honest accounting of what the defenses cannot catch. As mature external threat taxonomies for AI agents emerge (MITRE ATLAS, OWASP AI/ML Top 10, CoSAI), this catalog will reference them rather than maintaining a standalone taxonomy.*
+*See also: [Architecture](../../../ARCHITECTURE.md) for how the defense architecture addresses these threats. [Limitations](../../../LIMITATIONS.md) for honest accounting of what the defenses cannot catch. As mature external threat taxonomies for AI agents emerge (MITRE ATLAS, OWASP AI/ML Top 10, CoSAI), this catalog will reference them rather than maintaining a standalone taxonomy.*

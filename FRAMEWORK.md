@@ -12,7 +12,7 @@ An AI agent operating in a work environment has the same fundamental security pr
 
 The dominant approach today is to trust the agent to follow instructions and hope for the best. ASK takes a different position: **agents are principals to be governed, not tools to be configured.**
 
-When an organization hires a human employee, it provisions a managed device, grants minimum necessary access, communicates policy through training, monitors the environment for threats, and maintains the ability to revoke access and terminate employment. ASK applies the same structural governance to AI agents — with one advantage over human employees: an agent's reasoning can be inspected, its decisions can be replayed, and its constraints can be architecturally enforced rather than merely communicated through policy.
+When an organization hires a human employee, it provisions a managed device, grants minimum necessary access, communicates policy through training, monitors the environment for threats, and maintains the ability to revoke access and terminate employment. ASK applies the same structural governance to AI agents. It has one advantage over the human case: an agent's reasoning can be inspected, its decisions replayed, and its constraints architecturally enforced rather than communicated through policy.
 
 This gives a better starting position than traditional workforce security. But "better" does not mean "solved." Agents will be tricked. Exploits will succeed. Controls will have gaps. The framework is designed around that reality — measuring success not by the absence of incidents, but by the speed and quality of detection, response, and learning when incidents inevitably occur.
 
@@ -37,7 +37,7 @@ Enforcement machinery must never run inside the agent's isolation boundary. The 
 Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.
 
 **Tenet 3 — Mediation is complete.**
-There is no path from the agent to any external resource that bypasses the mediation layer. If a new external dependency is added, it must go through the mediation layer. Direct network access from the agent container is a framework violation. Egress includes indirect paths, not only the calls the agent makes itself: if the agent's output can cause data to leave through another party's action, that path is part of the agent's egress and must be mediated. Routing through a trusted intermediary does not make a path mediated.
+There is no path from the agent to any external resource that bypasses the mediation layer. If a new external dependency is added, it must go through the mediation layer. Direct network access from the agent container is a framework violation. Egress includes indirect paths, not only the calls the agent makes itself. If the agent's output can cause data to leave through another party's action, that path is part of the agent's egress and must be mediated. Routing through a trusted intermediary does not make a path mediated.
 
 **Tenet 4 — Enforcement failure defaults to denial.**
 No failure of enforcement infrastructure — mediation, gateway, proxy, policy engine — can result in expanded agent capability. An agent whose enforcement layer is unavailable is an agent that cannot act.
@@ -179,7 +179,7 @@ Knowledge accumulated by agents must be structured, auditable, and operator-owne
 *Agent organizations that compound intelligence over time produce shared knowledge as a byproduct of work. This knowledge is an organizational asset — queryable by humans, exportable in standard formats, and more valuable than any individual agent's output. Like audit logs and policy, it is infrastructure that belongs to the organization.*
 
 **Tenet 27 — Knowledge access is bounded by authorization scope.**
-Organizational knowledge is shared, but access to it is not unlimited. Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No agent can read knowledge outside its authorized scope, and the synthesized view available through the graph must not exceed what the querying agent is individually authorized to access (Tenet 20 — synthesis cannot exceed individual authorization).
+Organizational knowledge is shared, but access to it is not unlimited. Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No agent can read knowledge outside its authorized scope. The synthesized view available through the graph must not exceed what the querying agent is individually authorized to access (Tenet 20).
 
 *In a multi-agent system, agents from different authorization scopes contribute knowledge to shared infrastructure. Without access controls, an agent could traverse relationships to reach a synthesized view that exceeds any individual contributor's authorization — using the knowledge store as a side channel to bypass authorization boundaries.*
 
@@ -265,7 +265,7 @@ Constraints have two manifestations: **agent-visible constraints** (the agent kn
 
 **Session — What is happening right now.** The LLM's active context — the current conversation, working reasoning, live decision-making. The Session is ephemeral. It is also the most exposed layer — the active attack surface for prompt injection, social engineering, and manipulation via tool outputs or fetched content.
 
-The Session is ephemeral by default, but the reasoning trace within it is security-relevant in two ways. It is not principal-facing (Tenet 28). And when an operator chooses to capture it for audit or forensics, that capture is performed by the mediation layer, is operator-controlled, and cannot be suppressed by the agent (Tenet 2) — capture is not required by the framework, and a captured trace remains internal state, not principal-facing output.
+The Session is ephemeral by default, but the reasoning trace within it is security-relevant in two ways. It is not principal-facing (Tenet 28). When an operator chooses to capture it for audit or forensics, the mediation layer performs that capture, the operator controls it, and the agent cannot suppress it (Tenet 2). Capture is not required by the framework. A captured trace remains internal state, not principal-facing output.
 
 **The critical security boundary is between Constraints (read-only to agent) and Identity (writable by agent).** An agent that can write to its own constraints can rewrite its own rules. The architecture makes this structurally impossible — not a matter of trust, policy, or the agent's good intentions.
 
@@ -381,7 +381,12 @@ Halt is a pause — the agent is suspended and resumable. Quarantine is containm
 
 ### Constraint Changes
 
-Constraints can change during an active session. All changes are atomic (Tenet 9) and logged (Tenet 10). The framework recognizes four categories: planned updates (default next session), reactive updates (triggered by incidents, severity determines handling), exception lifecycle (grant, expiry, revocation), and trust changes (elevation always next session with human approval, reduction can be immediate).
+Constraints can change during an active session. All changes are atomic (Tenet 9) and logged (Tenet 10). The framework recognizes four categories:
+
+- **Planned updates** — take effect next session by default.
+- **Reactive updates** — triggered by incidents; severity determines handling.
+- **Exception lifecycle** — grant, expiry, revocation.
+- **Trust changes** — elevation always next session with human approval; reduction can be immediate.
 
 ---
 

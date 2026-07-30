@@ -170,7 +170,7 @@ Each agent gets its own container, scoped API key, egress policy, and network se
 |---|---|---|
 | **Worker** | Does the work | High capability within scope, isolated from other agents |
 | **Coordinator** | Plans, delegates, synthesizes | Cannot act directly in worker workspaces; constrained by Tenets 19–20 |
-| **Function** | Oversight and governance (e.g., security monitor) | Cross-boundary visibility, constrained action capability |
+| **Function** | Oversight and governance, such as the security monitor | Cross-boundary visibility, constrained action capability |
 
 ### Delegation Bus
 
