@@ -205,7 +205,7 @@ The cognitive model rests on Session being ephemeral — "resets each session." 
 ## Knock-on changes
 
 - **`FRAMEWORK.md` policy hierarchy.** "Platform Tenets" sits at the top of the hierarchy and `Effective permissions = Platform tenets ∩ Compliance policy ∩ …`. Intersecting invariants with permission sets is a category error — an invariant is not a permission you narrow, it is a property that holds across every layer. Restate as a precondition on the whole hierarchy, not a member of it.
-- **Numbering.** `I-01` is unreadable (I/1 collision). Use `INV-01` and `PRIN-01`, or bare numbers leaning on the existing "reference by name, not number" policy — which makes this rename far cheaper than 918 occurrences suggests.
+- **Numbering: `INV-01` and `PRIN-01`.** *(Decided.)* `I-01` was rejected for the I/1 collision. The existing "reference by name, not number" policy in `README.md` still stands and is what makes this rename far cheaper than 918 occurrences suggests.
 - **`ARCHITECTURE.md § Verification Testing`** grows from six tests to one per invariant. This is the largest single piece of work in the proposal and the one that makes the rename true rather than cosmetic.
 - **`REGULATORY.md`** mappings are keyed `T<n>` throughout and need re-keying. Worth doing in the same pass as adding COSAiS.
 - **T21's forward reference** to T24 crosses two categories backwards; resolve during renumbering.
