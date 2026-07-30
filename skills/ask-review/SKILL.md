@@ -57,11 +57,13 @@ Every ASK deployment MUST implement all four. Omitting any element creates a gap
 
 ### Mind / Body / Workspace
 
-| Layer | What It Is | Independently Replaceable |
+| Layer | What It Is | Ownership |
 |---|---|---|
-| **Mind** | Cognitive core — reasoning, role, behavioral parameters, memory | Swap agent frameworks without losing identity |
-| **Body** | Runtime process — hosts the Mind, manages lifecycle, translates decisions to actions | Reimage without losing state |
-| **Workspace** | Managed environment — container, VM, namespace with tools, network, resource limits | Change role by loading different Mind |
+| **Mind** | Cognitive core — reasoning, role, behavioral parameters, memory | Split — role/constraints/memory operator-controlled; reasoning runs at an inference provider that is not |
+| **Body** | Runtime process — hosts the Mind, manages lifecycle, translates decisions to actions | Operator-attested |
+| **Workspace** | Managed environment — container, VM, namespace with tools, network, resource limits | Provisioned by infrastructure, never by the agent |
+
+Replaceable: the Workspace (reimage without losing state) and the role (load a different Mind configuration). The Mind is **not** portable across Bodies. Flag any Body that routes model output into a shell, evaluator, or deserializer without a policy check — that collapses the Mind/Body boundary.
 
 ### Constraints / Session / Identity
 

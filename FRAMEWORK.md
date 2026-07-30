@@ -239,13 +239,19 @@ An agent is not a monolithic entity. It decomposes into layers, each with distin
 
 ### Mind, Body, and Workspace
 
-**Mind** — The agent's cognitive core. Its reasoning capability, role definition, behavioral parameters, memory, and learned context. The Mind is what makes this agent *this agent*. It processes inputs, makes decisions, and generates outputs. It does not execute anything directly. The Mind's configuration is a portable, declarative artifact — independent of where or how it runs.
+**Mind** — The agent's cognitive core. Its reasoning capability, role definition, behavioral parameters, memory, and learned context. The Mind is what makes this agent *this agent*. It processes inputs, makes decisions, and emits outputs; it does not itself execute them.
+
+The Mind spans a trust boundary, and the framework is explicit about which side it governs. Role definition, constraints, and memory are local artifacts under operator control. The reasoning itself runs at an inference provider the operator does not control, reached through the mediation layer. Treat the model as an untrusted component of the Mind: ASK governs what reaches it and what its output can cause, never what it does internally. Model integrity and supply chain are out of scope — see [LIMITATIONS.md](LIMITATIONS.md).
 
 **Body** — The agent's runtime process. The software that hosts the Mind, manages its lifecycle, handles input and output, maintains local state, and translates the Mind's decisions into executable actions. A compromise of the Body means the attacker can execute actions within the Workspace's constraints.
 
+The Mind/Body boundary is a security boundary only where the Body makes it one. A Body that passes model output into a shell, an evaluator, or a deserializer without an intervening policy check has collapsed the two layers, and naming them separately protects nothing. This is not hypothetical: it is the mechanism behind the remote-execution vulnerabilities found in agent frameworks through 2026.
+
 **Workspace** — The managed environment the Body occupies. The container, VM, or namespace that provides the runtime, filesystem, tools, network access, and resource limits. The Workspace is provisioned by infrastructure, never by the agent itself. The Body inherits its constraints from the Workspace it occupies.
 
-The three layers are independently replaceable: the same Mind can run in a different Body (swap agent frameworks without losing identity), the same Mind and Body can run in a different Workspace (reimage without losing state), and the same Body and Workspace can run a different Mind (change the agent's role by loading a different Mind configuration).
+**What is actually replaceable.** The Workspace is: the same Mind and Body can be reimaged onto fresh infrastructure without losing state. The role is: the same Body and Workspace can run a different role by loading a different Mind configuration.
+
+The Mind is **not** portable across Bodies. Context management, compaction strategy, tool-call schemas, and memory formats are all Body-specific, and moving a Mind between agent frameworks changes its behavior materially. What did become portable in practice is narrower and more useful — the Constraints layer: agent instruction files and the skills an agent may use travel across frameworks unchanged. Portability is a property of Constraints, not of the Mind. Do not design as though a Mind can be lifted between runtimes intact.
 
 ### Inside the Mind: Constraints, Session, and Identity
 

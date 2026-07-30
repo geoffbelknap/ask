@@ -18,19 +18,23 @@ separation is correctly implemented, or when designing agent architectures.
 
 ## Mind / Body / Workspace
 
-An agent is not a monolithic entity. It decomposes into three independently replaceable layers:
+An agent is not a monolithic entity. It decomposes into three layers with distinct owners and lifecycles:
 
-| Layer | What It Is | Replaceable How |
+| Layer | What It Is | Ownership |
 |---|---|---|
-| **Mind** | Cognitive core — reasoning capability, role definition, behavioral parameters, memory, learned context | Swap agent frameworks without losing identity |
-| **Body** | Runtime process — hosts the Mind, manages lifecycle, handles I/O, translates decisions to actions | Reimage without losing state |
-| **Workspace** | Managed environment — container, VM, namespace with runtime, filesystem, tools, network, resource limits | Change role by loading a different Mind |
+| **Mind** | Cognitive core — reasoning capability, role definition, behavioral parameters, memory, learned context | Split: role, constraints, and memory are operator-controlled; reasoning runs at an inference provider that is not |
+| **Body** | Runtime process — hosts the Mind, manages lifecycle, handles I/O, translates decisions to actions | Operator-attested (`runtime-known`) |
+| **Workspace** | Managed environment — container, VM, namespace with runtime, filesystem, tools, network, resource limits | Provisioned by infrastructure, never by the agent |
 
 **Key properties:**
 
-- The Mind is what makes this agent *this agent*. It processes inputs, makes decisions, generates outputs. It does not execute anything directly.
+- The Mind is what makes this agent *this agent*. It processes inputs, makes decisions, emits outputs. It does not itself execute them.
+- **Treat the model as an untrusted component of the Mind.** The framework governs what reaches it and what its output can cause — never what it does internally.
 - The Body translates the Mind's decisions into executable actions. A compromise of the Body means the attacker can execute actions within the Workspace's constraints.
+- **The Mind/Body boundary is a security boundary only where the Body enforces it.** A Body that passes model output into a shell, evaluator, or deserializer without a policy check has collapsed the two layers. Flag this in review — it is the mechanism behind the agent-framework RCE class.
 - The Workspace is provisioned by infrastructure, **never by the agent itself.** The Body inherits its constraints from the Workspace it occupies.
+
+**What is actually replaceable.** The Workspace (reimage without losing state) and the role (load a different Mind configuration). The Mind is **not** portable across Bodies — context management, compaction, tool-call schemas, and memory formats are Body-specific. Portability is a property of the Constraints layer, not the Mind.
 
 ---
 

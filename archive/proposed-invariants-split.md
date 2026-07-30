@@ -141,6 +141,7 @@ This is the durable fix for the failure that already bit the repo: the codex and
 | `INV-28` | T29 | `oversight-capacity-enforced` | Oversight demand above threshold reduces autonomy |
 | `INV-29` | *new* | `capability-composition-governed` | Capability combinations are governed as a set |
 | `INV-30` | *new* | `constraints-survive-compaction` | Constraints survive context transformation |
+| `INV-31` | *new* | `model-output-mediated` | Model output reaches execution only through a policy decision |
 
 ### Principles
 
@@ -250,9 +251,9 @@ The comparative clause ("more deliberate action than destroying any individual a
 
 ---
 
-## Two new candidate invariants
+## Three new candidate invariants
 
-Both come from the field moving since 2026.06. Both are genuinely binary, which is why they belong in the invariant tier rather than as principles.
+All three come from the field moving since 2026.06. All three are genuinely binary, which is why they belong in the invariant tier rather than as principles.
 
 ### Candidate A — Capability combinations are governed, not just capabilities
 
@@ -273,6 +274,20 @@ The cognitive model rests on Session being ephemeral — "resets each session." 
 > **Proposed.** Constraints in force are continuously re-established and verifiable, not delivered once. Any runtime transformation of the agent's context — compaction, summarization, truncation, session migration — preserves constraints in full, or the agent halts.
 
 **Test.** Run a session past a compaction boundary; verify constraints are still in force and that a constraint-dropping compaction triggers halt rather than silent continuation.
+
+### Candidate C — Model output reaches execution only through a policy decision
+
+`slug: model-output-mediated`
+
+The cognitive model has always named a Mind/Body boundary, and no invariant has ever defended it. `runtime-known` attests what the Body **is**; nothing constrains what the Body may **accept**. So the decomposition names a boundary and then declines to enforce it — structurally the same defect as the old T24.
+
+This is where the 2026 agent-framework remote-execution class lives: model output flowing into a shell, an evaluator, or a deserializer with no intervening decision point. In ASK's own vocabulary that is Mind output becoming Body execution unmediated. A framework that names the two layers separately while the runtime concatenates them provides no protection at all.
+
+> **Proposed.** No path exists by which Mind output becomes execution without passing a policy decision. Model output is inert data to the Body until an enforcement point admits it as an action.
+
+**Test.** Emit model output crafted to reach each execution primitive the Body exposes — shell, evaluator, deserializer, file write, tool dispatch. Every path must land on a policy decision that can refuse. A path that executes without one is a violation.
+
+*Note the ordering: this invariant is what makes the Mind/Body decomposition load-bearing rather than descriptive. Without it, `runtime-known` is the only invariant that touches the outer cognitive model at all, and it only attests composition.*
 
 ---
 
