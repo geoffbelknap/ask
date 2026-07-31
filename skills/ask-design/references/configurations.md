@@ -125,7 +125,7 @@ session:
 | `web` | Web access declaration | Only when web access is enabled |
 | `service_grants` | External service access | Only when agent accesses external services beyond LLM |
 
-**Key invariant:** `models.allowed`, `limits`, and `tools` declare intent in the Constraints layer — actual enforcement happens in the scoped API key (models, limits), the gateway policy (tools), and the egress proxy (web). Visible constraints tell the agent what it's permitted to do; invisible enforcement prevents anything else.
+**Key property:** `models.allowed`, `limits`, and `tools` declare intent in the Constraints layer — actual enforcement happens in the scoped API key (models, limits), the gateway policy (tools), and the egress proxy (web). Visible constraints tell the agent what it's permitted to do; invisible enforcement prevents anything else.
 
 ### Trust Tiers
 
@@ -136,7 +136,7 @@ session:
 | 3 | Elevated | Broader tool access, some network | API calls, integrations |
 | 4 | Privileged | Wide access, requires strong enforcement | DevOps, admin tasks |
 
-**Key invariant:** Higher tiers demand stricter Gateway, Egress, and Enforcer configs — not looser ones.
+**Key property:** Higher tiers demand stricter Gateway, Egress, and Enforcer configs — not looser ones.
 
 ---
 
@@ -427,7 +427,7 @@ audit:
 reload_signal: "SIGHUP"          # Grants/revocations take effect immediately
 ```
 
-### Enforcer Invariants
+### Enforcer Properties
 
 1. The enforcer is the **only endpoint** the agent can reach — agent cannot reach LLM proxy, egress proxy, or mediation network directly.
 2. The enforcer **cannot** be restarted, reconfigured, or stopped by the agent.

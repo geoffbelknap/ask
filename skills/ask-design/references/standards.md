@@ -16,7 +16,7 @@ NIST's Center for AI Standards and Innovation (CAISI) launched the AI Agent Stan
 - **RFI on AI Agent Security** (NIST-2025-0035): 932 public comments. Questions about constraining agent environments, monitoring actions, and maintaining human override align with ASK's four elements.
 - **NCCoE Concept Paper: Software and AI Agent Identity and Authorization**: Proposes applying identity standards (OAuth 2.0/2.1, OIDC, SPIFFE/SPIRE, SCIM, NGAC) to agentic architectures. Focuses on identification, authentication, authorization, delegation, logging, and prompt injection mitigation for enterprise-internal agents.
 
-**Relationship to ASK:** NCCoE's focus areas — agent identification, authorization, delegation, tamper-proof logging, and prompt injection — correspond closely to ASK's principal model, mediation layer, audit log, and XPIA threat treatment. Candidate technologies (SPIFFE/SPIRE, NGAC, SCIM) align with ASK's enforcer credential management and principal model identity lifecycle. ASK defines architectural properties; NCCoE shows specific technology implementations. The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that ASK's Security invariants (17–19) and multi-agent architecture address.
+**Relationship to ASK:** NCCoE's focus areas — agent identification, authorization, delegation, tamper-proof logging, and prompt injection — correspond closely to ASK's principal model, mediation layer, audit log, and XPIA threat treatment. Candidate technologies (SPIFFE/SPIRE, NGAC, SCIM) align with ASK's enforcer credential management and principal model identity lifecycle. ASK defines architectural properties; NCCoE shows specific technology implementations. The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that ASK's trust invariants (`unverified-zero-trust`, `external-agents-cannot-instruct`) and multi-agent architecture address.
 
 ### NIST Cybersecurity Framework Profile for AI (NISTIR 8596)
 
@@ -28,7 +28,7 @@ Maps AI security concerns onto CSF 2.0 across securing AI systems, AI-enabled cy
 
 The foundational zero trust reference. The principle that no entity is inherently trusted, all access is verified, and breach is assumed.
 
-**Relationship to ASK:** ASK applies zero trust principles to AI agents. Invariants 5 (no blind trust), 15 (trust is earned and monitored continuously), and 18 (unknown entities default to zero trust) are direct applications.
+**Relationship to ASK:** ASK applies zero trust principles to AI agents. `trust-declared` (trust without a declaration is rejected) and `unverified-zero-trust` (unverified entities default to zero trust) are direct applications, with `trust-earned` as the calibration principle.
 
 ### NIST SP 800-63-4 — Digital Identity Guidelines
 
@@ -83,7 +83,7 @@ Open standard for AI application ↔ external tool/data integration via JSON-RPC
 
 Open protocol (launched by Google, now under the Linux Foundation) for inter-agent communication across organizational and framework boundaries. Supports agent discovery via Agent Cards, OAuth 2.0/OIDC authentication, JSON-RPC 2.0 over HTTPS, and Server-Sent Events for long-running tasks. 150+ organizations in the ecosystem as of early 2026.
 
-**Relationship to ASK:** A2A extends beyond ASK's current multi-agent model (single operator). ASK Security invariants 17–19 provide the policy framework for how compliant systems interact with A2A-speaking external agents. The delegation bus could be extended to mediate A2A traffic at organizational boundaries. A2A's built-in support for short-lived OAuth tokens and OpenTelemetry-compatible tracing aligns with ASK's credential scoping and audit log requirements.
+**Relationship to ASK:** A2A extends beyond ASK's current multi-agent model (single operator). ASK's trust invariants — `trust-declared`, `unverified-zero-trust`, and `external-agents-cannot-instruct` — provide the policy framework for how compliant systems interact with A2A-speaking external agents. The delegation bus could be extended to mediate A2A traffic at organizational boundaries. A2A's built-in support for short-lived OAuth tokens and OpenTelemetry-compatible tracing aligns with ASK's credential scoping and audit log requirements.
 
 ---
 

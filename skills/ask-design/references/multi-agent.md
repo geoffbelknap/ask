@@ -22,7 +22,7 @@ Read this file when reviewing or designing systems with multiple interacting age
 Multi-agent systems amplify every risk in the XPIA kill chain. When Agent A's output becomes
 Agent B's input, a single injection can propagate across the entire system.
 
-**ASK multi-agent invariants:**
+**ASK multi-agent design rules:**
 
 1. **No transitive trust.** Agent A trusting Agent B does not mean Agent A trusts Agent C
    (even if Agent B trusts Agent C).
@@ -34,9 +34,12 @@ Agent B's input, a single injection can propagate across the entire system.
 
 **Relevant invariants:**
 - **`delegation-bounded`:** Delegation cannot exceed delegator scope
-- **`labeled-delivery-enforced`:** Synthesis cannot exceed individual authorization
+- **`labeled-delivery-enforced`:** Labeled components are refused to uncleared recipients
 - **`external-agents-cannot-instruct`:** External agents cannot instruct internal agents
-- **`unknown-conflicts-yield`:** Unknown conflicts default to yield and flag
+- **`authority-derived-from-principal`:** Authority is derived from the requesting principal
+
+**Relevant principle (directional, not an invariant):**
+- **`unknown-conflicts-yield`:** Unknown workspace conflicts default to yield and flag
 
 ---
 

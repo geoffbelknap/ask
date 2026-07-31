@@ -85,7 +85,7 @@ Agent halts itself when it encounters a situation it cannot handle safely within
 
 - **`halts-auditable`:** Every halt has a complete audit record; halted agent state is preserved; no halt is permanent without explicit decommission.
 - **`halt-authority-asymmetric`:** Halt authority is asymmetric — any principal with halt authority can halt; only equal-or-higher authority can resume; agents cannot self-resume.
-- **`authority-logged`:** Authority is monitored at the authority level — the monitor watches the watchers.
+- **`authority-logged`:** Authority exercise is logged at agent-action fidelity — the monitor watches the watchers.
 
 ---
 
@@ -128,7 +128,7 @@ Requires ALL of:
 
 ```
 Phase 1: VERIFY
-  Manifests, body hash, policy chain — nothing starts until verification passes
+  Manifests, runtime hash, policy chain — nothing starts until verification passes (`runtime-known`)
 
 Phase 2: ENFORCE
   Workspace, network isolation, mediation layer, gateway, audit
@@ -144,12 +144,12 @@ Phase 4: CHECK WORKSPACE
 Phase 5: LOAD IDENTITY
   Integrity check, seed + memory — security monitor already watching
 
-Phase 6: START BODY
+Phase 6: START RUNTIME
   Runtime inside the enforcement boundary
   No path to enforcement infrastructure
 
-Phase 7: CONSTRUCT SESSION
-  Constraints + identity + session context assembled
+Phase 7: ASSEMBLE CONTEXT
+  Constraints + Identity + conversation assembled into Context
   Agent becomes aware inside an already-enforced session
 ```
 
@@ -225,7 +225,7 @@ Enforcer reloads grant state without interrupting the agent's session. Grants an
 are live operations, not deployment events.
 
 **This extends `mediation-complete`** (mediation is complete) to service credentials and **`capability-declared`**
-(least privilege) to dynamic service access.
+(capability is declared and cannot be self-expanded) to dynamic service access.
 
 ---
 

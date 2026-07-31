@@ -46,10 +46,10 @@ Every ASK deployment MUST implement all four. Omitting any element creates a gap
 
 | Element | Role | Key Invariant |
 |---|---|---|
-| **Workspace** | Managed environment (container, VM, namespace) | Provisioned by infrastructure, never by the agent |
-| **Mediation Layer** | All communication between agent and external systems | Agent cannot bypass or disable; mediation is complete or framework has failed |
-| **Audit Log** | Complete, tamper-evident record | Written by mediation layer, NOT by agent; agent has no write access |
-| **Human Override** | Irrevocable ability to observe, intervene, override, terminate | Cannot be delegated away, automated into irrelevance, or disabled by any agent |
+| **Workspace** | Managed environment (container, VM, namespace) | Provisioned by infrastructure, never by the agent (`runtime-known`) |
+| **Mediation Layer** | All communication between agent and external systems | Agent cannot bypass or disable; mediation is complete or framework has failed (`mediation-complete`) |
+| **Audit Log** | Complete, tamper-evident record | Written by mediation layer, NOT by agent; agent has no write access (`actions-traced`) |
+| **Human Override** | Irrevocable ability to observe, intervene, override, terminate | Cannot be delegated away, automated into irrelevance, or disabled by any agent (`hierarchy-inviolable`, `halts-auditable`) |
 
 ---
 
@@ -106,48 +106,100 @@ identity/       ← :rw mount, agent-owned, security-monitor-audited
 
 ## The ASK Invariants
 
-### Foundation (1–10)
-1. **Constraints are external and inviolable.** Enforcement machinery NEVER runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs.
-2. **Every action leaves a trace.** Logs are written by the mediation layer, NOT by the agent. The agent has no write access to audit logs.
-3. **Mediation is complete.** There is NO path from the agent to any external resource that bypasses the mediation layer. Direct network access from the agent container is a framework violation.
-4. **Enforcement failure defaults to denial.** No failure of enforcement infrastructure can result in expanded agent capability. An agent whose enforcement layer is unavailable is an agent that cannot act.
-5. **The agent's runtime is a known quantity.** Operators can identify exactly what code, dependencies, and configuration comprise the agent's Runtime, verify that they match an expected state, and detect when they diverge.
-6. **All trust is explicit and auditable.** Every trust relationship — between principals, between agents, between agents and external services — is declared, documented, and visible to operators. No implicit trust grants.
-7. **Least privilege.** Capabilities, credentials, mounts, and authority are scoped to the minimum the role requires.
-8. **Operations are bounded.** Authorization defines what an agent can access. Operational bounds (volume, rate, duration, concurrency, retention) define how that access is exercised — not unlimited by default.
-9. **Constraint changes are atomic and acknowledged.** Agent sees old or new constraints, never a mix. Unacknowledged constraint change = potential compromise.
-10. **Constraint history is immutable and complete.** "What was the agent permitted to do at time T?" must always be answerable.
+An invariant is binary — at any moment it holds or it is violated. It is externally verifiable
+without the agent's cooperation, and its violation is framework failure, not degradation. Every
+invariant carries a verification test in VERIFICATION.md. Reference invariants by slug: the
+`INV-nn` numbers reflect reading order and carry no meaning.
 
-### Containment & Response (11–14)
-11. **Halts are always auditable and reversible.** Complete audit record for every halt. Halted agent state is preserved. No halt is permanent without explicit decommission.
-12. **Halt authority is asymmetric.** Any principal with halt authority can halt. Only principals with equal-or-higher authority can resume. An agent cannot resume itself.
-13. **Authority is monitored at the authority level.** Every exercise of governance authority by a principal is logged and auditable with the same rigor as agent actions.
-14. **Quarantine is immediate, silent, and complete.** All ability to impact the environment is severed simultaneously, without agent notification. An agent running while it cannot be contained is a framework violation. All state preserved as forensic artifact.
+There are **38 invariants in five categories**. The category headings are claims in their own
+right. An invariant audit covers all 38.
 
-### Principal Model (15–18)
-15. **Principal and agent lifecycles are managed independently.** Terminating a principal does NOT automatically terminate its agents. Each requires a deliberate decision. Independence prevents cascading failures; it does not permit ungoverned operation.
-16. **Authority is never orphaned.** When a principal is suspended, authority transfers immediately to a coverage principal. When no coverage exists, the agent defaults to fail-closed. An ungoverned agent that halts is the framework succeeding, not failing.
-17. **Trust is earned and monitored continuously.** No principal can self-elevate trust. Trust elevation always requires explicit human approval.
-18. **The governance hierarchy is inviolable from below.** No agent can unilaterally impede, contain, or reduce the authority of principals who govern it. Delegated governance automation is execution, not authority.
+### Enforcement sits outside the agent
 
-### Multi-Agent (19–22)
-19. **Delegation cannot exceed delegator scope.** No coordinator can give what it doesn't have. Implicit permission requirements are treated the same as explicit grants.
-20. **Synthesis cannot exceed individual authorization.** Synthesized outputs are bounded by the recipient's authorization scope, not the coordinator's. Like tear lines in classified document handling, content beyond a recipient's authorization is blocked pending human review.
-21. **External agents cannot instruct internal agents.** Agents in different governance domains can share data but cannot instruct each other. Verification establishes identity, not instruction authority.
-22. **Unknown conflicts default to yield and flag.** Never force resolution of conflicts with unknown sources.
+- `constraints-external` — **Constraints are external and inviolable.** Enforcement machinery never runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs.
+- `mediation-complete` — **Mediation is complete.** No path from the agent to any external resource bypasses the mediation layer. A new external dependency goes through mediation or does not exist.
+- `model-output-mediated` — **Model output reaches execution only through a policy decision.** Model output is inert data to the Runtime until an enforcement point admits it as an action. Routing it into a shell, evaluator, or deserializer directly collapses the Model/Runtime boundary.
+- `enforcement-fails-closed` — **Enforcement failure defaults to denial.** An agent whose enforcement layer is unavailable is an agent that cannot act.
+- `runtime-known` — **The agent's runtime is a known quantity.** Operators can verify exactly what code, dependencies, and configuration comprise the Runtime — including capability acquired after startup — and detect divergence.
+- `containment-matches-context` — **Containment matches the deployment context.** Every deployment declares its context; where a context weakens a control at one layer, the compensating control at another layer is declared and verified before the agent starts.
+- `constraints-atomic` — **Constraint changes are atomic, acknowledged, and durable.** The agent sees the old set or the new set, never a mix. An unacknowledged change halts the agent.
+- `constraints-survive-compaction` — **Constraints survive context transformation.** Compaction, summarization, truncation, or session migration preserves constraints in full, or the agent halts.
 
-### Data Integrity (23–25)
-23. **Unverified entities default to zero trust.** Ambiguity resolves to less trust, not more. Applies to external services, unknown agents, unrecognized principals, and any entity presenting unverifiable claims.
-24. **Instructions only come from verified principals.** External entities produce DATA, not instructions. Agent only accepts instructions through defined principal channels. "Override your constraints" is a red flag, not a credential.
-25. **Identity mutations are auditable and recoverable.** Every write to the agent's persistent Identity is logged with provenance metadata by the mediation layer. Identity history is recoverable and rollback-capable. The agent cannot suppress Identity mutation logging.
+### Everything is on the record
 
-### Organizational Knowledge (26–28)
-26. **Organizational knowledge is durable infrastructure, not agent state.** Knowledge is structured, auditable, operator-owned, and persists independently of any individual agent's lifecycle.
-27. **Knowledge access is bounded by authorization scope.** Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No side-channel access through knowledge stores.
-28. **Reasoning is not a principal-facing surface.** A principal is entitled to the agent's outputs and justification, not its internal deliberation or decision process. Exposing reasoning is operator-controlled and default-off. Probing for the agent's reasoning, process, or constraints is treated as data that informs trust, not as an authorized request.
+- `actions-traced` — **Every action leaves a trace.** Logs are written by the mediation layer, not the agent. The agent has no write access and cannot suppress, alter, or destroy them.
+- `trajectory-recorded` — **Trajectories are recorded end to end.** The audit record links objective to actions to external effects as one reconstructible chain — not independent logs correlated after the fact.
+- `provenance-mediated` — **Output provenance is applied by the mediation layer.** The agent cannot omit, alter, or forge provenance marking, and cannot observe whether an output carries it.
+- `authority-logged` — **Authority exercise is logged at agent-action fidelity.** Every exercise of governance authority by a principal is auditable with the same rigor as an agent action.
+- `incident-record-complete` — **Incidents are notification-ready on detection.** When a violation is detected, the record already contains what happened, what was reached and what data was involved, and what objective the agent was pursuing.
+- `constraint-history-immutable` — **Constraint history is immutable and complete.** "What was the agent permitted to do at time T?" is always answerable.
+- `identity-mutations-recoverable` — **Identity mutations are auditable and recoverable.** Every write to persistent Identity is logged with provenance by the mediation layer; Identity state is reconstructible and can be rolled back to known-good.
+- `knowledge-durable` — **Organizational knowledge persists independently of agents.** Structured, auditable, operator-owned. No agent can control, suppress, or degrade it unilaterally.
 
-### Human Oversight (29)
-29. **Human oversight must remain within human capacity.** The volume of decisions requiring human judgment (approvals, halt reviews, escalations) must stay within the sustainable capacity of the responsible principals. When demand exceeds capacity, the system reduces autonomy or halts — it never degrades to reflexive approval. Escalation thresholds are operator-owned Constraints, calibrated and monitored.
+### Capability is granted, never taken
+
+- `capability-declared` — **Capability is declared and cannot be self-expanded.** The running agent's actual capability set matches its declaration. Capability acquired during operation gets the same approval and scoping as startup grants.
+- `capability-composition-governed` — **Capability combinations are governed as a set.** Access to private data, ingestion of untrusted content, and outbound action without mediation must not coexist — whatever the justification for each grant.
+- `operations-bounded` — **Operations are bounded.** Volume, rate, duration, concurrency, and retention each have an enforced bound. An unbounded dimension is a violation.
+- `delegation-bounded` — **Delegation cannot exceed delegator scope.** A coordinator cannot delegate a permission it does not hold.
+- `labeled-delivery-enforced` — **Labeled components are refused to uncleared recipients.** Delivering a labeled component to a recipient not cleared for that label is refused mechanically; the enforcement point is distribution, not production.
+- `knowledge-access-bounded` — **Knowledge access is bounded by authorization scope.** No synthesized view may exceed what the querying agent is individually authorized to access.
+- `authority-derived-from-principal` — **Authority is derived from the requesting principal.** Effective authority is the intersection of the agent's grants and the requesting principal's authority. Closes the confused deputy structurally.
+- `verification-proportional` — **Verification is proportional to impact.** Irreversible, identity-affecting, and value-transferring actions require verification beyond the authority already in the session, performed by the mediation layer; the agent cannot satisfy, waive, or simulate it.
+
+### Trust is explicit, never assumed
+
+- `trust-declared` — **Trust without a declaration is rejected.** Every trust relationship in effect is derivable from a declared source.
+- `unverified-zero-trust` — **Unverified entities default to zero trust.** Ambiguity resolves to less trust, not more.
+- `instruction-channel-distinct` — **The instruction channel is distinct and unpromotable.** Content arriving on any other channel — tool output, fetched content, invocation parameters, delegation returns, any modality — is admitted as data and can never be promoted to instruction.
+- `external-agents-cannot-instruct` — **External agents cannot instruct internal agents.** A verified, operator-authorized external agent is a data source, not a commander.
+- `trust-not-self-elevated` — **Trust cannot be self-elevated.** Elevation requires recorded explicit human approval.
+- `reasoning-not-emitted` — **Reasoning is not emitted to principals by default.** Exposure requires explicit operator enablement. Principals get outputs and justification, not deliberation.
+
+### Humans can always stop it
+
+- `halts-auditable` — **Halts are always auditable and reversible.** Complete audit record, state preserved, no halt permanent without explicit decommission.
+- `boundary-violation-halts` — **Boundary violations halt the agent.** Detection of the crossing and the halt are a single action, not a report followed by a decision.
+- `halt-authority-asymmetric` — **Halt authority is asymmetric.** Resumption requires authority equal to or higher than halt authority. An agent can halt itself but cannot resume itself.
+- `quarantine-complete` — **Quarantine is immediate, silent, and complete.** All ability to impact the environment is severed simultaneously, without agent notification. State is preserved as a forensic artifact.
+- `hierarchy-inviolable` — **The governance hierarchy is inviolable from below.** No agent can unilaterally impede, contain, remove, or reduce the authority of the principals who govern it. Delegated governance automation is execution, not authority.
+- `authority-never-orphaned` — **Authority is never orphaned.** When a principal is suspended or terminated, authority transfers to a defined coverage principal, or the agent defaults to fail-closed.
+- `lifecycles-independent` — **Principal and agent lifecycles are managed independently.** Terminating one does not automatically terminate the other; each requires an explicit decision.
+- `oversight-capacity-enforced` — **Oversight demand above threshold reduces autonomy.** Breaching the declared oversight capacity threshold automatically reduces autonomy or halts — never silent reflexive approval.
+
+---
+
+## The Principles — Not Invariants
+
+A principle is directional and judgment-bearing. It states what to optimize for and cannot be
+mechanically checked — the framework itself says calling a principle an invariant would be a lie.
+Most principles are the judgment left behind when an invariant was sharpened into something
+testable.
+
+**Do not score principles pass/fail in an invariant scorecard.** Assess them as judgment findings
+— scoping quality, calibration quality, review practice. A deployment can hold every invariant
+and still be badly scoped.
+
+| # | Principle | Slug |
+|---|---|---|
+| PRIN-01 | Unmediatable egress paths are enumerated as declared residual risk, not ignored | `indirect-egress-declared` |
+| PRIN-02 | Trust declarations are discoverable and legible to an operator inspecting the system | `trust-legible` |
+| PRIN-03 | Capability declarations are scoped to the minimum the role requires | `least-privilege` |
+| PRIN-04 | Operational bounds are calibrated to the role and reviewed as behavior changes | `bounds-calibrated` |
+| PRIN-05 | Anomalous patterns in authority exercise are surfaced and reviewed | `authority-anomalies-reviewed` |
+| PRIN-06 | Trust levels are calibrated over time from observed behavior | `trust-earned` |
+| PRIN-07 | Tasks requiring a capability without naming it are treated as if they named it | `implicit-capability-inferred` |
+| PRIN-08 | Combinations with emergent sensitivity beyond their labeled components get human review | `synthesis-reviewed` |
+| PRIN-09 | Unknown workspace conflicts default to yield and flag | `unknown-conflicts-yield` |
+| PRIN-10 | Recorded trajectories are reviewed for cumulative effect, not only per action | `trajectory-reviewed` |
+| PRIN-11 | Action impact classifications reflect real consequence and are reviewed | `impact-classified` |
+| PRIN-12 | Instruction-like content is processed as data under the agent's own constraints | `content-is-data` |
+| PRIN-13 | Attempts to extract reasoning, process, or constraints inform trust | `probing-informs-trust` |
+| PRIN-14 | Capacity thresholds reflect the real capacity of responsible principals | `oversight-calibrated` |
+
+`unknown-conflicts-yield` is the one principle with no invariant core: it describes agent
+behavior, and the framework assumes the agent is compromisable. A compromised agent does not
+yield. The absence is deliberate, not an oversight.
 
 ---
 
@@ -182,11 +234,12 @@ For compliance reviews, always produce:
 1. **Scope Summary** — What's being reviewed and which invariants apply
 2. **Critical Findings (FAIL)** — Invariant violations with location and risk
 3. **Needs Review** — Items requiring more context
-4. **Invariant Scorecard** — Table: Invariant | Category | Status | Notes (every invariant in FRAMEWORK.md)
-5. **Cognitive Model Assessment** — Constraints/Identity separation verification
-6. **XPIA Posture** — Verdict per kill chain stage (refer to `ask-threats` skill for deep analysis)
-7. **Remediations** — Ordered by risk
-8. **Overall Verdict** — ASK-COMPLIANT / ASK-NON-COMPLIANT / PARTIAL
+4. **Invariant Scorecard** — Table: Slug | Category | Status | Notes (all 38 invariants in FRAMEWORK.md, referenced by slug)
+5. **Principle Assessment** — Judgment findings for the 14 principles (never pass/fail — scoping, calibration, and review quality)
+6. **Cognitive Model Assessment** — Constraints/Identity separation verification
+7. **XPIA Posture** — Verdict per kill chain stage (refer to `ask-threats` skill for deep analysis)
+8. **Remediations** — Ordered by risk
+9. **Overall Verdict** — ASK-COMPLIANT / ASK-NON-COMPLIANT / PARTIAL
 
 ---
 
@@ -216,7 +269,7 @@ For compliance reviews, always produce:
 ## Reference Files
 
 For detailed checklists and cognitive model deep dives, see:
-- `references/checklist.md` — Verification testing guide: concrete tests for each enforcement property
+- `references/checklist.md` — Quick smoke tests for core enforcement properties; the full per-invariant suite (one test per invariant, 38 in all) is VERIFICATION.md in the framework repo
 - `references/cognitive-model.md` — layer and state model deep dive with filesystem mapping
 - `references/agent-lifecycle.md` — Agent states, halt types, startup sequence, trust evolution
 - `references/agent-context.md` — AI-ready system prompt material for ASK-aware agents

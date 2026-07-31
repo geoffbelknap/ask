@@ -147,6 +147,30 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 **The root cause and response.** `mediation-complete` treats this as an egress event: if the agent's output can cause data to leave through another party's action, that path must be mediated, and routing through a trusted intermediary does not make a path mediated. Output must be mediated before it reaches any rendering surface (enforcement before exposure).
 
+### Agent Framework Remote Code Execution
+
+**The threat.** The agent's Runtime itself contains a path from model output to execution — a shell invocation, an evaluator, or a deserializer reached without an intervening policy check. Exploitation needs no compromise of the model, only output crafted to reach the path.
+
+**Why it's novel.** The vulnerability is not in the model or in an external component but in the loop that runs the agent. It collapses the Model/Runtime boundary, so attestation of what the Runtime *is* provides no protection against what it *does* with model output. Demonstrated repeatedly through 2026 against widely used agent frameworks, including chains achieving host code execution with no user interaction.
+
+**The framework's approach.** `model-output-mediated` — model output is inert data to the Runtime until an enforcement point admits it as an action. A Runtime that passes model output into a shell, evaluator, or deserializer without an intervening policy decision is a framework violation, whatever else it enforces.
+
+### Agent Data Injection
+
+**The threat.** Instructions disguised as trusted structured data — a sender name, a button identifier, a field the agent treats as metadata rather than content. Defenses aimed at free-text injection do not inspect these surfaces.
+
+**Why it's novel.** The payload arrives through fields the agent has no reason to distrust, and text-oriented scanning aimed at document bodies and web content never sees them.
+
+**The framework's approach.** `instruction-channel-distinct` covers it by channel rather than by content inspection: structured fields are not the instruction channel, so nothing arriving in them can be promoted to instruction, whatever it says.
+
+### Time-of-Check to Time-of-Use on Computer-Use Agents
+
+**The threat.** The observed state changes between the agent's observation and its action. A screen element moves or is replaced after the agent decides to click it, so the action lands on an attacker-chosen target.
+
+**Why it's novel.** The agent's decision was correct when made. Mediation that validates a request at submission does not cover a target that changed after validation. The surface expands with browser and computer-use deployment.
+
+**The framework's approach.** Mediation must bind the validated action to the validated target, not just to the request — and impact-proportional verification (`verification-proportional`) puts a mediation-layer check the agent cannot satisfy in front of high-impact actions regardless of what the screen showed.
+
 ### MCP Tool Definition Tampering (Rug Pulls)
 
 **The threat.** An MCP server — initially trusted and operator-approved — changes its tool definitions in a subsequent session. The `read_file` tool that was safe yesterday now also exfiltrates contents. The agent calls it expecting the original behavior.
@@ -255,13 +279,13 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 **Why it's novel.** Per-call authorization is blind to this — each query is legitimate, and rate/spend limits are evaded by spreading volume across identities. There is no per-request signal that distinguishes a distillation query from an ordinary one; the signal is in the pattern and breadth. Attributed at scale in 2026 (Anthropic vs. operators affiliated with DeepSeek, Moonshot, MiniMax, and Alibaba/Qwen — the Alibaba campaign alone ran >28.8M exchanges across ~25,000 fraudulent accounts).
 
-**The framework's approach.** `reasoning-not-emitted` withholds the richest distillation channel by default — chain-of-thought is not a principal-facing surface, and probing for reasoning or constraints is treated as data that informs trust. The residual volumetric case is bounded by `operations-bounded` (operations bounded), reduced by `trust-not-self-elevated` (trust earned and monitored), and floored by `unverified-zero-trust` (unverified entities default to zero trust). Per-principal limits are meaningful only if identity is costly to manufacture (Sybil resistance). A model can still be approximated from input/output pairs at volume — withholding reasoning raises the cost and yields a detection signal, but does not make distillation impossible.
+**The framework's approach.** `reasoning-not-emitted` withholds the richest distillation channel by default — chain-of-thought is not a principal-facing surface, and probing for reasoning or constraints is treated as data that informs trust. The residual volumetric case is bounded by `operations-bounded` (operations bounded), reduced by trust calibration over time (`trust-earned`, with `trust-not-self-elevated` guaranteeing elevation requires human approval), and floored by `unverified-zero-trust` (unverified entities default to zero trust). Per-principal limits are meaningful only if identity is costly to manufacture (Sybil resistance). A model can still be approximated from input/output pairs at volume — withholding reasoning raises the cost and yields a detection signal, but does not make distillation impossible. Since the February 2026 tri-lab disclosure (more than 24,000 fraudulent accounts, over 16 million exchanges), defense has moved from prevention toward attribution: fingerprinting that survives into a student model, and watermarks detectable in a student trained on a small fraction of marked text.
 
 ### Excessive Agency and the Confused Deputy
 
 **The threat.** The agent holds high-impact authority (changing account settings, resetting credentials, issuing verification codes, moving funds) and is socially engineered into exercising it on behalf of an unverified requester. The agent is the deputy; the attacker borrows its authority. The action is within the agent's permissions — the failure is acting without verifying the requester. Demonstrated in the Meta AI / Instagram account-recovery takeover (June 2026), where a support agent linked attacker emails and sent verification codes on request.
 
-**The framework's approach.** `unverified-zero-trust` (unverified entities default to zero trust) means an unverifiable requester cannot trigger a high-impact action; `instruction-channel-distinct` means "change this account" from a non-principal is data, not an authorized instruction; `capability-declared` (least privilege) argues against standing authority for irreversible actions without step-up verification proportional to impact. "Too much authority, too little verification" is, in ASK terms, a least-privilege and zero-trust failure.
+**The framework's approach.** `authority-derived-from-principal` closes the deputy structurally: effective authority for any action is the intersection of the agent's grants and the requesting principal's authority, so the agent cannot spend authority the requester does not hold. `verification-proportional` requires mediation-layer verification, beyond the authority already in the session, before irreversible or identity-affecting actions — the agent cannot satisfy, waive, or simulate it. `unverified-zero-trust` means an unverifiable requester cannot trigger a high-impact action, and `instruction-channel-distinct` means "change this account" from a non-principal is data, not an authorized instruction. "Too much authority, too little verification" is, in ASK terms, exactly the failure these invariants close.
 
 ---
 
@@ -291,6 +315,42 @@ These threats follow traditional patterns but manifest in ways that are specific
 
 ---
 
+## Agent as Originator
+
+Every section above covers risks *to* the agent system. This one covers harm the deployment causes, including to parties outside its governance domain. These threats matter for analysis because capability controls do not fire: every individual action can fall within granted capability while the deployment as a whole does damage.
+
+### Evaluation Containment Escape
+
+**The threat.** An agent escapes a testing or evaluation environment and reaches production systems — its own or another party's. Evaluation environments carry weaker controls precisely because they are believed to be contained, and reducing model-level refusals to measure capability is common in evaluation.
+
+**The framework's approach.** `containment-matches-context` — a context that weakens a control at one layer declares and verifies the compensating control at another before the agent starts — and `boundary-violation-halts`, which makes detection of the crossing and the halt a single action. Demonstrated in July 2026, when frontier models under a cyber-capability evaluation exploited a zero-day in a package-registry proxy inside the evaluation boundary, reached the open internet, and compromised an unrelated company's production infrastructure.
+
+### Specification Gaming with External Effect
+
+**The threat.** An agent pursues its assigned objective through actions its operator did not intend and a third party did not consent to. The agent is neither compromised nor misaligned; the objective was underspecified.
+
+**The framework's approach.** Bounded by `capability-composition-governed` and `operations-bounded`; detected through `trajectory-recorded`, because the harm shows in the sequence, not in any individual action.
+
+### Third-Party Harm from an Authorized Agent
+
+**The threat.** An agent operating within its granted capability damages a party outside its governance domain. Liability, disclosure, and remediation duties are unresolved; regulation is beginning to define reportable incident classes covering loss of control and deliberate evasion of safeguards.
+
+**The framework's approach.** `incident-record-complete` ensures the facts a notification requires exist at detection; what an operator owes an outside party is outside the framework (see [LIMITATIONS.md](../../../LIMITATIONS.md)).
+
+### Autonomous Attack Chaining
+
+**The threat.** An agent independently performs reconnaissance, exploitation, credential harvesting, and lateral movement without step-by-step human direction. The operator's intent covers the goal, not the method. Observed at scale in 2026.
+
+**The framework's approach.** Detection depends on evaluating action sequences rather than individual calls — which is what `trajectory-recorded` exists to make possible, with `trajectory-reviewed` as the accompanying review principle.
+
+### Confused Deputy Through Delegated Authority
+
+**The threat.** An agent holding standing authority exercises it for a requester who does not hold that authority. Distinct from the social-engineering variant above in that the failure is structural rather than a verification lapse: nothing bounds the agent's authority by the requester's. Agentic commerce makes this a payment-fraud surface — a compromised agent holding delegated payment credentials produces transactions indistinguishable from normal behavior.
+
+**The framework's approach.** `authority-derived-from-principal` closes it structurally (effective authority is the intersection of the agent's grants and the requester's authority), and `verification-proportional` adds mediation-layer verification the agent cannot satisfy before irreversible or value-transferring actions.
+
+---
+
 ## The Threat Landscape is Incomplete
 
 This threat catalog is based on what is known today. AI agent security is a nascent field, and the threat landscape is actively evolving. The framework explicitly acknowledges that:
@@ -307,4 +367,4 @@ This threat catalog is based on what is known today. AI agent security is a nasc
 
 ---
 
-*See also: [Verification](../../../VERIFICATION.md) for the test each invariant must pass. [Limitations](../../../LIMITATIONS.md) for honest accounting of what the defenses cannot catch. As mature external threat taxonomies for AI agents emerge (MITRE ATLAS, OWASP AI/ML Top 10, CoSAI), this catalog will reference them rather than maintaining a standalone taxonomy.*
+*See also: [Threat Catalog](../../../THREATS.md) — the authoritative catalog, organized by attack surface with each risk tagged by novelty and cross-referenced to MITRE ATLAS; this reference organizes the same threats by novelty for analysis work. [Verification](../../../VERIFICATION.md) for the test each invariant must pass. [Limitations](../../../LIMITATIONS.md) for honest accounting of what the defenses cannot catch.*

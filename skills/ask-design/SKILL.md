@@ -216,7 +216,6 @@ The framework scales from single-endpoint to enterprise through the **Mediation 
 ## Policy Hierarchy
 
 ```
-Platform Invariants (immovable)
 Compliance Policy (external obligations)
 Organizational Policy (internal non-negotiables)
 ── ── ── HARD FLOOR ── ──
@@ -225,6 +224,11 @@ Agent Policy (mind.yaml + enforcement configs)
 ```
 
 Most restrictive combination of all layers determines effective agent permissions.
+
+**The invariants are not a layer in this hierarchy.** They are a precondition on all of it: no
+policy layer can grant a permission that would violate an invariant, and no combination of layers
+can produce one. Where a policy and an invariant conflict, the deployment is misconfigured — the
+invariant is not overridden.
 
 ---
 
