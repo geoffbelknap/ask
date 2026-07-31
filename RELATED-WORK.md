@@ -4,7 +4,37 @@
 
 ASK operates within a growing ecosystem of frameworks, standards, threat taxonomies, and protocols addressing AI agent security. This document maps the relationship between ASK and each body of work — what overlaps, what's complementary, and where ASK's scope begins and ends.
 
-The entries are organized by type: **Standards and Guidelines**, **Threat Taxonomies**, **Protocols and Specifications**, **Industry Research**, and **Foundational Security Patterns**.
+The entries are organized by type: **Peer Frameworks and Certification**, **Standards and Guidelines**, **Threat Taxonomies**, **Protocols and Specifications**, **Industry Research**, and **Foundational Security Patterns**.
+
+---
+
+## Peer Frameworks and Certification
+
+Work that addresses the same problem ASK does. These are the closest comparisons, and the differences are worth stating precisely.
+
+### Anthropic — Zero Trust for AI Agents (2026)
+
+A [security framework](https://claude.com/blog/zero-trust-for-ai-agents) for deploying enterprise AI agents, published May 2026. Applies zero trust's founding position — trust nothing, verify everything, assume breach — to agentic systems. Covers cryptographically rooted identities, task-scoped permissions, memory protection, sandboxing, and input and output controls, organized as a three-tier maturity model with an eight-phase implementation workflow. Addresses prompt injection, tool poisoning, identity abuse, memory poisoning, and supply chain attacks, and proposes running defensive operations at a speed that matches autonomous attackers.
+
+**Relationship to ASK.** The closest peer, and the positions agree on the fundamentals: the agent is not trusted, identity is scoped, memory is a protected surface, breach is assumed. The frameworks differ in what they produce. Anthropic's is a maturity model — an organization locates itself at Foundation, Advanced, or Optimized and works through phases. ASK states properties that either hold or do not, with a verification test for each. A maturity model answers "how far along are we"; ASK answers "can you demonstrate this." Implementers can use both: the maturity model to sequence adoption, the invariants to prove the result.
+
+### Google DeepMind — AI Control Roadmap (2026)
+
+A [defense-in-depth approach](https://adversa.ai/blog/top-agentic-ai-security-resources-july-2026/) that treats internal agents as potentially misaligned insider threats rather than as tools.
+
+**Relationship to ASK.** Arrives at ASK's founding position from the alignment side rather than the security side. Where ASK says the agent is always assumed compromisable, the control literature says it may be misaligned without any compromise at all. The conclusions converge: enforcement must sit outside the agent, and it must hold whether the agent was subverted or is pursuing its objective too well. The ExploitGym incident is the case where the distinction stops being academic.
+
+### AIUC-1 (2026)
+
+The [first certification standard written for AI agents](https://www.aiuc-1.com/). Six control families — data and privacy, security, safety, reliability, accountability, and society — across 51 named controls, with crosswalks to NIST AI RMF, MITRE ATLAS, ISO/IEC 42001, and the OWASP agentic lists. Developed with Orrick, the Cloud Security Alliance, and MITRE. Certificates run twelve months with quarterly technical testing, and Schellman became the first authorized auditor in February 2026. Its Q2 2026 update added controls for coding agents covering agent identity, just-in-time credentials, MCP runtime containment, and tool-call logging. Certification is backed by Lloyd's of London insurance: the body that issues the certificate also underwrites the risk.
+
+**Relationship to ASK.** Complementary, and the division is clean. ASK states what must be true and provides the test. AIUC-1 certifies and prices the result. Several AIUC-1 controls describe mechanisms for properties ASK states — MCP runtime containment and tool-call logging correspond to `mediation-complete` and `actions-traced`. An ASK-conforming deployment should generate much of the evidence an AIUC-1 audit asks for. The insurance coupling matters commercially: it turns agent security controls into an underwriting question rather than a discretionary spend.
+
+### Singapore IMDA — Model Governance Framework for Agentic AI (2026)
+
+The [first agentic-specific governance framework](https://responsibleailabs.ai/knowledge-hub/articles/global-ai-regulation-2026) from a national regulator, launched January 2026. Covers four dimensions: accountability, transparency, human oversight, and data governance.
+
+**Relationship to ASK.** Regulatory precedent for treating agents as a distinct governance category rather than as an application of general AI rules. Its human-oversight dimension corresponds to `oversight-capacity-enforced` and the Human Override element; its accountability dimension to `actions-traced` and `authority-logged`. Transparency is the dimension ASK does not currently cover — see [REGULATORY.md](REGULATORY.md).
 
 ---
 
@@ -21,6 +51,24 @@ NIST's Center for AI Standards and Innovation (CAISI) [launched the AI Agent Sta
 **Relationship to ASK.** The NCCoE concept paper's areas of interest — agent identification, authorization, delegation, tamper-proof logging, and prompt injection — correspond closely to ASK's principal model, mediation layer, audit log, and XPIA threat treatment. The standards it considers implementing (SPIFFE/SPIRE for workload identity, NGAC for fine-grained access control, SCIM for identity lifecycle) are candidate technologies for ASK's enforcer credential management and principal model identity lifecycle. ASK addresses the architectural properties that must hold; the NCCoE project would demonstrate specific technology implementations that satisfy those properties.
 
 The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that ASK's Data Integrity and Multi-Agent invariants (21, 23, 24) and multi-agent architecture address.
+
+### NIST COSAiS — Control Overlays for Securing AI Systems
+
+An [extension of SP 800-53](https://csrc.nist.gov/Projects/cosais/use-cases) to AI use cases, with dedicated overlays for single-agent and multi-agent deployments. Drafting through late 2026 into 2027.
+
+**Relationship to ASK.** The most technically specific forthcoming guidance for agent deployments, and a likely basis for future FedRAMP AI requirements. Where the overlays specify controls, ASK's invariants describe the properties those controls exist to produce. Implementers in federal scope should expect COSAiS to become the control language and can use ASK's verification tests as the evidence behind it.
+
+### ISO/IEC 42001 — AI Management Systems
+
+The [international standard](https://www.schellman.com/blog/ai-governance/ai-governance-and-iso-42001-faqs) for an AI management system, published December 2023. Thirty-eight controls across core clauses and Annex A, certified through staged audit with three-year validity and annual surveillance.
+
+**Relationship to ASK.** Complementary and non-overlapping. ISO/IEC 42001 governs the management system: policy, roles, risk process, documentation, continual improvement. ASK governs the runtime. An organization needs both, and ASK explicitly declines the management-system obligations — see [What ASK Governs](FRAMEWORK.md#what-ask-governs).
+
+### Council of Europe Framework Convention on AI (CETS 225)
+
+The first legally binding international treaty on AI, in force since November 2025 and ratified by the United States and the United Kingdom. Frames obligations around human rights, democracy, and the rule of law.
+
+**Relationship to ASK.** Binding rather than advisory, which distinguishes it from most entries here. Its obligations are principle-level and require national implementation; ASK sits well below it, describing runtime properties that support the accountability and oversight commitments it establishes.
 
 ### NIST Cybersecurity Framework Profile for AI (NISTIR 8596)
 

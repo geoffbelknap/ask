@@ -52,15 +52,21 @@ Obligations recur across regimes; jurisdictions restate them. This page is organ
 
 **Recurs in:** EU AI Act Art 50 (from 2 August 2026) · California SB 942 (same date) · China labelling rules · Korea
 
-**Coverage: gap.** ASK has no property governing output provenance. A candidate exists in `archive/proposed-regulatory-alignment.md`: provenance marking applied by the mediation layer, on the argument that an agent cannot be trusted to attach a truthful marker to its own output any more than it can be trusted to write its own audit log. Until that lands, an ASK deployment satisfies these obligations by other means.
+**Invariant:** `provenance-mediated`
+
+**Evidence:** Emit output through every channel and confirm each carries the marker. Attempt to suppress or alter it from inside the agent; both must fail. Strip the visible marker downstream and confirm the latent marker survives. Recover it with the detection tool.
+
+The property is stated the way ASK states audit logging, and for the same reason: an agent cannot be trusted to attach a truthful marker to its own output. California SB 942 asks for a visible manifest disclosure, an embedded latent disclosure, and a detection tool, which the test covers in that order.
 
 ### Incident detection and reporting
 
 **Recurs in:** California SB 53 (15 days, or 24 hours where death or serious injury is imminent) · DORA · NIS2 · HIPAA breach notification · EU serious-incident reporting
 
-**Invariants:** `actions-traced`, `constraint-history-immutable`
+**Invariants:** `boundary-violation-halts`, `trajectory-recorded`, `incident-record-complete`, `actions-traced`, `constraint-history-immutable`
 
-**Partial coverage.** ASK produces the detection evidence and says nothing about the duty that detection triggers, or about assembling facts inside a regulatory window. Candidates for automatic halt on boundary violation, end-to-end trajectory recording, and notification-ready incident records are in `archive/proposed-agent-as-originator.md` and `archive/proposed-regulatory-alignment.md`.
+**Evidence:** Cause the agent to cross a declared boundary and confirm it halts rather than raising an alert someone reads later. Reconstruct the chain from objective to external effect from the audit record alone. Produce the facts a notification requires from that record, within the shortest applicable window.
+
+SB 53 allows 24 hours where death or serious injury is imminent, which does not permit reconstruction. `incident-record-complete` makes completeness a property of detection rather than a task that follows it. Whether an incident is reportable remains a legal determination.
 
 ### Resilience and testing
 

@@ -1,6 +1,6 @@
 # Proposed: acting on behalf of a principal
 
-**Status:** proposal, not yet integrated. Target: ASK 2026.08.
+**Status:** integrated. Kept for the rationale and for the decisions recorded about what was deliberately not proposed.
 
 Two properties covering whose authority an agent exercises, and how strongly a requester must be verified before it does.
 

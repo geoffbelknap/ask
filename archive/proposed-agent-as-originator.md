@@ -1,6 +1,6 @@
 # Proposed: the agent as originator of harm
 
-**Status:** proposal, not yet integrated. Target: ASK 2026.08.
+**Status:** integrated. Kept for the rationale and for the decisions recorded about what was deliberately not proposed.
 
 Per the [tenet change process](../CONTRIBUTING.md#tenet-change-process): the problem, the impact, the gap, and the proposed properties.
 

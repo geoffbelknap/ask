@@ -1,6 +1,6 @@
 # Proposed: regulatory alignment as an output, not a mapping
 
-**Status:** proposal, not yet integrated. Target: ASK 2026.08.
+**Status:** integrated. Kept for the rationale and for the decisions recorded about what was deliberately not proposed.
 
 Supersedes the structure of `REGULATORY.md`. Adds two properties and extends [the agent-as-originator proposal](proposed-agent-as-originator.md), whose incident class is now legislated in California.
 

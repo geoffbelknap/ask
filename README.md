@@ -28,6 +28,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 → [ARCHITECTURE.md](ARCHITECTURE.md) — Enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
 
 **Feed context to an agent building ASK systems**
+→ Install the plugin, or point the agent at [FRAMEWORK.md](FRAMEWORK.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
 
 **Check regulatory alignment**
 → [REGULATORY.md](REGULATORY.md) — Mapping of ASK invariants to EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, and SEC AI Guidance. Working document — contributions welcome.
@@ -70,14 +71,14 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── CLAUDE.md              ← Project instructions for AI agents
 ├── LICENSE                ← CC BY 4.0
 │
-└── archive/               ← Proposals: pending, and integrated ones kept for provenance
-    ├── proposed-invariants-split.md    ← Pending: rename invariants to invariants, split the tier
-    ├── proposed-cognitive-model-replacement.md ← Integrated: Model/Context/Runtime/Workspace
-    ├── proposed-agent-as-originator.md ← Pending: outward harm and deployment context
-    ├── proposed-regulatory-alignment.md ← Pending: compliance evidence, provenance, incident readiness
-    ├── proposed-acting-on-behalf.md ← Pending: authority derivation and step-up verification
-    ├── proposed-invariant-reasoning-exposure.md ← Integrated: reasoning is not principal-facing
-    └── proposed-invariants-knowledge.md    ← Integrated as the Organizational Knowledge invariants
+└── archive/               ← Integrated proposals, kept for their rationale
+    ├── proposed-invariants-split.md         ← Invariants and principles, the two-tier split
+    ├── proposed-cognitive-model-replacement.md ← Model/Context/Runtime/Workspace
+    ├── proposed-agent-as-originator.md      ← Outward harm and deployment context
+    ├── proposed-regulatory-alignment.md     ← Compliance evidence and provenance
+    ├── proposed-acting-on-behalf.md         ← Authority derivation and proportional verification
+    ├── proposed-tenet-reasoning-exposure.md ← Reasoning is not principal-facing
+    └── proposed-tenets-knowledge.md         ← The Organizational Knowledge properties
 ```
 
 ---

@@ -13,11 +13,26 @@ ASK uses date-based versioning. Reference invariants and principles by slug; the
 - **Slugs are the reference identity.** Every cross-reference now reads `mediation-complete` rather than Tenet 3. `INV-nn` and `PRIN-nn` reflect reading order, carry no meaning, and appear once each as their own headings. Renumbering is no longer a breaking change.
 - **Twelve items split** into an invariant plus the judgment left behind. Least privilege became `capability-declared`, which has a test, plus `least-privilege`, which does not. Instructions only come from verified principals became `instruction-channel-distinct`, a property of channels, plus `content-is-data`, which the framework already conceded was enforced by containment rather than by the model.
 - **One item has no invariant core.** `unknown-conflicts-yield` describes agent behavior, and the framework assumes the agent is compromisable. It is listed as a principle so the absence is deliberate.
-- **Three new invariants:** `capability-composition-governed` (grants are evaluated as a set — private data, untrusted content, and unmediated outbound action must not coexist), `constraints-survive-compaction` (constraints survive any runtime transformation of Context, or the agent halts), and `model-output-mediated` (model output is inert until a policy decision admits it as an action).
+- **Ten new invariants.** Three from the split itself: `capability-composition-governed` (grants are evaluated as a set — private data, untrusted content, and unmediated outbound action must not coexist), `constraints-survive-compaction` (constraints survive any runtime transformation of Context, or the agent halts), and `model-output-mediated` (model output is inert until a policy decision admits it as an action).
+- Seven more from three research threads, each with a verification test:
+  - `boundary-violation-halts` — an agent detected outside a declared boundary halts automatically rather than raising an alert someone reads later. Fail-closed applied to the agent rather than the enforcement layer.
+  - `containment-matches-context` — every deployment declares its context, and a context that weakens a control at one layer declares and verifies the compensating control at another before startup.
+  - `trajectory-recorded` — the audit record links objective to actions to external effects as one reconstructible chain. Individual actions can each be unremarkable while the sequence is an attack.
+  - `authority-derived-from-principal` — an agent acting for a principal exercises no more authority than that principal holds. Closes the confused deputy structurally; the framework previously described it in three places and prevented it nowhere.
+  - `verification-proportional` — required verification rises with an action's impact, and the agent cannot satisfy or waive it.
+  - `provenance-mediated` — output provenance is applied by the mediation layer, for the same reason audit logs are.
+  - `incident-record-complete` — when a violation is detected the record already contains what a notification requires. Completeness is a property of detection, not a task that follows it.
+- **Two new principles:** `trajectory-reviewed` and `impact-classified`, the judgment residues of trajectory recording and impact classification.
+- **38 invariants and 14 principles**, each invariant with a verification test.
 - **Policy hierarchy corrected.** Invariants were listed as the top policy layer and intersected with permission sets. They are a precondition on the whole hierarchy: no layer can grant a permission that violates one.
 
 ### Architecture
-- **A verification test for every invariant.** ARCHITECTURE had seven test blocks; it now has one per property, keyed by slug. Where a property has a part no test can reach, that part is named under Judgment rather than left implied.
+- **A verification test for every invariant.** ARCHITECTURE had seven test blocks; it now has 38, one per invariant, keyed by slug. Where a property has a part no test can reach, that part is named under Judgment rather than left implied.
+
+### Threat catalog
+- **New section: Agent as Originator.** Every existing section covers risks *to* the agent system. This one covers harm the deployment causes, including to parties outside its governance domain: evaluation containment escape, specification gaming with external effect, third-party harm from an authorized agent, autonomous attack chaining, and the structural form of the confused deputy.
+- New entries: agent framework remote code execution, agent data injection, and time-of-check to time-of-use against computer-use agents.
+- Model distillation updated for the February 2026 tri-lab disclosure and the shift of defense from prevention toward attribution.
 
 ### Regulatory
 - **REGULATORY.md rebuilt** around obligation classes rather than framework-by-framework tables. Each class names the invariants that satisfy it and the test that evidences it. Adds California (SB 53, AB 2013, CPPA ADMT, SB 942), the Council of Europe convention, Korea, Singapore, DORA, NYDFS, ISO/IEC 42001, AIUC-1, and NIST COSAiS. Names what ASK does not provide, including bias testing, privacy determinations, and trust and safety.
