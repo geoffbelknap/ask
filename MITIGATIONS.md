@@ -184,4 +184,4 @@ Per-call authorization is blind to this threat — each query is legitimate. Rat
 
 ---
 
-*See also: [Threat Catalog](THREATS.md) for the risks these mitigations address. [Architecture](ARCHITECTURE.md) for how the defense layers are composed. [Limitations](LIMITATIONS.md) for honest accounting of what these mitigations cannot catch.*
+*See also: [Threat Catalog](THREATS.md) for the risks these mitigations address. [Verification](VERIFICATION.md) for the test each invariant must pass. [Limitations](LIMITATIONS.md) for honest accounting of what these mitigations cannot catch.*

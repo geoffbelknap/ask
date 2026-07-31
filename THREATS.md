@@ -155,4 +155,4 @@ This threat catalog is based on what is known today. AI agent security is a nasc
 
 ---
 
-*See also: [Mitigations](MITIGATIONS.md) for implementation guidance on novel threats. [Architecture](ARCHITECTURE.md) for how the defense layers are composed. [Limitations](LIMITATIONS.md) for honest accounting of what the defenses cannot catch. As mature external threat taxonomies for AI agents emerge (MITRE ATLAS, OWASP AI/ML Top 10, CoSAI), this catalog will reference them rather than maintaining a standalone taxonomy.*
+*See also: [Mitigations](MITIGATIONS.md) for implementation guidance on novel threats. [Verification](VERIFICATION.md) for the test each invariant must pass. [Limitations](LIMITATIONS.md) for honest accounting of what the defenses cannot catch. As mature external threat taxonomies for AI agents emerge (MITRE ATLAS, OWASP AI/ML Top 10, CoSAI), this catalog will reference them rather than maintaining a standalone taxonomy.*

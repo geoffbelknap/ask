@@ -823,7 +823,6 @@ footer {
     <li><a href="#get-started">Get started</a></li>
     <li><a href="#regulatory">Compliance</a></li>
     <li><a href="#documents">Read the docs</a></li>
-    <li><a href="#reference">Implementations</a></li>
     <li>
       <a href="https://github.com/geoffbelknap/ask" class="nav-gh">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
@@ -848,7 +847,6 @@ footer {
     <li><a href="#get-started" class="nav-drawer-link">Get Started</a></li>
     <li><a href="#regulatory" class="nav-drawer-link">Compliance</a></li>
     <li><a href="#documents" class="nav-drawer-link">Read the Docs</a></li>
-    <li><a href="#reference" class="nav-drawer-link">Implementations</a></li>
   </ul>
   <div class="nav-drawer-footer">
     <a href="https://github.com/geoffbelknap/ask" class="nav-drawer-gh">
@@ -868,7 +866,6 @@ footer {
   <li><a href="#get-started" data-section="get-started">Get started</a></li>
   <li><a href="#regulatory" data-section="regulatory">Compliance</a></li>
   <li><a href="#documents" data-section="documents">Read the docs</a></li>
-  <li><a href="#reference" data-section="reference">Implementations</a></li>
   <li><a href="#about" data-section="about">About</a></li>
 </ul>
 
@@ -1140,10 +1137,10 @@ footer {
       <p>Risks organized by attack surface — runtime, network, ingress, agent state, multi-agent, governance. Cross-referenced to MITRE ATLAS technique IDs.</p>
       <div class="doc-card-arrow">Read →</div>
     </a>
-    <a href="https://github.com/geoffbelknap/ask/blob/main/ARCHITECTURE.md" class="doc-card fade-up delay-2">
-      <div class="doc-card-label">Technical reference</div>
-      <h4>ARCHITECTURE.md</h4>
-      <p>Reference defense architecture — enforcement layers, topology, runtime gateway, guardrails stack, trust tiers, scaling patterns, and verification tests.</p>
+    <a href="https://github.com/geoffbelknap/ask/blob/main/VERIFICATION.md" class="doc-card fade-up delay-2">
+      <div class="doc-card-label">Verification</div>
+      <h4>VERIFICATION.md</h4>
+      <p>A test for every invariant, each stating what to do and what must happen. Where a property has a part no test can reach, that part is named rather than implied.</p>
       <div class="doc-card-arrow">Read →</div>
     </a>
     <a href="https://github.com/geoffbelknap/ask/blob/main/MITIGATIONS.md" class="doc-card fade-up delay-3">
@@ -1170,28 +1167,7 @@ footer {
 <hr class="section-divider"/>
 
 <!-- ─── REFERENCE IMPL ────────────────────────────────────── -->
-<section id="reference">
-  <div class="section-label fade-up">Implementations</div>
-  <h2 class="section-heading fade-up">Built on ASK.</h2>
-  <p class="section-sub fade-up">Agency is the reference implementation of ASK — an open source platform for orchestrating teams of AI agents with full enforcement architecture.</p>
-  <div class="ref-impl fade-up">
-    <div style="flex-shrink:0;">
-      <svg width="52" height="52" viewBox="0 0 52 52">
-        <rect x="0" y="0" width="22" height="22" rx="3" fill="#00A882"/>
-        <rect x="26" y="0" width="22" height="22" rx="3" fill="#1A1714"/>
-        <rect x="0" y="26" width="22" height="22" rx="3" fill="#1A1714"/>
-        <rect x="26" y="26" width="22" height="22" rx="3" fill="#1A1714"/>
-      </svg>
-    </div>
-    <div class="ref-impl-text">
-      <h3><a href="https://github.com/geoffbelknap/agency/" style="color:inherit; text-decoration:none;">Agency</a></h3>
-      <p>Implements the single-agent architecture with all core enforcement layers: network isolation, mediation proxy, XPIA guardrails, per-agent enforcement sidecar, container hardening, runtime gateway, and continuous monitoring.</p>
-    </div>
-  </div>
-  <p class="fade-up" style="margin-top:20px; font-size:13px; color:var(--ink-mid); line-height:1.65;">Agency is not the only valid ASK implementation. Any platform that satisfies the invariants is ASK-compliant. If you've built an ASK-compliant system and want to be listed here, open a PR.</p>
-</section>
 
-<hr class="section-divider"/>
 
 <!-- ─── ABOUT ─────────────────────────────────────────────── -->
 <section id="about">
@@ -1218,7 +1194,6 @@ footer {
       <li><a href="https://github.com/geoffbelknap/ask/blob/main/FRAMEWORK.md">Framework</a></li>
       <li><a href="https://github.com/geoffbelknap/ask/blob/main/MITIGATIONS.md">Mitigations</a></li>
       <li><a href="https://github.com/geoffbelknap/ask/blob/main/CONTRIBUTING.md">Contribute</a></li>
-      <li><a href="https://github.com/geoffbelknap/agency/">Agency</a></li>
     </ul>
     <span class="footer-copy">ASK 2026.06 — CC BY 4.0</span>
   </div>
