@@ -145,4 +145,4 @@ NIST COSAiS extends SP 800-53 with dedicated single-agent and multi-agent overla
 
 ## Related work additions
 
-AIUC-1, Singapore IMDA's agentic framework, the Council of Europe convention, NIST COSAiS, and ISO/IEC 42001 all need entries. AIUC-1 needs the most care: it is the closest peer, it is complementary rather than competing, and its Q2-2026 update covers agent identity, just-in-time credentials, MCP runtime containment, and tool-call logging — all of which ASK already describes as properties.
+AIUC-1, Singapore IMDA's agentic framework, the Council of Europe convention, NIST COSAiS, and ISO/IEC 42001 all need entries. AIUC-1 needs the most care. It is the closest peer, and complementary rather than competing. Its Q2-2026 update covers agent identity, just-in-time credentials, MCP runtime containment, and tool-call logging, all of which ASK already describes as properties.
