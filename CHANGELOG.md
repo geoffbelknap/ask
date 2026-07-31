@@ -27,6 +27,12 @@ ASK uses date-based versioning. Reference invariants and principles by slug; the
 - **38 invariants and 14 principles**, each invariant with a verification test.
 - **Policy hierarchy corrected.** Invariants were listed as the top policy layer and intersected with permission sets. They are a precondition on the whole hierarchy: no layer can grant a permission that violates one.
 
+### Architecture retired
+- **ARCHITECTURE.md is removed.** It was 874 lines, of which 226 were the verification tests and the rest described one reference implementation. Two things were wrong with that. It had already fallen behind: none of the ten invariants added in this release appeared anywhere in it. And publishing a reference architecture is a claim about *how*, which the framework declines to make everywhere else. How to implement these properties will move faster than the properties do.
+- **New document: VERIFICATION.md.** The 38 tests, which are the part that has to live in the framework. They imply mechanism without prescribing it: "kill each enforcement component; the agent must lose the capability rather than bypass it" says separable enforcement exists and says nothing about what it is made of.
+- **New section: What You Already Run.** The enterprise control mapping survives the deletion, re-keyed from components to invariants. An organization already running device management, egress filtering, and privileged access management is not facing a new discipline.
+- **No named reference implementation.** ASK no longer points at one. The framework stands on properties and tests.
+
 ### Architecture
 - **A verification test for every invariant.** ARCHITECTURE had seven test blocks; it now has 38, one per invariant, keyed by slug. Where a property has a part no test can reach, that part is named under Judgment rather than left implied.
 

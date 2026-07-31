@@ -10,7 +10,7 @@ How an ASK deployment produces the evidence regulators ask for, and what it does
 
 Regulators converged on demanding evidence rather than policy documents. They ask for audit trails the system cannot tamper with, human override that demonstrably works, and access control that can be shown.
 
-ASK asserts those properties, and every invariant carries a verification test in [ARCHITECTURE.md](ARCHITECTURE.md) with a stated pass condition. This document maps obligations onto those tests. An auditor gets a test and a result, not an assertion that a principle aligns.
+ASK asserts those properties, and every invariant carries a verification test in [VERIFICATION.md](VERIFICATION.md) with a stated pass condition. This document maps obligations onto those tests. An auditor gets a test and a result, not an assertion that a principle aligns.
 
 Obligations recur across regimes; jurisdictions restate them. This page is organized by obligation, with the jurisdictions in an annex.
 

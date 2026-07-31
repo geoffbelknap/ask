@@ -58,7 +58,7 @@ An invariant is a property that must hold for the framework to function. Three t
 2. **Externally verifiable.** An operator or auditor can test it from outside the agent, without the agent's cooperation and without trusting its self-report.
 3. **Violation is framework failure.** Not degradation, not a gap. The framework has failed and must be repaired.
 
-Every invariant carries a verification test in [ARCHITECTURE.md](ARCHITECTURE.md). An invariant with no test is a principle wearing a costume.
+Every invariant carries a verification test in [VERIFICATION.md](VERIFICATION.md). An invariant with no test is a principle wearing a costume.
 
 The five headings below are claims in their own right. A reader who disagrees with one is disagreeing with the framework, not with a filing decision.
 
@@ -376,6 +376,29 @@ Agent security is converging on properties that can be demonstrated rather than 
 
 ---
 
+## What You Already Run
+
+Most of the controls an agent deployment needs already exist in an enterprise security programme, aimed at human employees on managed devices. The agent case is the same shape with a different principal.
+
+| Control you already run | What it does | The invariant that covers it |
+|---|---|---|
+| Mobile device management | Enforce configuration, manage lifecycle | `constraints-external`, `runtime-known` |
+| Secure web gateway | Filter and log outbound traffic | `mediation-complete` |
+| Cloud access security broker | Mediate access to external services | `mediation-complete`, `capability-declared` |
+| Data loss prevention | Stop sensitive data leaving | `mediation-complete`, `provenance-mediated` |
+| Endpoint detection and response | Detect and respond to threats | `actions-traced`, `trajectory-recorded`, `boundary-violation-halts` |
+| Application allowlisting | Control what software may run | `capability-declared`, `model-output-mediated` |
+| Credential vault | Storage, rotation, scoped access | `capability-declared`, `authority-derived-from-principal` |
+| Conditional access | Verify before granting | `unverified-zero-trust`, `verification-proportional` |
+| Network access control | Segment, limit lateral movement | `mediation-complete`, `capability-composition-governed` |
+| User behavior analytics | Baseline normal, detect drift | `trajectory-recorded`, `trust-earned` |
+| Privileged access management | Elevate deliberately, log it | `trust-not-self-elevated`, `authority-logged` |
+| Offboarding | Revoke on departure | `lifecycles-independent`, `authority-never-orphaned` |
+
+This is the adoption argument. An organization running these controls is not facing a new discipline, and does not need a parallel one. It is applying a discipline it already has to a principal that is not a person.
+
+The mapping is deliberately to invariants rather than to products. Which component enforces a given property is an implementation decision, and those will change faster than the properties do.
+
 ## The Cognitive Model
 
 An agent decomposes into four layers. Each has one owner and one trust level, and the boundaries between them are where enforcement sits.
@@ -582,4 +605,4 @@ Delegation is validated against explicit permission declarations, not natural-la
 
 ---
 
-*See also: [Architecture](ARCHITECTURE.md) for the reference defense architecture. [Threat Catalog](THREATS.md) for the risks this framework addresses. [Mitigations](MITIGATIONS.md) for implementation guidance on novel threats. [Limitations](LIMITATIONS.md) for honest accounting of what the framework cannot guarantee.*
+*See also: [Verification](VERIFICATION.md) for the test each invariant must pass. [Threat Catalog](THREATS.md) for the risks this framework addresses. [Mitigations](MITIGATIONS.md) for implementation guidance on novel threats. [Limitations](LIMITATIONS.md) for honest accounting of what the framework cannot guarantee.*

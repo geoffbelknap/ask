@@ -13,7 +13,7 @@ ASK is a security framework for AI agent systems — invariants, a cognitive mod
 | [FRAMEWORK.md](FRAMEWORK.md) | The invariants, cognitive model, trust spectrum, policy model |
 | [THREATS.md](THREATS.md) | Threat catalog organized by attack surface |
 | [MITIGATIONS.md](MITIGATIONS.md) | Implementation guidance for novel threats |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Reference defense architecture and verification tests |
+| [VERIFICATION.md](VERIFICATION.md) | A test for every invariant |
 | [LIMITATIONS.md](LIMITATIONS.md) | Honest accounting of what the framework cannot guarantee |
 
 ## Ways to Contribute
@@ -55,14 +55,14 @@ There is deliberately **one** copy. Do not fork per-product variants: a skill th
 - **Respects the invariants.** The invariants are the foundation. If a proposed change would violate an invariant, the change is wrong — not the invariant. If you believe an invariant should be modified, make the case explicitly and expect rigorous review.
 - **Is concrete.** Specific proposals with clear threat justification are more useful than general suggestions. "The framework should address X" is a good issue. "Here's a new threat entry for X with severity context and ATLAS mapping" is a good PR.
 - **Acknowledges limitations.** ASK is honest about its gaps (see [LIMITATIONS.md](LIMITATIONS.md)). Contributions should be equally honest about what they can and cannot solve.
-- **Is non-prescriptive.** The framework defines properties that must hold, not how to implement them. Contributions should state what must be true, not what technology to use. Implementation-specific guidance belongs in ARCHITECTURE.md or MITIGATIONS.md.
+- **Is non-prescriptive.** The framework defines properties that must hold, not how to implement them. Contributions should state what must be true, not what technology to use. Implementation-specific guidance belongs in MITIGATIONS.md.
 
 ## What We're Not Looking For
 
 - Changes that weaken the security model for convenience
 - Proposals that require the agent to cooperate with its own enforcement
 - Marketing language or vague claims about security properties
-- Implementation-specific details in the framework document (those belong in ARCHITECTURE.md)
+- Implementation-specific details. ASK states what must be true, not how to build it
 - Vendor-specific recommendations
 
 ## Invariant Change Process

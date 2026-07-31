@@ -4,7 +4,7 @@ Documentation-only repo for the ASK security framework.
 
 ## Repo Purpose
 
-This repo defines the governing security model for Agency:
+This repo defines the ASK security model:
 - framework invariants
 - threat analysis
 - cognitive model

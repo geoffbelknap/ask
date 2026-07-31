@@ -24,11 +24,11 @@ ASK defines what must be true for AI agents to run safely at any scale. It cover
 **Understand the threats**
 → [THREATS.md](THREATS.md) — Threat catalog: traditional risks grounded in established best practices, novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
 
-**Understand the technical architecture**
-→ [ARCHITECTURE.md](ARCHITECTURE.md) — Enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
+**Verify a deployment**
+→ [VERIFICATION.md](VERIFICATION.md) — A test for every invariant, with the outcome each one must produce.
 
 **Feed context to an agent building ASK systems**
-→ Install the plugin, or point the agent at [FRAMEWORK.md](FRAMEWORK.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
+→ Install the plugin, or point the agent at [FRAMEWORK.md](FRAMEWORK.md) and [VERIFICATION.md](VERIFICATION.md).
 
 **Check regulatory alignment**
 → [REGULATORY.md](REGULATORY.md) — Mapping of ASK invariants to EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, and SEC AI Guidance. Working document — contributions welcome.
@@ -44,7 +44,7 @@ ASK defines what must be true for AI agents to run safely at any scale. It cover
 ├── README.md              ← You are here
 ├── FRAMEWORK.md           ← Complete theory: elements, invariants, cognitive model, lifecycle
 ├── THREATS.md             ← Threat catalog: traditional, novel, and hybrid threats
-├── ARCHITECTURE.md        ← Technical guide: enforcement layers, topology, scaling
+├── VERIFICATION.md        ← A test for every invariant
 ├── MITIGATIONS.md         ← Implementation guidance for novel threats
 ├── REGULATORY.md          ← Regulatory mapping: EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, SEC
 │
@@ -80,20 +80,6 @@ ASK defines what must be true for AI agents to run safely at any scale. It cover
     ├── proposed-tenet-reasoning-exposure.md ← Reasoning is not principal-facing
     └── proposed-tenets-knowledge.md         ← The Organizational Knowledge properties
 ```
-
----
-
-## Reference implementation
-
-[Agency](https://github.com/geoffbelknap/agency) is the reference implementation of ASK. It implements the single-agent architecture with every core enforcement layer:
-
-- Network isolation and egress proxy
-- LLM proxy with XPIA guardrails
-- Per-agent enforcer sidecar
-- Container hardening and runtime gateway
-- Continuous monitoring
-
-Multi-agent coordination, the principal model, and trust evolution are designed but not yet implemented.
 
 ---
 

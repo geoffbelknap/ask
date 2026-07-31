@@ -4,7 +4,7 @@ Pure documentation repository. Contains the ASK agent security framework: invari
 
 ## Framework Invariants — Do Not Violate
 
-These apply to all work on this repository. Before proposing or implementing any change, verify that it does not break these invariants. If a proposed design requires violating any of them, stop and flag it — the design is wrong, not the invariant. See `FRAMEWORK.md` for the full set and [ARCHITECTURE.md](ARCHITECTURE.md) for the test that proves each one.
+These apply to all work on this repository. Before proposing or implementing any change, verify that it does not break these invariants. If a proposed design requires violating any of them, stop and flag it — the design is wrong, not the invariant. See `FRAMEWORK.md` for the full set and [VERIFICATION.md](VERIFICATION.md) for the test that proves each one.
 
 - `constraints-external` — enforcement machinery never runs inside the agent's isolation boundary. The agent cannot influence or circumvent enforcement.
 - `actions-traced` — logs are written by the mediation layer, not the agent. The agent has no write access and cannot suppress or alter them.
