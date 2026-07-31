@@ -2,9 +2,16 @@
 
 *Part of the ASK operating framework.*
 
-ASK operates within a growing ecosystem of frameworks, standards, threat taxonomies, and protocols addressing AI agent security. This document maps the relationship between ASK and each body of work — what overlaps, what's complementary, and where ASK's scope begins and ends.
+ASK operates within a growing ecosystem of frameworks, standards, threat taxonomies, and protocols addressing AI agent security. This document maps how ASK relates to each body of work: what overlaps, what is complementary, and where ASK's scope begins and ends.
 
-The entries are organized by type: **Peer Frameworks and Certification**, **Standards and Guidelines**, **Threat Taxonomies**, **Protocols and Specifications**, **Industry Research**, and **Foundational Security Patterns**.
+The entries are organized by type:
+
+- Peer frameworks and certification
+- Standards and guidelines
+- Threat taxonomies
+- Protocols and specifications
+- Industry research
+- Foundational security patterns
 
 ---
 
@@ -14,7 +21,7 @@ Work that addresses the same problem ASK does. These are the closest comparisons
 
 ### Anthropic — Zero Trust for AI Agents (2026)
 
-A [security framework](https://claude.com/blog/zero-trust-for-ai-agents) for deploying enterprise AI agents, published May 2026. Applies zero trust's founding position — trust nothing, verify everything, assume breach — to agentic systems. Covers cryptographically rooted identities, task-scoped permissions, memory protection, sandboxing, and input and output controls, organized as a three-tier maturity model with an eight-phase implementation workflow. Addresses prompt injection, tool poisoning, identity abuse, memory poisoning, and supply chain attacks, and proposes running defensive operations at a speed that matches autonomous attackers.
+A [security framework](https://claude.com/blog/zero-trust-for-ai-agents) for deploying enterprise AI agents, published May 2026. Applies zero trust's founding position — trust nothing, verify everything, assume breach — to agentic systems. It covers cryptographically rooted identities, task-scoped permissions, memory protection, sandboxing, and input and output controls. These sit in a three-tier maturity model with an eight-phase workflow. It addresses prompt injection, tool poisoning, identity abuse, memory poisoning, and supply chain attacks. It also proposes running defense at a speed that matches autonomous attackers.
 
 **Relationship to ASK.** The closest peer, and the positions agree on the fundamentals: the agent is not trusted, identity is scoped, memory is a protected surface, breach is assumed. The frameworks differ in what they produce. Anthropic's is a maturity model — an organization locates itself at Foundation, Advanced, or Optimized and works through phases. ASK states properties that either hold or do not, with a verification test for each. A maturity model answers "how far along are we"; ASK answers "can you show this." Implementers can use both: the maturity model to sequence adoption, the invariants to prove the result.
 
@@ -50,7 +57,7 @@ NIST's Center for AI Standards and Innovation (CAISI) [launched the AI Agent Sta
 
 **Relationship to ASK.** The NCCoE concept paper's areas of interest — agent identification, authorization, delegation, tamper-proof logging, and prompt injection — correspond closely to ASK's principal model, mediation layer, audit log, and XPIA threat treatment. The standards it considers implementing (SPIFFE/SPIRE for workload identity, NGAC for fine-grained access control, SCIM for identity lifecycle) are candidate technologies for ASK's enforcer credential management and principal model identity lifecycle. ASK addresses the architectural properties that must hold; the NCCoE project would show specific technology implementations that satisfy those properties.
 
-The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that ASK's Data Integrity and Multi-Agent invariants (21, 23, 24) and multi-agent architecture address.
+The NCCoE scopes out external and untrusted agents. That leaves a gap which ASK's data integrity and multi-agent invariants (21, 23, 24) and multi-agent architecture address.
 
 ### NIST COSAiS — Control Overlays for Securing AI Systems
 
@@ -66,13 +73,13 @@ The [international standard](https://www.schellman.com/blog/ai-governance/ai-gov
 
 ### Council of Europe Framework Convention on AI (CETS 225)
 
-The first legally binding international treaty on AI, in force since November 2025 and ratified by the United States and the United Kingdom. Frames obligations around human rights, democracy, and the rule of law.
+The first legally binding international treaty on AI. In force since November 2025, and ratified by the United States and the United Kingdom. It frames obligations around human rights, democracy, and the rule of law.
 
 **Relationship to ASK.** Binding rather than advisory, which distinguishes it from most entries here. Its obligations are principle-level and require national implementation; ASK sits well below it, describing runtime properties that support the accountability and oversight commitments it establishes.
 
 ### NIST Cybersecurity Framework Profile for AI (NISTIR 8596)
 
-[Preliminary draft](https://www.nist.gov/news-events/news/2025/12/draft-nist-guidelines-rethink-cybersecurity-ai-era) released December 2025. Maps AI security concerns onto CSF 2.0 across three focus areas: securing AI systems, AI-enabled cyber defense, and thwarting AI-enabled attacks. Initial public draft expected later in 2026.
+[Preliminary draft](https://www.nist.gov/news-events/news/2025/12/draft-nist-guidelines-rethink-cybersecurity-ai-era) released December 2025. It maps AI security concerns onto CSF 2.0 across three focus areas: securing AI systems, AI-enabled cyber defense, and blocking AI-enabled attacks. Initial public draft expected later in 2026.
 
 **Relationship to ASK.** Broader than ASK — covers all AI systems, not just agents. ASK-compliant deployments can use the Cyber AI Profile as a governance overlay for organizational cybersecurity planning. The profile's subcategory prioritization (High/Moderate/Foundational) could inform how operators prioritize ASK invariant implementation.
 
@@ -113,7 +120,12 @@ A [seven-layer threat classification taxonomy](https://cloudsecurityalliance.org
 
 ### MITRE ATLAS (Adversarial Threat Landscape for AI Systems)
 
-A [threat taxonomy](https://atlas.mitre.org) for AI systems maintained by MITRE, extending the ATT&CK framework to adversarial machine learning. It includes agent-specific techniques. Examples are AML.T0051 LLM Prompt Injection, AML.T0058 AI Agent Context Poisoning, AML.T0068 AI Agent Tool Credential Harvesting, and AML.T0071 AI Supply Chain Rug Pull.
+A [threat taxonomy](https://atlas.mitre.org) for AI systems maintained by MITRE, extending the ATT&CK framework to adversarial machine learning. It includes agent-specific techniques:
+
+- AML.T0051 LLM Prompt Injection
+- AML.T0058 AI Agent Context Poisoning
+- AML.T0068 AI Agent Tool Credential Harvesting
+- AML.T0071 AI Supply Chain Rug Pull
 
 **Relationship to ASK.** ASK's [threat catalog](THREATS.md) cross-references ATLAS technique IDs throughout — every risk in the catalog that maps to an ATLAS technique includes the AML.Txxxx identifier. ATLAS provides the broader adversarial taxonomy; ASK's catalog focuses on the runtime enforcement perspective. Practitioners should use both: ATLAS for understanding adversary behavior, ASK for understanding what architectural properties defend against it.
 
@@ -129,7 +141,7 @@ The [Coalition for Secure AI](https://www.cosai.owasp.org/) published an MCP sec
 
 ### Model Context Protocol (MCP)
 
-An [open standard](https://modelcontextprotocol.io/) (originally developed by Anthropic) that defines how AI applications connect to external data sources and tools via JSON-RPC 2.0. Widely adopted by major AI providers and development tools.
+An [open standard](https://modelcontextprotocol.io/), originally developed by Anthropic. It defines how AI applications connect to external data sources and tools over JSON-RPC 2.0. Widely adopted by major AI providers and development tools.
 
 **Relationship to ASK.** MCP is the primary tool integration protocol ASK's architecture mediates. The gateway's MCP tool policy (allowlists, version pinning, rate limits) enforces `mediation-complete` (mediation is complete) for MCP tool calls. MCP's security properties — or lack thereof — are a major attack surface addressed in [THREATS.md](THREATS.md). See also: CoSAI MCP Security White Paper above.
 

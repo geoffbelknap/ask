@@ -21,7 +21,13 @@ Agents are assigned trust tiers that govern their capabilities — the agent equ
 | **Tier 3: Elevated** | IT admin | All models, broader web access, extended tools, higher limits, can delegate to Tier 1–2 |
 | **Tier 4: Privileged** | Security operations | All capabilities, can modify policies, can delegate to any tier. Human-supervised. |
 
-Each tier maps to a concrete configuration: a scoped API key, a proxy policy file, allowed tools, a rate limit profile, and a delegation policy.
+Each tier maps to a concrete configuration:
+
+- A scoped API key
+- A proxy policy file
+- Allowed tools
+- A rate limit profile
+- A delegation policy
 
 ---
 
@@ -323,7 +329,7 @@ block_dns_over_https: true
 
 Every agent must have a dedicated policy enforcement point that mediates all its external communication. The agent's only path to external resources (LLM providers, web, external services) passes through this enforcement point. The enforcement point runs in its own isolation boundary, performs credential mediation (the agent never holds real service credentials), logs every request, and sanitizes responses. The agent cannot reach shared infrastructure directly — only through its dedicated enforcement point.
 
-This layer is distinct from two others. Egress mediation enforces domain-level policy, and execution-level mediation enforces policy within the workspace. The per-agent enforcement point mediates HTTP-level policy: credential swap, request routing, per-request audit, and response sanitization. Collapsing it into either the egress proxy or the execution-level gateway would violate the principle that each enforcement layer has its own isolation boundary.
+This layer is distinct from two others. Egress mediation enforces domain-level policy, and execution-level mediation enforces policy within the workspace. The per-agent enforcement point mediates HTTP-level policy: credential swap, request routing, per-request audit, and response sanitization. Collapsing it into the egress proxy or the execution-level gateway breaks a principle: each enforcement layer keeps its own isolation boundary.
 
 ### Reference Approach
 
@@ -343,7 +349,7 @@ The enforcer runs in its own isolation boundary, reaching both the agent-interna
 
 ### Architectural Requirement
 
-The mediation layer (enforcer, egress proxy, LLM proxy) mediates actions that cross the workspace boundary. But a compromised agent can cause significant damage entirely within the workspace: reading sensitive files, spawning processes, executing destructive commands, or staging data for exfiltration. Container hardening limits the blast radius but doesn't provide visibility or fine-grained control.
+The mediation layer (enforcer, egress proxy, LLM proxy) mediates actions that cross the workspace boundary. But a compromised agent can do real damage inside the workspace: reading sensitive files, spawning processes, executing destructive commands, or staging data for exfiltration. Container hardening limits the blast radius but doesn't provide visibility or fine-grained control.
 
 A compliant implementation must provide execution-level mediation. It enforces policy on file operations, command execution, process creation, and tool invocations within the agent's workspace. This mediation must run in its own isolation boundary that the agent cannot access, observe, or influence. The agent must not be able to bypass the mediation without a kernel-level exploit.
 
@@ -360,7 +366,7 @@ A compliant implementation must provide execution-level mediation. It enforces p
 
 ### Reference Approach
 
-The reference implementation achieves execution-level mediation with a sidecar gateway — a separate container that shares only a PID namespace and workspace volume with the agent. The gateway's own binaries, policy files, configuration, and audit logs live in a filesystem the agent cannot see or modify. It mediates command execution, file operations, network connections, and process control through OS-level mechanisms: shell shims, FUSE filesystems, seccomp filters, and Landlock sandboxing. The agent cannot bypass these without a kernel exploit, which is the same trust boundary the container runtime itself relies on.
+The reference implementation achieves execution-level mediation with a sidecar gateway — a separate container that shares only a PID namespace and workspace volume with the agent. The gateway's own binaries, policy files, configuration, and audit logs live in a filesystem the agent cannot see or modify. It mediates command execution, file operations, network connections, and process control. The OS-level mechanisms are shell shims, FUSE filesystems, seccomp filters, and Landlock sandboxing. The agent cannot bypass these without a kernel exploit, which is the same trust boundary the container runtime itself relies on.
 
 Other implementations may use different OS-level mechanisms (for example eBPF, LSMs, or hypervisor-based interception) provided they meet the mediation domain requirements above.
 
@@ -416,7 +422,7 @@ Any compliant implementation must prevent the equivalent attack classes. The age
 
 ## Read-Only Tool Delivery
 
-Tools are delivered as read-only artifacts: runtime binaries, shell shims, and skill libraries. Each is built and verified outside the agent's environment, then mounted into the workspace as an immutable layer the agent can use but cannot modify. This satisfies `constraints-external` (constraints are external and inviolable) and means tool updates are artifact rebuilds, not in-place modifications. The specific delivery mechanism (named volumes, overlay filesystem layers, read-only bind mounts) is implementation-dependent.
+Tools are delivered as read-only artifacts: runtime binaries, shell shims, and skill libraries. Each is built and verified outside the agent's environment. It is then mounted into the workspace as an immutable layer the agent can use but cannot modify. This satisfies `constraints-external` (constraints are external and inviolable) and means tool updates are artifact rebuilds, not in-place modifications. The specific delivery mechanism (named volumes, overlay filesystem layers, read-only bind mounts) is implementation-dependent.
 
 ---
 
@@ -424,7 +430,7 @@ Tools are delivered as read-only artifacts: runtime binaries, shell shims, and s
 
 This section defines required guardrail capabilities — what an implementation must provide — not specific detection techniques or deployment patterns.
 
-Guardrails scan content at two points: **pre_call** (scanning input before it reaches the LLM) and **post_call** (scanning responses before they return to the agent). The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input and tool responses before they reach the LLM. Post_call catches the injection kill chain on the way back out: poisoned content, then manipulated model response, then exfiltration or unauthorized action. It also catches credential leakage, policy violations in generated content, and unauthorized tool calls.
+Guardrails scan content at two points. **Pre_call** scans input before it reaches the LLM. **Post_call** scans responses before they return to the agent. The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input and tool responses before they reach the LLM. Post_call catches the injection kill chain on the way back out: poisoned content, then manipulated model response, then exfiltration or unauthorized action. It also catches credential leakage, policy violations in generated content, and unauthorized tool calls.
 
 ### Required Guardrail Capabilities
 
@@ -452,7 +458,7 @@ The security monitor performs three categories of analysis:
 - **Guardrail trigger correlation** — correlates events across layers to identify active attack chains.
 - **Identity write pattern analysis** — detects instruction-like content in agent memory writes that may indicate behavioral self-modification.
 
-It produces structured findings, real-time alerts, recommended actions (halt, investigate, reduce trust, quarantine), and periodic compliance reports. The security monitor recommends but does not act unilaterally except for self-halt. It is itself subject to the framework. Its own LLM calls go through the same guardrails stack, and its findings are written to a separate store to prevent circular contamination.
+It produces structured findings, real-time alerts, recommended actions (halt, investigate, reduce trust, quarantine), and periodic compliance reports. The security monitor recommends but does not act unilaterally except for self-halt. It is itself subject to the framework. Its own LLM calls go through the same guardrails stack. Its findings are written to a separate store, to prevent circular contamination.
 
 At Scale 1, the security monitor can be a simple log analysis script. At Scale 3, it is a fleet of function agents with specialized roles.
 
@@ -832,7 +838,7 @@ Each test states what to do and what must happen. Where a property has a part no
 
 **Unknown conflicts default to yield and flag.** `unknown-conflicts-yield` — **No test.**
 
-This property is a principle rather than an invariant, and it has no architectural test. It describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. The platform-side control is that conflicting writes are refused when the activity register is unavailable, which is an implementation choice rather than a framework property.
+This property is a principle rather than an invariant, and it has no architectural test. It describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. The platform-side control refuses conflicting writes when the activity register is unavailable. That is an implementation choice rather than a framework property.
 
 ### Data integrity
 
