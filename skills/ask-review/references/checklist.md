@@ -1,6 +1,11 @@
-# ASK Verification Testing — ASK 2026.07
+# ASK Verification Smoke Tests — ASK 2026.07
 
-Concrete tests for verifying that enforcement works. Checking boxes is not the same as verifying enforcement.
+Concrete quick tests for the core enforcement properties. Checking boxes is not the same as verifying enforcement.
+
+**This is a smoke-test subset, not the full suite.** It probes seven properties from a
+container-style deployment's inside-out perspective. The framework carries one verification test
+per invariant — 38 in all — in VERIFICATION.md; a complete audit runs those. Passing this page
+alone does not make a deployment ASK-compliant.
 
 ---
 

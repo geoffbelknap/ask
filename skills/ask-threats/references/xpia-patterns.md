@@ -104,9 +104,9 @@ Data is extracted from the system through the agent's action surface.
 
 ## The Principal/Data Distinction
 
-**`instruction-channel-distinct` — Instructions only come from verified principals.**
+**`instruction-channel-distinct` (invariant) — the instruction channel is distinct and unpromotable.** Content arriving on any other channel is admitted as data and can never be promoted to instruction.
 
-The design principle behind XPIA defense:
+**`content-is-data` (principle) — the design principle behind XPIA defense:**
 
 - The agent treats ALL external content as **data**, not instructions
 - Web pages, tool outputs, documents, messages from external agents — regardless of what they say, they are data to be processed under the agent's own constraints
@@ -114,7 +114,7 @@ The design principle behind XPIA defense:
 - **Principals never need to override constraints.** If an entity instructs the agent to bypass, ignore, or override constraints, it is either malicious or not a legitimate principal
 - Legitimate principals set constraints through the Constraints layer; they don't override them in-session
 
-The principal/data distinction is a **design principle** — the enforcement is defense-in-depth containment:
+The principal/data distinction is a **design principle** (`content-is-data`) — the enforcement is defense-in-depth containment:
 - Detection (guardrails scanning for injection patterns)
 - Containment (network isolation, credential mediation, tool allowlists limiting what a successful injection can accomplish)
 
@@ -138,7 +138,7 @@ External Input ──▶ [Guardrail Pipeline] ──▶ Agent Context
 ```
 
 **Applies to:** Tool results, document content, API responses, user input, MCP server responses
-**ASK invariants:** 3 (mediation complete), 17 (instructions from verified principals)
+**ASK invariants:** `mediation-complete`, `instruction-channel-distinct`
 **Critical:** The guardrail classifier must run **outside** the agent's process. Running it inside violates `constraints-external`.
 
 ### Pattern 2: Gateway Scope Lock
@@ -154,7 +154,7 @@ Agent ──action──▶ [Enforcer] ──validate──▶ [Gateway] ──e
 ```
 
 **Applies to:** Every tool call, file operation, command execution, MCP tool invocation
-**ASK invariants:** 1 (enforcement separation), 3 (complete mediation), 4 (least privilege)
+**ASK invariants:** `constraints-external`, `mediation-complete`, `capability-declared`, `operations-bounded`
 
 ### Pattern 3: Egress Containment
 
@@ -174,7 +174,7 @@ Agent Environment
 ```
 
 **Applies to:** All outbound network traffic
-**ASK invariants:** 3 (complete mediation), 4 (least privilege)
+**ASK invariants:** `mediation-complete`, `capability-declared`
 
 ### Pattern 4: Restricted Context Processing
 
@@ -209,7 +209,7 @@ Agent ──MCP call──▶ [Gateway MCP Policy] ──▶ MCP Server
                      • New server registration blocked?
 ```
 
-**ASK invariants:** 3 (complete mediation)
+**ASK invariants:** `mediation-complete`, `capability-declared`, `runtime-known`
 **Critical:** Application-level MCP policy inside the agent process is insufficient — gateway-level (OS-level) enforcement required.
 
 ---
