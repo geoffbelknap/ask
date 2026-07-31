@@ -39,8 +39,8 @@ An agent decomposes into four layers. Each has one owner and one trust level, an
 ## State: Constraints and Identity
 
 The four layers describe what happens on a turn. Constraints and Identity are what persist between
-turns. The split between them — operator-controlled versus agent-controlled — is the most important
-security boundary inside the agent. Both feed Context at assembly time; neither is Context.
+turns. The split between them is the most important security boundary inside the agent: Constraints are
+operator-controlled, Identity is agent-controlled. Both feed Context at assembly time; neither is Context.
 
 ### Constraints — What the operator controls
 
