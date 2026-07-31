@@ -1,15 +1,21 @@
 # ASK Framework
 
-Pure documentation repository. Contains the ASK agent security framework: tenets, cognitive model, threat analysis, and enforcement architecture.
+Pure documentation repository. Contains the ASK agent security framework: invariants, cognitive model, threat analysis, and enforcement architecture.
 
-## Framework Tenets — Do Not Violate
+## Framework Invariants — Do Not Violate
 
-These apply to all work on this repository. Before proposing or implementing any change, verify it does not break these tenets. If a proposed design requires violating any of them, stop and flag it — the design is wrong, not the tenet. See `FRAMEWORK.md` for full context.
+These apply to all work on this repository. Before proposing or implementing any change, verify it does not break these invariants. If a proposed design requires violating any of them, stop and flag it — the design is wrong, not the invariant. See `FRAMEWORK.md` for the full set and [ARCHITECTURE.md](ARCHITECTURE.md) for the test that proves each one.
 
-1. **Constraints are external and inviolable.** Enforcement machinery (policy engine, audit logger, mediation proxies) must never run inside the agent's isolation boundary. The agent cannot influence or circumvent enforcement.
-2. **Every action leaves a trace.** Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.
-3. **Mediation is complete.** There is no path from the agent to any external resource that bypasses the mediation layer. If you add a new external dependency, it must go through the egress proxy or LLM proxy.
-4. **Least privilege.** Capabilities, credentials, mounts, and authority are scoped to the minimum required. Don't add capabilities to the assistant container. Don't mount host paths into the assistant that it doesn't need.
-5. **No blind trust.** Every trust relationship in the system is documented, visible, and auditable. There are no implicit trust grants.
-6. **Constraints are operator-owned and read-only.** Anything that governs what the agent is permitted to do (policy, guardrail rules, tier config, AGENTS.md) belongs in the Constraints layer and must be read-only to the agent.
-7. **Each enforcement layer has its own isolation boundary.** Network isolation, egress proxy, LLM proxy, enforcer, container hardening, and runtime gateway are separate containers/mechanisms. Don't collapse enforcement layers into a single container or let one component subsume another's role.
+- `constraints-external` — enforcement machinery never runs inside the agent's isolation boundary. The agent cannot influence or circumvent enforcement.
+- `actions-traced` — logs are written by the mediation layer, not the agent. The agent has no write access and cannot suppress or alter them.
+- `mediation-complete` — no path from the agent to any external resource bypasses the mediation layer. A new external dependency goes through it or does not exist.
+- `model-output-mediated` — model output is inert until a policy decision admits it as an action. Never route it into a shell, evaluator, or deserializer directly.
+- `enforcement-fails-closed` — no enforcement failure can expand agent capability.
+- `capability-declared` — capability is operator-declared and cannot be self-expanded at runtime.
+- `capability-composition-governed` — grants are evaluated as a set. Private data, untrusted content, and unmediated outbound action must not coexist.
+- `constraints-external` and `constraints-atomic` — anything governing what the agent may do is operator-owned and read-only to the agent, delivered atomically and durable for the session.
+- `trust-declared` — every trust relationship is derivable from a declared source. Trust without a declaration is refused.
+
+Enforcement layers keep their own isolation boundaries. Network isolation, egress proxy, LLM proxy, enforcer, container hardening, and the runtime gateway are separate mechanisms. Do not collapse them or let one subsume another's role.
+
+The judgment-bearing counterparts — `least-privilege` among them — are principles rather than invariants. They guide scoping decisions and cannot be mechanically checked.

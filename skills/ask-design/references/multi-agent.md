@@ -32,11 +32,11 @@ Agent B's input, a single injection can propagate across the entire system.
    that validates authorization, scopes tasks, scans responses, and logs everything.
 5. **Human > Agent.** In any conflict, human principal decisions outrank agent decisions.
 
-**Relevant tenets:**
-- **Tenet 19:** Delegation cannot exceed delegator scope
-- **Tenet 20:** Synthesis cannot exceed individual authorization
-- **Tenet 21:** External agents cannot instruct internal agents
-- **Tenet 22:** Unknown conflicts default to yield and flag
+**Relevant invariants:**
+- **`delegation-bounded`:** Delegation cannot exceed delegator scope
+- **`labeled-delivery-enforced`:** Synthesis cannot exceed individual authorization
+- **`external-agents-cannot-instruct`:** External agents cannot instruct internal agents
+- **`unknown-conflicts-yield`:** Unknown conflicts default to yield and flag
 
 ---
 
@@ -45,7 +45,7 @@ Agent B's input, a single injection can propagate across the entire system.
 | Type | Role | Permission Model |
 |---|---|---|
 | **Worker** | Does the work | High capability within scope, isolated from other agents |
-| **Coordinator** | Plans, delegates, synthesizes | Cannot act directly in worker workspaces; constrained by Tenets 19–20 |
+| **Coordinator** | Plans, delegates, synthesizes | Cannot act directly in worker workspaces; constrained by `delegation-bounded`, `labeled-delivery-enforced` |
 | **Function** | Oversight and governance | Cross-boundary visibility, constrained action capability |
 
 ### Function Agents (Inverted Permissions)
@@ -75,7 +75,7 @@ Agent A ──output──▶ [Guardrail] ──▶ [Enforcer B] ──▶ Agent
 ```
 
 **When to use:** Most multi-agent deployments. Start here unless you have strong reason not to.
-**ASK tenets:** 5 (no blind trust), 17 (instructions from verified principals), 18 (default to zero trust)
+**ASK invariants:** 5 (no blind trust), 17 (instructions from verified principals), 18 (default to zero trust)
 
 ### Model 2: Verified Trust
 
@@ -143,9 +143,9 @@ delegation:
 ```
 
 **Key:** The delegated scope is always ≤ the delegator's scope. Never equal, never greater.
-**ASK tenet:** 11 (delegation cannot exceed delegator scope)
+**ASK invariant:** 11 (delegation cannot exceed delegator scope)
 
-**Tenet 19 in practice:** The delegation bus validates against the **explicit permission declarations**
+**`delegation-bounded` in practice:** The delegation bus validates against the **explicit permission declarations**
 in the delegation request — `permitted_tools`, `permitted_paths`, `budget` — not against the
 natural-language task description alone. Semantic validation of task briefs is a supplementary check,
 not the primary enforcement mechanism.
@@ -166,7 +166,7 @@ Agent C ──result──▶ [Sanitizer] ──┘
                    • Scan for XPIA injection patterns
 ```
 
-**Tenet 20 in practice:** Coordinator output permissions are bounded by the most restrictive
+**`labeled-delivery-enforced` in practice:** Coordinator output permissions are bounded by the most restrictive
 permissions among contributing agents and the coordinator's own output scope. Synthesis that
 would expose internal content externally, or combine agent outputs to exceed individual
 authorization, requires human review before delivery.
@@ -238,7 +238,7 @@ active_agents:
 
 Agents observe the register but cannot write to it. Infrastructure maintains it.
 When the register is unavailable, the conflict resolution default applies:
-yield and flag (Tenet 22).
+yield and flag (`unknown-conflicts-yield`).
 
 ---
 
@@ -263,14 +263,14 @@ Agent A and Agent B share the same context / conversation thread
 ```
 User ──▶ Orchestrator ──▶ Agent (Orchestrator just passes messages through)
 ```
-**Problem:** Orchestrator with no enforcement is just an unauthenticated proxy. Violates Tenet 1.
+**Problem:** Orchestrator with no enforcement is just an unauthenticated proxy. Violates `constraints-external`.
 
 ### Credential forwarding
 
 ```
 Orchestrator passes its API keys to subordinate agents in prompts or tool args
 ```
-**Problem:** Violates Tenet 7 (least privilege). Credentials are injected by runtime via
+**Problem:** Violates `capability-declared` (least privilege). Credentials are injected by runtime via
 enforcer credential swap, never in prompts or agent context.
 
 ### Implicit scope inheritance
@@ -278,11 +278,11 @@ enforcer credential swap, never in prompts or agent context.
 ```
 "Agent B was spawned by Agent A, so it inherits A's permissions"
 ```
-**Problem:** Violates Tenet 19. Delegation must be explicit and scope-reduced.
+**Problem:** Violates `delegation-bounded`. Delegation must be explicit and scope-reduced.
 
 ### Direct agent-to-agent communication
 
 ```
 Agent A ──TCP──▶ Agent B (no delegation bus in between)
 ```
-**Problem:** Violates Tenet 3 (complete mediation). All inter-agent communication must be mediated.
+**Problem:** Violates `mediation-complete` (complete mediation). All inter-agent communication must be mediated.

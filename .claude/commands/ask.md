@@ -42,9 +42,9 @@ Identify which files/configs belong to each layer and whether they are correctly
 
 Flag any security-relevant parameter found in a writable location.
 
-### 4. Tenet Check
+### 4. Invariant Check
 
-For each tenet in FRAMEWORK.md, output **PASS**, **FAIL**, **UNKNOWN** (cannot determine from available info), or **N/A** (not applicable to this deployment type), with a one-line rationale for any non-PASS result.
+For each invariant in FRAMEWORK.md, output **PASS**, **FAIL**, **UNKNOWN** (cannot determine from available info), or **N/A** (not applicable to this deployment type), with a one-line rationale for any non-PASS result.
 
 **Foundation**
 1. Enforcement machinery (proxy, guardrail, gateway, logger) runs OUTSIDE the agent's isolation boundary
@@ -132,7 +132,7 @@ Assess the system's exposure to the primary threat classes:
 
 Output a prioritized findings table:
 
-| Severity | Finding | Violated Tenet(s) | Remediation |
+| Severity | Finding | Violated Invariant(s) | Remediation |
 |---|---|---|---|
 | **Critical** — Stop; remediate before any use | ... | ... | ... |
 | **High** — Remediate before any sensitive use | ... | ... | ... |

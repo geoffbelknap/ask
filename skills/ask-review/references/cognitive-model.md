@@ -194,8 +194,8 @@ The question of where a piece of configuration belongs has one test:
 | Working notes, session transcripts | **Identity** | Accumulated context |
 
 **Red flags:**
-- Security params in Identity files (writable by agent) → **Tenet 1 violation**
-- Constraints on a `:rw` mount → **Tenet 1 violation**
+- Security params in Identity files (writable by agent) → **`constraints-external` violation**
+- Constraints on a `:rw` mount → **`constraints-external` violation**
 - Agent writing to `constraints/` directory → **Structural impossibility if correctly mounted**
 
 ---

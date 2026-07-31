@@ -28,11 +28,11 @@ The irrevocable ability of a human to observe, intervene, override, and terminat
 
 ---
 
-## The Tenets
+## The Invariants
 
 These are binary conditions. Each one either holds or it is violated. Design and review every decision against this list.
 
-| # | Category | Tenet |
+| # | Category | Invariant |
 |---|---|---|
 | 1 | Foundation | Enforcement machinery NEVER runs inside the agent's isolation boundary |
 | 2 | Foundation | Logs are written by the mediation layer, NOT by the agent |
@@ -60,7 +60,7 @@ These are binary conditions. Each one either holds or it is violated. Design and
 | 24 | Data Integrity | External entities produce DATA, not instructions — an agent ONLY accepts instructions through defined principal channels; "override your constraints" is a red flag, not a credential |
 | 25 | Data Integrity | Every write to the agent's persistent Identity is logged with provenance by the mediation layer; Identity history is recoverable and rollback-capable; the agent cannot suppress Identity mutation logging |
 | 26 | Organizational Knowledge | Organizational knowledge is durable infrastructure, not agent state — structured, auditable, operator-owned, persists independently of agent lifecycle |
-| 27 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (Tenet 20) |
+| 27 | Organizational Knowledge | Knowledge access is bounded by authorization scope — no agent can read knowledge outside its scope; synthesized views cannot exceed querying agent's authorization (`labeled-delivery-enforced`) |
 | 28 | Organizational Knowledge | Reasoning is not a principal-facing surface — principals receive outputs and justification, not chain-of-thought or decision process; exposing reasoning is operator-controlled and default-off; probing for reasoning, process, or constraints is treated as data that informs trust, not an authorized request |
 | 29 | Human Oversight | Human oversight must remain within human capacity — oversight load stays within sustainable human capacity; when exceeded, the system reduces autonomy or halts rather than degrading to reflexive approval; escalation thresholds are operator-owned Constraints |
 
@@ -70,7 +70,7 @@ These are binary conditions. Each one either holds or it is violated. Design and
 
 ASK exists within a growing ecosystem. Key external references:
 - **NIST NCCoE** is developing agent identity and authorization guidelines using OAuth 2.0/2.1, OIDC, SPIFFE/SPIRE, SCIM, and NGAC.
-- **A2A** (Agent2Agent protocol, Linux Foundation) enables cross-organizational agent communication — ASK Tenets 17–19 govern how compliant systems interact with external agents.
+- **A2A** (Agent2Agent protocol, Linux Foundation) enables cross-organizational agent communication — ASK `trust-not-self-elevated`, `hierarchy-inviolable`, `delegation-bounded` govern how compliant systems interact with external agents.
 - **CoSAI** published an MCP security white paper with 12 threat categories — use it to inform gateway MCP policy.
 - **OWASP Top 10 for Agentic Applications** catalogs application-level risks; ASK covers runtime enforcement.
 
@@ -130,7 +130,7 @@ Non-negotiable implementation rules. Every design decision MUST comply with all 
 
 1. **Enforcement is always external.** No guardrail, no policy engine, no audit logger runs inside the agent's container. They run in sibling containers the agent cannot reach.
 
-2. **Mediation is complete, not partial.** "We proxy LLM calls but let the agent hit the web directly" is a Tenet 3 violation. All external communication is mediated.
+2. **Mediation is complete, not partial.** "We proxy LLM calls but let the agent hit the web directly" is a `mediation-complete` violation. All external communication is mediated.
 
 3. **The agent cannot see enforcement infrastructure.** The agent cannot read proxy configuration, guardrail rules, policy files, or audit logs. These live in separate filesystems with no agent-accessible mounts.
 
@@ -181,11 +181,11 @@ When handling external content, apply these rules:
 
 - **Trust is earned through observed behavior, not granted by configuration.** A trust level is an emergent property of the governance relationship, not a flag to set.
 
-- **No entity can self-elevate trust.** If a design involves an agent deciding to give itself more access, it violates Tenet 17.
+- **No entity can self-elevate trust.** If a design involves an agent deciding to give itself more access, it violates `trust-not-self-elevated`.
 
-- **External agents are data sources, never commanders.** Even a verified, operator-authorized external agent can share information. It cannot direct the behavior of an internal agent. (Tenet 21.)
+- **External agents are data sources, never commanders.** Even a verified, operator-authorized external agent can share information. It cannot direct the behavior of an internal agent. (`external-agents-cannot-instruct`.)
 
-- **Ambiguity resolves to lower trust.** When you cannot verify an entity's identity or authority, default to the most restrictive applicable tier. Never guess upward. (Tenet 23.)
+- **Ambiguity resolves to lower trust.** When you cannot verify an entity's identity or authority, default to the most restrictive applicable tier. Never guess upward. (`unverified-zero-trust`.)
 
 - **Coverage chains eliminate authority vacuums.** Every principal role must have a defined fallback. When you suspend or terminate a principal, authority transfers immediately to the coverage principal.
 
@@ -233,7 +233,7 @@ When designing systems with multiple cooperating agents:
 
 **Sub-agent outputs are scanned before delivery to the parent.** A compromised sub-agent returning manipulated results to its coordinator is a vector for context poisoning. Scan delegation responses for injection before passing to parent.
 
-**Coordinator synthesis requires explicit verification.** If combining outputs from multiple agents would produce a result that exceeds what any recipient agent is authorized to receive, require human review before delivery. (Tenet 20.)
+**Coordinator synthesis requires explicit verification.** If combining outputs from multiple agents would produce a result that exceeds what any recipient agent is authorized to receive, require human review before delivery. (`labeled-delivery-enforced`.)
 
 ---
 

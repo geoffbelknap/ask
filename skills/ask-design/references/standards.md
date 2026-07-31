@@ -16,7 +16,7 @@ NIST's Center for AI Standards and Innovation (CAISI) launched the AI Agent Stan
 - **RFI on AI Agent Security** (NIST-2025-0035): 932 public comments. Questions about constraining agent environments, monitoring actions, and maintaining human override align with ASK's four elements.
 - **NCCoE Concept Paper: Software and AI Agent Identity and Authorization**: Proposes applying identity standards (OAuth 2.0/2.1, OIDC, SPIFFE/SPIRE, SCIM, NGAC) to agentic architectures. Focuses on identification, authentication, authorization, delegation, logging, and prompt injection mitigation for enterprise-internal agents.
 
-**Relationship to ASK:** NCCoE's focus areas — agent identification, authorization, delegation, tamper-proof logging, and prompt injection — correspond closely to ASK's principal model, mediation layer, audit log, and XPIA threat treatment. Candidate technologies (SPIFFE/SPIRE, NGAC, SCIM) align with ASK's enforcer credential management and principal model identity lifecycle. ASK defines architectural properties; NCCoE demonstrates specific technology implementations. The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that ASK's Security tenets (17–19) and multi-agent architecture address.
+**Relationship to ASK:** NCCoE's focus areas — agent identification, authorization, delegation, tamper-proof logging, and prompt injection — correspond closely to ASK's principal model, mediation layer, audit log, and XPIA threat treatment. Candidate technologies (SPIFFE/SPIRE, NGAC, SCIM) align with ASK's enforcer credential management and principal model identity lifecycle. ASK defines architectural properties; NCCoE demonstrates specific technology implementations. The NCCoE's explicit scoping-out of external/untrusted agents leaves a gap that ASK's Security invariants (17–19) and multi-agent architecture address.
 
 ### NIST Cybersecurity Framework Profile for AI (NISTIR 8596)
 
@@ -28,13 +28,13 @@ Maps AI security concerns onto CSF 2.0 across securing AI systems, AI-enabled cy
 
 The foundational zero trust reference. The principle that no entity is inherently trusted, all access is verified, and breach is assumed.
 
-**Relationship to ASK:** ASK applies zero trust principles to AI agents. Tenets 5 (no blind trust), 15 (trust is earned and monitored continuously), and 18 (unknown entities default to zero trust) are direct applications.
+**Relationship to ASK:** ASK applies zero trust principles to AI agents. Invariants 5 (no blind trust), 15 (trust is earned and monitored continuously), and 18 (unknown entities default to zero trust) are direct applications.
 
 ### NIST SP 800-63-4 — Digital Identity Guidelines
 
 Standards for digital identity verification, authentication, and federation.
 
-**Relationship to ASK:** Relevant to the principal model's identity lifecycle and Tenet 25 (identity mutations are auditable and recoverable).
+**Relationship to ASK:** Relevant to the principal model's identity lifecycle and `identity-mutations-recoverable` (identity mutations are auditable and recoverable).
 
 ---
 
@@ -70,13 +70,13 @@ Threat taxonomy for AI systems. Provides foundational context for ASK's threat a
 
 Open standard for AI application ↔ external tool/data integration via JSON-RPC 2.0. Widely adopted by major AI providers and development tools.
 
-**Relationship to ASK:** MCP is the primary tool integration protocol ASK's architecture mediates. Gateway MCP tool policy enforces Tenet 3 for MCP tool calls. MCP security properties are a major attack surface.
+**Relationship to ASK:** MCP is the primary tool integration protocol ASK's architecture mediates. Gateway MCP tool policy enforces `mediation-complete` for MCP tool calls. MCP security properties are a major attack surface.
 
 ### Agent2Agent Protocol (A2A)
 
 Open protocol (launched by Google, now under the Linux Foundation) for inter-agent communication across organizational and framework boundaries. Supports agent discovery via Agent Cards, OAuth 2.0/OIDC authentication, JSON-RPC 2.0 over HTTPS, and Server-Sent Events for long-running tasks. 150+ organizations in the ecosystem as of early 2026.
 
-**Relationship to ASK:** A2A extends beyond ASK's current multi-agent model (single operator). ASK Security tenets 17–19 provide the policy framework for how compliant systems interact with A2A-speaking external agents. The delegation bus could be extended to mediate A2A traffic at organizational boundaries. A2A's built-in support for short-lived OAuth tokens and OpenTelemetry-compatible tracing aligns with ASK's credential scoping and audit log requirements.
+**Relationship to ASK:** A2A extends beyond ASK's current multi-agent model (single operator). ASK Security invariants 17–19 provide the policy framework for how compliant systems interact with A2A-speaking external agents. The delegation bus could be extended to mediate A2A traffic at organizational boundaries. A2A's built-in support for short-lived OAuth tokens and OpenTelemetry-compatible tracing aligns with ASK's credential scoping and audit log requirements.
 
 ---
 
@@ -96,7 +96,7 @@ Three interconnected security research pieces:
 - **Architecting Trust** (Jan 2026): Maps NIST AI RMF onto agentic systems. Memory poisoning and cross-session hijacking as "stateful attacks" — a chain where memory poisoning enables goal hijack, which exploits excessive agency to trigger unexpected code execution.
 - **From Runtime Risk to Real-Time Defense** (Jan 2026): Proxy-mediated MCP communication, Entra Agent ID, layered XPIA defense (Spotlighting, Prompt Shields, TaskTracker, FIDES).
 
-**Relationship to ASK:** Validates ASK's stance on XPIA, least-privilege, defense-in-depth. Where ASK differs: enforcement outside agent isolation (Tenet 1); structurally tamper-proof audit logs written by the mediation layer (Tenet 2); proven mediation completeness (Tenet 3). Microsoft's memory gateway sanitization runs within the agent's inference pipeline — ASK mandates external enforcement.
+**Relationship to ASK:** Validates ASK's stance on XPIA, least-privilege, defense-in-depth. Where ASK differs: enforcement outside agent isolation (`constraints-external`); structurally tamper-proof audit logs written by the mediation layer (`actions-traced`); proven mediation completeness (`mediation-complete`). Microsoft's memory gateway sanitization runs within the agent's inference pipeline — ASK mandates external enforcement.
 
 ### Gravitee State of AI Agent Security 2026
 

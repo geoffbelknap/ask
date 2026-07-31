@@ -10,16 +10,16 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 **Architecturally concrete.** ASK doesn't say "ensure appropriate oversight." It says "the mediation layer runs in a separate isolation boundary, the agent cannot reach the audit log, constraints are a read-only mount." That's something an engineer can build against and an auditor can verify.
 
-**Principle-based, not implementation-prescriptive.** The tenets say *what must be true*, not *how to build it*. Any technology stack that satisfies the tenets is a valid ASK deployment.
+**Principle-based, not implementation-prescriptive.** The invariants say *what must be true*, not *how to build it*. Any technology stack that satisfies the invariants is a valid ASK deployment.
 
-**Scale-independent.** The same tenets apply whether you're running one agent or ten thousand — from a single container on a laptop to an enterprise fleet.
+**Scale-independent.** The same invariants apply whether you're running one agent or ten thousand — from a single container on a laptop to an enterprise fleet.
 
 ---
 
 ## Reading paths
 
 **Understand the framework theory**
-→ [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, tenets, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
+→ [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, invariants, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
 
 **Understand the threats**
 → [THREATS.md](THREATS.md) — Threat catalog: traditional risks grounded in established best practices, genuinely novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
@@ -30,7 +30,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 **Feed context to an agent building ASK systems**
 
 **Check regulatory alignment**
-→ [REGULATORY.md](REGULATORY.md) — Mapping of ASK tenets to EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, and SEC AI Guidance. Working document — contributions welcome.
+→ [REGULATORY.md](REGULATORY.md) — Mapping of ASK invariants to EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, and SEC AI Guidance. Working document — contributions welcome.
 
 **Understand the landscape**
 → [RELATED-WORK.md](RELATED-WORK.md) — How ASK relates to NIST standards, OWASP, MAESTRO, A2A, MCP security research, and industry findings.
@@ -41,7 +41,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ```
 ├── README.md              ← You are here
-├── FRAMEWORK.md           ← Complete theory: elements, tenets, cognitive model, lifecycle
+├── FRAMEWORK.md           ← Complete theory: elements, invariants, cognitive model, lifecycle
 ├── THREATS.md             ← Threat catalog: traditional, novel, and hybrid threats
 ├── ARCHITECTURE.md        ← Technical guide: enforcement layers, topology, scaling
 ├── MITIGATIONS.md         ← Implementation guidance for novel threats
@@ -71,13 +71,13 @@ ASK defines what must be true — architecturally, operationally, and organizati
 ├── LICENSE                ← CC BY 4.0
 │
 └── archive/               ← Proposals: pending, and integrated ones kept for provenance
-    ├── proposed-invariants-split.md    ← Pending: rename tenets to invariants, split the tier
+    ├── proposed-invariants-split.md    ← Pending: rename invariants to invariants, split the tier
     ├── proposed-cognitive-model-replacement.md ← Integrated: Model/Context/Runtime/Workspace
     ├── proposed-agent-as-originator.md ← Pending: outward harm and deployment context
     ├── proposed-regulatory-alignment.md ← Pending: compliance evidence, provenance, incident readiness
     ├── proposed-acting-on-behalf.md ← Pending: authority derivation and step-up verification
-    ├── proposed-tenet-reasoning-exposure.md ← Integrated: reasoning is not principal-facing
-    └── proposed-tenets-knowledge.md    ← Integrated as the Organizational Knowledge tenets
+    ├── proposed-invariant-reasoning-exposure.md ← Integrated: reasoning is not principal-facing
+    └── proposed-invariants-knowledge.md    ← Integrated as the Organizational Knowledge invariants
 ```
 
 ---
@@ -92,9 +92,9 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ASK uses date-based versioning: **ASK 2026.06** (the current version).
 
-Tenet numbers reflect reading order within the framework document and may change between versions when tenets are reorganized. Reference tenets by name for stability across versions. The changelog documents all numbering changes between versions.
+Reference invariants and principles by slug — `mediation-complete`, `least-privilege`. Slugs are permanent. The `INV-nn` and `PRIN-nn` numbers reflect reading order, carry no meaning, and change when the framework is reorganized. Nothing in the framework points at a number.
 
-Breaking changes (tenet renumbering, element redefinition, structural changes to the cognitive model) will increment the version and be documented in a changelog. Non-breaking additions (new Limitations entries, new examples, clarifications) do not require a version change.
+Breaking changes (retiring or restating an invariant, element redefinition, structural changes to the cognitive model) will increment the version and be documented in a changelog. Renumbering is not a breaking change, because nothing references a number. Non-breaking additions (new Limitations entries, new examples, clarifications) do not require a version change.
 
 ---
 

@@ -104,7 +104,7 @@ Data is extracted from the system through the agent's action surface.
 
 ## The Principal/Data Distinction
 
-**Tenet 24 — Instructions only come from verified principals.**
+**`instruction-channel-distinct` — Instructions only come from verified principals.**
 
 This is the design principle behind XPIA defense:
 
@@ -138,8 +138,8 @@ External Input ──▶ [Guardrail Pipeline] ──▶ Agent Context
 ```
 
 **Applies to:** Tool results, document content, API responses, user input, MCP server responses
-**ASK tenets:** 3 (mediation complete), 17 (instructions from verified principals)
-**Critical:** The guardrail classifier must run **outside** the agent's process. Running it inside violates Tenet 1.
+**ASK invariants:** 3 (mediation complete), 17 (instructions from verified principals)
+**Critical:** The guardrail classifier must run **outside** the agent's process. Running it inside violates `constraints-external`.
 
 ### Pattern 2: Gateway Scope Lock
 
@@ -154,7 +154,7 @@ Agent ──action──▶ [Enforcer] ──validate──▶ [Gateway] ──e
 ```
 
 **Applies to:** Every tool call, file operation, command execution, MCP tool invocation
-**ASK tenets:** 1 (enforcement separation), 3 (complete mediation), 4 (least privilege)
+**ASK invariants:** 1 (enforcement separation), 3 (complete mediation), 4 (least privilege)
 
 ### Pattern 3: Egress Containment
 
@@ -174,7 +174,7 @@ Agent Environment
 ```
 
 **Applies to:** All outbound network traffic
-**ASK tenets:** 3 (complete mediation), 4 (least privilege)
+**ASK invariants:** 3 (complete mediation), 4 (least privilege)
 
 ### Pattern 4: Restricted Context Processing
 
@@ -209,7 +209,7 @@ Agent ──MCP call──▶ [Gateway MCP Policy] ──▶ MCP Server
                      • New server registration blocked?
 ```
 
-**ASK tenets:** 3 (complete mediation)
+**ASK invariants:** 3 (complete mediation)
 **Critical:** Application-level MCP policy inside the agent process is insufficient — gateway-level (OS-level) enforcement required.
 
 ---
@@ -229,7 +229,7 @@ guardrail:
   fallback_on_error: block  # Fail closed
 ```
 
-**Important:** The classifier must run **outside** the agent's process. Running it inside violates Tenet 1.
+**Important:** The classifier must run **outside** the agent's process. Running it inside violates `constraints-external`.
 **Limitation:** Guardrails are probabilistic — sophisticated attacks may evade detection. This is why architectural containment matters.
 
 ### Heuristic Detection
@@ -279,7 +279,7 @@ Agent Process
 └─────────────────────┘
 ```
 
-**Violates Tenet 1.** Enforcement must be external to the agent's isolation boundary.
+**Violates `constraints-external`.** Enforcement must be external to the agent's isolation boundary.
 
 ### Tool results bypass guardrails
 
@@ -289,7 +289,7 @@ User Input ──▶ [Guardrail] ──▶ Agent ──▶ Tool Call ──▶ T
                                                           └── No guardrail here!
 ```
 
-**Violates Tenet 3.** All inputs to the agent must pass through mediation.
+**Violates `mediation-complete`.** All inputs to the agent must pass through mediation.
 
 ### MCP policy only at application level
 
@@ -301,7 +301,7 @@ Agent Process
 └───────────────────────────┘
 ```
 
-**Violates Tenet 1.** MCP tool policy must be enforced at the gateway level (OS-level), not just inside the agent process.
+**Violates `constraints-external`.** MCP tool policy must be enforced at the gateway level (OS-level), not just inside the agent process.
 
 ### Correct: All inputs through external guardrails
 

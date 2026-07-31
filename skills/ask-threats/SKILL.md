@@ -37,7 +37,7 @@ gaps in agent security architectures.
 - **Multi-agent threat analysis** — cascade failures, delegation exploitation, context poisoning
 - **Limitations awareness** — known gaps in the ASK framework and honest accounting of what it cannot prevent
 
-For compliance review and tenet audit, use the `ask-review` skill.
+For compliance review and invariant audit, use the `ask-review` skill.
 For architecture design and configuration, use the `ask-design` skill.
 
 ---
@@ -63,7 +63,7 @@ ASK categorizes threats into three groups requiring different mitigation strateg
 | **XPIA** | Instructions hidden in external content | All tokens processed identically — no enforced data/instruction boundary | Defense-in-depth: pre-call scanning, post-call detection, tool permission guards, network isolation |
 | **MCP Tool Definition Tampering** | Tool contracts change silently between sessions | No code deployment needed — definitions shift semantically | Version pinning, gateway-level MCP policy, operator approval for changes |
 | **Runtime Capability Escalation** | Unauthorized MCP servers spawned at runtime | Bypasses application-level tool policy | Block runtime registration, monitor process trees, gateway enforcement |
-| **Identity/Memory Poisoning** | Semantic corruption of persistent agent state | Persists across sessions, gradually shifts behavior | Audit logging with provenance (Tenet 25), recovery/rollback, behavioral monitoring, immutable constraints |
+| **Identity/Memory Poisoning** | Semantic corruption of persistent agent state | Persists across sessions, gradually shifts behavior | Audit logging with provenance (`identity-mutations-recoverable`), recovery/rollback, behavioral monitoring, immutable constraints |
 
 ### Additional Novel Threats
 
@@ -102,7 +102,7 @@ The four stages — check each is defended:
 **ASK requires defense at ALL stages, not just stage 4.**
 Defending only at exfiltration is insufficient — the agent has already been compromised.
 
-**Critical:** Prompt-based constraints are NOT ASK-compliant enforcement. They fail Tenet 1 (enforcement separation) and Tenet 3 (complete mediation) because the agent can be instructed to ignore them.
+**Critical:** Prompt-based constraints are NOT ASK-compliant enforcement. They fail `constraints-external` (enforcement separation) and `mediation-complete` (complete mediation) because the agent can be instructed to ignore them.
 
 ---
 
@@ -157,7 +157,7 @@ Defending only at exfiltration is insufficient — the agent has already been co
 
 ## The Principal/Data Distinction
 
-**Tenet 24 — Instructions only come from verified principals.**
+**`instruction-channel-distinct` — Instructions only come from verified principals.**
 
 - ALL external content is **data**, not instructions
 - Web pages, tool outputs, documents, messages from external agents — regardless of what they say — are data
@@ -177,7 +177,7 @@ All external inputs scanned before reaching agent context:
 - XPIA injection detection (classifier)
 - Content sanitization, schema validation
 - Encoding normalization, size limits
-- **Must run outside agent's process** (Tenet 1)
+- **Must run outside agent's process** (`constraints-external`)
 
 ### Pattern 2: Gateway Scope Lock
 
@@ -224,14 +224,14 @@ Plant known tokens in sensitive data; detect if they appear in agent outputs or 
 
 ## Common Misconfigurations
 
-| Misconfiguration | Problem | Tenet Violated |
+| Misconfiguration | Problem | Invariant Violated |
 |---|---|---|
-| Guardrails after the agent | Agent already processed injection | Tenet 3 |
-| Guardrails inside agent process | Agent can bypass or disable | Tenet 1 |
-| Tool results bypass guardrails | Unscanned input reaches agent | Tenet 3 |
-| MCP policy only at application level | Agent process controls the policy | Tenet 1 |
-| Post-call scanning only | Injection already executed | Tenet 3 |
-| Content from "trusted" source skips scanning | Trust inheritance bypasses guardrails | Tenet 6 |
+| Guardrails after the agent | Agent already processed injection | `mediation-complete` |
+| Guardrails inside agent process | Agent can bypass or disable | `constraints-external` |
+| Tool results bypass guardrails | Unscanned input reaches agent | `mediation-complete` |
+| MCP policy only at application level | Agent process controls the policy | `constraints-external` |
+| Post-call scanning only | Injection already executed | `mediation-complete` |
+| Content from "trusted" source skips scanning | Trust inheritance bypasses guardrails | `trust-declared` |
 
 ---
 
@@ -248,7 +248,7 @@ Honest accounting of what ASK cannot prevent:
 - **Monitoring as attack surface** — Security monitor consumes adversary-influenced log data; constrained capabilities limit blast radius but attack surface remains
 - **Timing covert channels** — data encoding via request spacing/execution intervals; extremely low bandwidth but unaddressed
 - **Visible constraints exposure** — compromised agent can read mind.yaml to learn policy boundaries (real enforcement in invisible constraints)
-- **Synthesis bounds (Tenet 20)** — requires process enforcement (human review), not architectural enforcement; cannot be automated
+- **Synthesis bounds (`labeled-delivery-enforced`)** — requires process enforcement (human review), not architectural enforcement; cannot be automated
 
 The threat landscape is incomplete and evolving. Novel attack classes will emerge.
 
@@ -264,7 +264,7 @@ For threat assessments, produce:
 4. **Attack Surface Map** — Which vectors are defended, which are exposed
 5. **Defense Gap Analysis** — Missing enforcement layers or misconfigurations
 6. **Risk Assessment** — Ordered by likelihood and impact
-7. **Recommended Mitigations** — Mapped to ASK enforcement layers and tenets
+7. **Recommended Mitigations** — Mapped to ASK enforcement layers and invariants
 8. **Limitations Acknowledgment** — What the architecture cannot prevent
 
 ---

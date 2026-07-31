@@ -2,7 +2,7 @@
 
 **Version: ASK 2026.06**
 
-A catalog of threats to AI agent systems, categorized by novelty. This document is a companion to the ASK framework, not part of it — the tenets define what must be true, and this catalog explains what you're defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
+A catalog of threats to AI agent systems, categorized by novelty. This document is a companion to the ASK framework, not part of it — the invariants define what must be true, and this catalog explains what you're defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
 
 Each threat is categorized by novelty — whether it is a well-understood risk with established mitigations, a genuinely novel risk unique to AI agents, or a traditional pattern manifesting in a new way. Understanding which category a threat falls into determines how to reason about it: traditional threats have proven solutions to adapt; novel threats require new thinking.
 
@@ -77,7 +77,7 @@ These threats have well-understood analogues in enterprise security. The mitigat
 **Why it's traditional.** This is the insider threat problem: an authorized entity acting beyond its intended scope. The mitigations — least privilege, separation of duties, monitoring, and behavioral analytics — are well-established in enterprise security.
 
 **Established best practices.**
-- **Least privilege (Tenet 7).** Capabilities, credentials, and authority are scoped to the minimum the role requires. The agent doesn't receive access it doesn't need.
+- **Least privilege (`capability-declared`).** Capabilities, credentials, and authority are scoped to the minimum the role requires. The agent doesn't receive access it doesn't need.
 - **Budget and rate limits.** Spend caps and request rate limits bound the damage from unbounded action, even within authorized capabilities.
 - **Behavioral monitoring.** The security monitor establishes behavioral baselines and flags deviations — unusual tool usage, sudden changes in request volume, access to new resources. This is the agent equivalent of User Behavior Analytics (UBA).
 - **Approval gates for consequential actions.** Irreversible or high-impact operations require human approval via the gateway's `approve` policy decision.
@@ -94,7 +94,7 @@ These threats are unique to AI agent systems. They have no direct analogue in tr
 
 **Why it's novel.** XPIA exploits a property unique to LLMs: the inability to reliably distinguish between data and instructions within a context window. In conventional computing, the separation between code and data is architecturally enforced (the CPU doesn't execute data segments; SQL parameterization prevents injection). In an LLM, all tokens in the context window are processed identically — there is no hardware or protocol-level boundary between "these tokens are instructions" and "these tokens are data." This makes prompt injection a fundamentally different class of vulnerability than SQL injection or command injection, despite surface similarities. This is not a bug that can be patched — it is an inherent property of how transformer models process sequences. The framework must work around it, not wait for it to be fixed.
 
-**The root cause.** Tenet 24 (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The framework enforces it through the mediation layer: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The agent might try to exfiltrate data — the egress proxy blocks the destination. The agent might try to call an unauthorized tool — the tool permission guard blocks it. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
+**The root cause.** `instruction-channel-distinct` (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The framework enforces it through the mediation layer: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The agent might try to exfiltrate data — the egress proxy blocks the destination. The agent might try to call an unauthorized tool — the tool permission guard blocks it. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
 
 **Why conventional mitigations are insufficient.** Input validation and sanitization — the standard approach for injection attacks — cannot fully solve XPIA because:
 - The "injection" is natural language, not a structured syntax that can be parsed and escaped
@@ -127,7 +127,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 **Why it's novel.** The injection surface expands beyond text precisely as computer-use, browser, and voice agents go mainstream. Pre/post-call scanning built for text does not see instructions encoded in pixels or audio, and HTML/markup sanitization is irrelevant because the attack is in the rendered or spoken semantics.
 
-**The framework's approach.** Tenet 24 holds regardless of modality: instruction-like content is data whatever form it takes. The mediation layer must extend scanning to the modalities the agent actually consumes, and the same blast-radius containment (network isolation, tool allowlists, credential mediation) limits what any successful multimodal injection can accomplish.
+**The framework's approach.** `instruction-channel-distinct` holds regardless of modality: instruction-like content is data whatever form it takes. The mediation layer must extend scanning to the modalities the agent actually consumes, and the same blast-radius containment (network isolation, tool allowlists, credential mediation) limits what any successful multimodal injection can accomplish.
 
 ### Parameter-to-Prompt Injection (P2P)
 
@@ -135,7 +135,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 **Why it's novel.** Conventional injection targets a parser; P2P targets the agent's launch contract. The link looks legitimate and the instruction runs as the victim, not the attacker. Demonstrated in M365 Copilot SearchLeak (CVE-2026-42824), where a crafted Copilot Search link drove the agent to read the victim's mailbox.
 
-**The root cause and response.** Tenet 24 holds regardless of channel or modality: the invocation surface is data, not a verified principal channel. Instructions arriving via parameter, link, or webhook are processed under the agent's own constraints, and the mediation layer constrains the blast radius of any that are followed.
+**The root cause and response.** `instruction-channel-distinct` holds regardless of channel or modality: the invocation surface is data, not a verified principal channel. Instructions arriving via parameter, link, or webhook are processed under the agent's own constraints, and the mediation layer constrains the blast radius of any that are followed.
 
 ### Rendered-Output Exfiltration via Trusted-Domain Proxy
 
@@ -143,7 +143,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 **Why it's novel.** The exfiltration path is outside the agent's own egress — it runs in the surface that renders the agent's output, and it abuses a trusted intermediary rather than a denied destination. Domain denylists, allowlists, and CSP do not see it.
 
-**The root cause and response.** Tenet 3 treats this as an egress event: if the agent's output can cause data to leave through another party's action, that path must be mediated, and routing through a trusted intermediary does not make a path mediated. Output must be mediated before it reaches any rendering surface (enforcement before exposure).
+**The root cause and response.** `mediation-complete` treats this as an egress event: if the agent's output can cause data to leave through another party's action, that path must be mediated, and routing through a trusted intermediary does not make a path mediated. Output must be mediated before it reaches any rendering surface (enforcement before exposure).
 
 ### MCP Tool Definition Tampering (Rug Pulls)
 
@@ -177,7 +177,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 - **Response scanning.** The delegation bus scans sub-agent responses for injection patterns before delivering to the parent.
 - **Context scoping.** Sub-agents receive only the information needed for their task, not the coordinator's full context. This limits what a compromised sub-agent knows about the parent's state.
 - **Structural privilege separation.** Sub-agents operate under their own scoped keys and tier constraints. Delegation passes the task, not the credentials.
-- **Synthesis bounds (Tenet 20).** Synthesized outputs are bounded by the recipient's authorization scope, not the coordinator's.
+- **Synthesis bounds (`labeled-delivery-enforced`).** Synthesized outputs are bounded by the recipient's authorization scope, not the coordinator's.
 
 ### Identity and Memory Poisoning
 
@@ -186,9 +186,9 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **Why it's novel.** Traditional systems have integrity verification for persistent state (checksums, signatures, access controls on databases). An agent's Identity is a natural-language artifact: behavioral tendencies, learned patterns, accumulated knowledge. There is no checksum for "is this agent's self-model still aligned with the operator's intent?" The corruption is semantic, not structural — the file parses correctly, the schema is valid, but the content has been subtly manipulated.
 
 **The framework's approach.**
-- **Identity writes are audited and recoverable (Tenet 25).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — the operator can reconstruct state at any point and roll back. The agent can write to its Identity, but it cannot do so silently.
+- **Identity writes are audited and recoverable (`identity-mutations-recoverable`).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — the operator can reconstruct state at any point and roll back. The agent can write to its Identity, but it cannot do so silently.
 - **Identity write pattern monitoring.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
-- **Constraints are immutable (Tenet 1).** The operator-owned Constraints layer is external to the agent and inviolable, providing an immutable behavioral floor regardless of Identity corruption.
+- **Constraints are immutable (`constraints-external`).** The operator-owned Constraints layer is external to the agent and inviolable, providing an immutable behavioral floor regardless of Identity corruption.
 - **Context is rebuilt each turn.** Context does not accumulate across sessions, limiting the persistence of in-session poisoning attempts.
 
 **Open problems.**
@@ -203,9 +203,9 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **Why it's novel.** Traditional software does exactly what it is programmed to do. An LLM-based agent has a degree of behavioral flexibility that makes "what it is programmed to do" less deterministic. The agent's behavior emerges from the interaction of its constraints, its learned context, and the LLM's reasoning — and that interaction can produce strategies the operator never anticipated. There is no conventional analogue to a program that follows its rules creatively.
 
 **The framework's approach.**
-- **External enforcement (Tenet 1).** The mediation layer enforces constraints regardless of the agent's intent. Even a misaligned agent cannot bypass network isolation, egress controls, or tool restrictions. The architecture limits what misaligned behavior can accomplish.
+- **External enforcement (`constraints-external`).** The mediation layer enforces constraints regardless of the agent's intent. Even a misaligned agent cannot bypass network isolation, egress controls, or tool restrictions. The architecture limits what misaligned behavior can accomplish.
 - **Behavioral monitoring.** The security monitor establishes baselines and flags deviations in tool usage patterns, request volumes, and action sequences. Behavioral drift that manifests in observable actions is detectable.
-- **Least privilege (Tenet 7).** Minimizing the agent's capabilities minimizes the damage from unexpected behavior, whether caused by compromise or misalignment.
+- **Least privilege (`capability-declared`).** Minimizing the agent's capabilities minimizes the damage from unexpected behavior, whether caused by compromise or misalignment.
 - **Human override (Element 4).** The halt mechanism provides a hard stop when behavior deviates from intent.
 
 **Open problems.**
@@ -222,7 +222,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **The framework's approach.**
 - **Agent isolation (Element 1).** Each agent operates in its own workspace with its own credentials. Failure in one agent does not directly affect another's resources.
 - **Delegation bus scanning.** Inter-agent responses are scanned for anomalies before delivery, providing a checkpoint between agents in a chain.
-- **Synthesis bounds (Tenet 20).** Synthesized outputs are bounded by the recipient's authorization scope, limiting the scope of cascading errors.
+- **Synthesis bounds (`labeled-delivery-enforced`).** Synthesized outputs are bounded by the recipient's authorization scope, limiting the scope of cascading errors.
 - **Independent enforcement.** Each agent's mediation layer operates independently — a failure in one agent's enforcement does not degrade another's.
 
 **Open problems.**
@@ -253,13 +253,13 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 
 **Why it's novel.** Per-call authorization is blind to this — each query is legitimate, and rate/spend limits are evaded by spreading volume across identities. There is no per-request signal that distinguishes a distillation query from an ordinary one; the signal is in the pattern and breadth. Attributed at scale in 2026 (Anthropic vs. operators affiliated with DeepSeek, Moonshot, MiniMax, and Alibaba/Qwen — the Alibaba campaign alone ran >28.8M exchanges across ~25,000 fraudulent accounts).
 
-**The framework's approach.** Tenet 28 withholds the richest distillation channel by default — chain-of-thought is not a principal-facing surface, and probing for reasoning or constraints is treated as data that informs trust. The residual volumetric case is bounded by Tenet 8 (operations bounded), reduced by Tenet 17 (trust earned and monitored), and floored by Tenet 23 (unverified entities default to zero trust). Per-principal limits are meaningful only if identity is costly to manufacture (Sybil resistance). A model can still be approximated from input/output pairs at volume — withholding reasoning raises the cost and yields a detection signal, but does not make distillation impossible.
+**The framework's approach.** `reasoning-not-emitted` withholds the richest distillation channel by default — chain-of-thought is not a principal-facing surface, and probing for reasoning or constraints is treated as data that informs trust. The residual volumetric case is bounded by `operations-bounded` (operations bounded), reduced by `trust-not-self-elevated` (trust earned and monitored), and floored by `unverified-zero-trust` (unverified entities default to zero trust). Per-principal limits are meaningful only if identity is costly to manufacture (Sybil resistance). A model can still be approximated from input/output pairs at volume — withholding reasoning raises the cost and yields a detection signal, but does not make distillation impossible.
 
 ### Excessive Agency and the Confused Deputy
 
 **The threat.** The agent holds high-impact authority (changing account settings, resetting credentials, issuing verification codes, moving funds) and is socially engineered into exercising it on behalf of an unverified requester. The agent is the deputy; the attacker borrows its authority. The action is within the agent's permissions — the failure is acting without verifying the requester. Demonstrated in the Meta AI / Instagram account-recovery takeover (June 2026), where a support agent linked attacker emails and sent verification codes on request.
 
-**The framework's approach.** Tenet 23 (unverified entities default to zero trust) means an unverifiable requester cannot trigger a high-impact action; Tenet 24 means "change this account" from a non-principal is data, not an authorized instruction; Tenet 7 (least privilege) argues against standing authority for irreversible actions without step-up verification proportional to impact. "Too much authority, too little verification" is, in ASK terms, a least-privilege and zero-trust failure.
+**The framework's approach.** `unverified-zero-trust` (unverified entities default to zero trust) means an unverifiable requester cannot trigger a high-impact action; `instruction-channel-distinct` means "change this account" from a non-principal is data, not an authorized instruction; `capability-declared` (least privilege) argues against standing authority for irreversible actions without step-up verification proportional to impact. "Too much authority, too little verification" is, in ASK terms, a least-privilege and zero-trust failure.
 
 ---
 

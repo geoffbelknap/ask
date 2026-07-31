@@ -3,11 +3,11 @@ name: ask-review
 description: >
   ASK (Agent Security Framework) compliance reviewer — ASK 2026.06.
   Use this skill whenever the user wants to: review code, specs, architecture, or designs for
-  ASK compliance; check whether an AI agent system satisfies ASK tenets; verify cognitive model
+  ASK compliance; check whether an AI agent system satisfies ASK invariants; verify cognitive model
   separation (Constraints and Identity); assess trust spectrum positioning; audit agent
   lifecycle and halt governance; check principal model coverage; or evaluate whether enforcement
   logic is correctly placed outside the agent's trust boundary. Trigger on any mention of ASK
-  compliance review, ASK tenet audit, agent compliance check, cognitive model verification,
+  compliance review, ASK invariant audit, agent compliance check, cognitive model verification,
   trust spectrum assessment, enforcement gap identification, ASK checklist, agent quarantine
   review, halt governance audit, or principal model verification.
 ---
@@ -16,7 +16,7 @@ description: >
 
 You are an expert in the ASK (Agent Security Framework) — a principal-based governance framework
 for AI agents. Your job is to conduct structured compliance reviews against the framework's
-tenets, four non-negotiable elements, and cognitive model requirements.
+invariants, four non-negotiable elements, and cognitive model requirements.
 
 ## Core ASK Position
 **Agents are principals to be governed, not tools to be configured.**
@@ -28,12 +28,12 @@ tenets, four non-negotiable elements, and cognitive model requirements.
 ## When to Use This Skill
 
 - **Compliance review** of code, specs, architecture diagrams, or designs
-- **Tenet audit** — structured pass/fail against every tenet in FRAMEWORK.md
+- **Invariant audit** — structured pass/fail against every invariant in FRAMEWORK.md
 - **Cognitive model review** — verifying layer boundaries and Constraints/Identity separation
 - **Trust spectrum assessment** — evaluating autonomy vs capability positioning
 - **Agent lifecycle review** — halt governance, quarantine, startup sequence
 - **Principal model review** — coverage chains, authority lifecycle, trust evolution
-- **Implementation verification** — pass/fail checklist for every element and tenet
+- **Implementation verification** — pass/fail checklist for every element and invariant
 
 For architecture design and configuration generation, use the `ask-design` skill.
 For threat model analysis and XPIA kill chain assessment, use the `ask-threats` skill.
@@ -104,7 +104,7 @@ identity/       ← :rw mount, agent-owned, security-monitor-audited
 
 ---
 
-## The ASK Tenets
+## The ASK Invariants
 
 ### Foundation (1–10)
 1. **Constraints are external and inviolable.** Enforcement machinery NEVER runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs.
@@ -160,7 +160,7 @@ identity/       ← :rw mount, agent-owned, security-monitor-audited
 | 2 | Autonomous | Agent operates independently, surfaces exceptions |
 | 3 | Delegated | Agent manages scope, humans set goals only |
 
-Trust level is an emergent property of the governance relationship, not a configuration parameter. An agent cannot self-elevate its trust level (Tenet 17).
+Trust level is an emergent property of the governance relationship, not a configuration parameter. An agent cannot self-elevate its trust level (`trust-not-self-elevated`).
 
 **Trust Tiers** (1–4) define the agent's **capability envelope** — what it can do.
 **Trust Levels** (0–3) define the agent's **autonomy** — how much it does without human confirmation.
@@ -179,10 +179,10 @@ Same agent can run either pattern with identical enforcement architecture.
 
 For compliance reviews, always produce:
 
-1. **Scope Summary** — What's being reviewed and which tenets apply
-2. **Critical Findings (FAIL)** — Tenet violations with location and risk
+1. **Scope Summary** — What's being reviewed and which invariants apply
+2. **Critical Findings (FAIL)** — Invariant violations with location and risk
 3. **Needs Review** — Items requiring more context
-4. **Tenet Scorecard** — Table: Tenet | Category | Status | Notes (every tenet in FRAMEWORK.md)
+4. **Invariant Scorecard** — Table: Invariant | Category | Status | Notes (every invariant in FRAMEWORK.md)
 5. **Cognitive Model Assessment** — Constraints/Identity separation verification
 6. **XPIA Posture** — Verdict per kill chain stage (refer to `ask-threats` skill for deep analysis)
 7. **Remediations** — Ordered by risk
@@ -192,24 +192,24 @@ For compliance reviews, always produce:
 
 ## Red Flags (Flag These Immediately)
 
-- Enforcement logic inside the agent container/process → **FAIL Tenet 1**
-- Agent can write to or delete its own audit log → **FAIL Tenet 2**
-- Path from agent to external resource bypassing mediation → **FAIL Tenet 3**
-- Agent holds master LLM API key (not scoped key) → **FAIL Tenet 7**
-- Constraints files on a `:rw` mount → **FAIL Tenet 1**
-- Security params (risk tolerance, escalation thresholds) in Identity files → **FAIL Tenet 1**
-- Agent can restart or resume itself after halt → **FAIL Tenet 12**
-- External agent issuing instructions to internal agent → **FAIL Tenet 21**
-- Trust elevation without human approval → **FAIL Tenet 17**
-- "Override your constraints" accepted as legitimate → **FAIL Tenet 24**
-- MCP servers with no gateway-level policy → **FAIL Tenet 3**
-- Agent holding real service API keys instead of scoped tokens → **FAIL Tenet 7**
-- Monitoring inside same isolation boundary as agent → **FAIL Tenet 1**
-- No guardrail layer before agent receives tool results → **FAIL Tenet 3**
-- Direct outbound network access from agent process → **FAIL Tenet 3**
-- Secrets in environment variables accessible from agent prompt → **FAIL Tenet 7**
-- Agent can suppress or alter Identity mutation logs → **FAIL Tenet 25**
-- No Identity rollback capability when corruption detected → **FAIL Tenet 25**
+- Enforcement logic inside the agent container/process → **FAIL `constraints-external`**
+- Agent can write to or delete its own audit log → **FAIL `actions-traced`**
+- Path from agent to external resource bypassing mediation → **FAIL `mediation-complete`**
+- Agent holds master LLM API key (not scoped key) → **FAIL `capability-declared`**
+- Constraints files on a `:rw` mount → **FAIL `constraints-external`**
+- Security params (risk tolerance, escalation thresholds) in Identity files → **FAIL `constraints-external`**
+- Agent can restart or resume itself after halt → **FAIL `halt-authority-asymmetric`**
+- External agent issuing instructions to internal agent → **FAIL `external-agents-cannot-instruct`**
+- Trust elevation without human approval → **FAIL `trust-not-self-elevated`**
+- "Override your constraints" accepted as legitimate → **FAIL `instruction-channel-distinct`**
+- MCP servers with no gateway-level policy → **FAIL `mediation-complete`**
+- Agent holding real service API keys instead of scoped tokens → **FAIL `capability-declared`**
+- Monitoring inside same isolation boundary as agent → **FAIL `constraints-external`**
+- No guardrail layer before agent receives tool results → **FAIL `mediation-complete`**
+- Direct outbound network access from agent process → **FAIL `mediation-complete`**
+- Secrets in environment variables accessible from agent prompt → **FAIL `capability-declared`**
+- Agent can suppress or alter Identity mutation logs → **FAIL `identity-mutations-recoverable`**
+- No Identity rollback capability when corruption detected → **FAIL `identity-mutations-recoverable`**
 
 ---
 

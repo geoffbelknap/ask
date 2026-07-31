@@ -34,7 +34,7 @@ ASK requirements.
 - **Deployment topology** — single-endpoint to enterprise scaling
 - **Component composition** — how enforcement pieces fit together
 
-For compliance review and tenet audit, use the `ask-review` skill.
+For compliance review and invariant audit, use the `ask-review` skill.
 For threat model analysis and XPIA assessment, use the `ask-threats` skill.
 
 ---
@@ -66,7 +66,7 @@ The defense architecture uses independent isolation boundaries. No layer shares 
 Non-negotiable implementation rules for every design:
 
 1. **Enforcement is always external.** No guardrail, policy engine, or audit logger inside the agent's container.
-2. **Mediation is complete, not partial.** "We proxy LLM calls but let the agent hit the web directly" is a Tenet 3 violation.
+2. **Mediation is complete, not partial.** "We proxy LLM calls but let the agent hit the web directly" is a `mediation-complete` violation.
 3. **The agent cannot see enforcement infrastructure.** No mounts to proxy config, guardrail rules, policy files, or audit logs.
 4. **Defense in depth with genuine isolation.** Layers 1–7 do not share a trust boundary with the agent.
 5. **Constraint updates are governance events.** Never in-session, never initiated by the agent.
@@ -169,7 +169,7 @@ Each agent gets its own container, scoped API key, egress policy, and network se
 | Type | Role | Permission Model |
 |---|---|---|
 | **Worker** | Does the work | High capability within scope, isolated from other agents |
-| **Coordinator** | Plans, delegates, synthesizes | Cannot act directly in worker workspaces; constrained by Tenets 19–20 |
+| **Coordinator** | Plans, delegates, synthesizes | Cannot act directly in worker workspaces; constrained by `delegation-bounded`, `labeled-delivery-enforced` |
 | **Function** | Oversight and governance, such as the security monitor | Cross-boundary visibility, constrained action capability |
 
 ### Delegation Bus
@@ -203,7 +203,7 @@ active_agents:
     working_in: [docs/]
 ```
 
-Agents observe but cannot write. Register unavailability triggers: yield and flag (Tenet 22).
+Agents observe but cannot write. Register unavailability triggers: yield and flag (`unknown-conflicts-yield`).
 
 ---
 
@@ -216,7 +216,7 @@ The framework scales from single-endpoint to enterprise via the **Mediation Stub
 ## Policy Hierarchy
 
 ```
-Platform Tenets (immovable)
+Platform Invariants (immovable)
 Compliance Policy (external obligations)
 Organizational Policy (internal non-negotiables)
 ── ── ── HARD FLOOR ── ──

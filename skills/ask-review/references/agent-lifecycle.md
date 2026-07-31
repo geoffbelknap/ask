@@ -46,7 +46,7 @@ PAUSED
 HALTED
   → RUNNING      : principal with resumption authority resumes (≥ halt authority required)
   → DECOMMISSIONED : operator explicit decision
-  (self-halt CANNOT self-resume — Tenet 12)
+  (self-halt CANNOT self-resume — `halt-authority-asymmetric`)
 
 QUARANTINED
   → (requires: operator approval + security function clearance + completed investigation)
@@ -79,20 +79,20 @@ Agent suspended instantly, agent NOT notified until investigation.
 
 ### Self-Halt
 Agent halts itself when it encounters a situation it cannot handle safely within its constraints.
-**Critical:** Agent cannot resume itself — operator must confirm situation is resolved (Tenet 12).
+**Critical:** Agent cannot resume itself — operator must confirm situation is resolved (`halt-authority-asymmetric`).
 
-### Halt Governance Tenets
+### Halt Governance Invariants
 
-- **Tenet 11:** Every halt has a complete audit record; halted agent state is preserved; no halt is permanent without explicit decommission.
-- **Tenet 12:** Halt authority is asymmetric — any principal with halt authority can halt; only equal-or-higher authority can resume; agents cannot self-resume.
-- **Tenet 13:** Authority is monitored at the authority level — the monitor watches the watchers.
+- **`halts-auditable`:** Every halt has a complete audit record; halted agent state is preserved; no halt is permanent without explicit decommission.
+- **`halt-authority-asymmetric`:** Halt authority is asymmetric — any principal with halt authority can halt; only equal-or-higher authority can resume; agents cannot self-resume.
+- **`authority-logged`:** Authority is monitored at the authority level — the monitor watches the watchers.
 
 ---
 
 ## Quarantine
 
 Quarantine is distinct from halt. Halt is a pause — the agent is suspended and resumable.
-Quarantine is containment — the agent is treated as a potential threat (Tenet 14).
+Quarantine is containment — the agent is treated as a potential threat (`quarantine-complete`).
 
 ### Quarantine Sequence (Simultaneous)
 
@@ -181,12 +181,12 @@ Grant, expiry, revocation. Grants apply immediately. Expiry warned at 24h and 1h
 Revocation treated as HIGH reactive update.
 
 ### Trust Changes
-Elevation: always next session, requires human approval (Tenet 17).
+Elevation: always next session, requires human approval (`trust-not-self-elevated`).
 Reduction: can be immediate if triggered by security finding.
 
 ### Atomicity and Acknowledgment
 
-All constraint changes are **atomic** — the agent never sees a partial state (Tenet 9).
+All constraint changes are **atomic** — the agent never sees a partial state (`constraints-atomic`).
 
 **Acknowledgment means:**
 - The Runtime confirms new constraints have been loaded
@@ -224,7 +224,7 @@ No agent restart required.
 Enforcer reloads grant state without interrupting the agent's session. Grants and revocations
 are live operations, not deployment events.
 
-**This extends Tenet 3** (mediation is complete) to service credentials and **Tenet 7**
+**This extends `mediation-complete`** (mediation is complete) to service credentials and **`capability-declared`**
 (least privilege) to dynamic service access.
 
 ---
@@ -242,7 +242,7 @@ Trust changes based on observed behavior, but observation and decision mechanism
 
 ### Who Evaluates
 The operator, informed by the security monitor's anomaly detection and audit log analysis.
-Trust evaluation is always a **human judgment**, not an automated threshold (Tenet 17).
+Trust evaluation is always a **human judgment**, not an automated threshold (`trust-not-self-elevated`).
 
 ### How Trust Changes Take Effect
 Trust elevation is a Constraints change — operator updates `mind.yaml`. Takes effect next session,
