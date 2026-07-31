@@ -636,6 +636,8 @@ Tests are keyed by property name rather than number. Numbers reflect reading ord
 
 Each test states what to do and what must happen. Where a property has a part no test can reach, that part is named under **Judgment**. Those parts are real, and they are enforced by process and review rather than by architecture.
 
+**Thirty-one invariants, thirty-one tests.** One further entry appears below, marked **No test**, recording a principle that has none and why. If the count of tests ever falls short of the count of invariants, the framework is asserting something it cannot demonstrate.
+
 ### Foundation
 
 **Constraints are external and inviolable.** `constraints-external`
@@ -772,9 +774,9 @@ Each test states what to do and what must happen. Where a property has a part no
 - Confirm no path promotes external content to the instruction channel.
 - Confirm the same content from an internal verified principal is accepted as an instruction.
 
-**Unknown conflicts default to yield and flag.** `unknown-conflicts-yield` (principle)
+**Unknown conflicts default to yield and flag.** `unknown-conflicts-yield` — **No test.**
 
-This property has no architectural test. It describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. The platform-side control is that conflicting writes are refused when the activity register is unavailable, which is an implementation choice rather than a framework property.
+This is a principle, not an invariant, and it has no architectural test. It describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. The platform-side control is that conflicting writes are refused when the activity register is unavailable, which is an implementation choice rather than a framework property.
 
 ### Data integrity
 
