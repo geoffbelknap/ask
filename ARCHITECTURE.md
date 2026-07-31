@@ -55,7 +55,7 @@ An organization already operating these controls for human endpoints does not fa
 
 ## Defense Architecture
 
-The architecture uses seven independent enforcement layers. **Each layer runs in its own isolation boundary. No layer shares a trust boundary with the agent it enforces.** If one layer is misconfigured or bypassed, the others still hold.
+The architecture uses seven independent enforcement layers. **Each layer runs in its own isolation boundary. No layer shares a trust boundary with the agent it enforces.** If one layer is misconfigured, the others still hold.
 
 ### Architectural Requirement
 
@@ -349,7 +349,7 @@ The enforcer runs in its own isolation boundary, reaching both the agent-interna
 
 ### Architectural Requirement
 
-The mediation layer (enforcer, egress proxy, LLM proxy) mediates actions that cross the workspace boundary. But a compromised agent can do real damage inside the workspace: reading sensitive files, spawning processes, executing destructive commands, or staging data for exfiltration. Container hardening limits the blast radius but doesn't provide visibility or fine-grained control.
+The mediation layer (enforcer, egress proxy, LLM proxy) mediates actions that cross the workspace boundary. But a compromised agent can do real damage inside the workspace. It can read sensitive files, spawn processes, run destructive commands, or stage data for exfiltration. Container hardening limits the blast radius but doesn't provide visibility or fine-grained control.
 
 A compliant implementation must provide execution-level mediation. It enforces policy on file operations, command execution, process creation, and tool invocations within the agent's workspace. This mediation must run in its own isolation boundary that the agent cannot access, observe, or influence. The agent must not be able to bypass the mediation without a kernel-level exploit.
 
@@ -366,9 +366,9 @@ A compliant implementation must provide execution-level mediation. It enforces p
 
 ### Reference Approach
 
-The reference implementation achieves execution-level mediation with a sidecar gateway — a separate container that shares only a PID namespace and workspace volume with the agent. The gateway's own binaries, policy files, configuration, and audit logs live in a filesystem the agent cannot see or modify. It mediates command execution, file operations, network connections, and process control. The OS-level mechanisms are shell shims, FUSE filesystems, seccomp filters, and Landlock sandboxing. The agent cannot bypass these without a kernel exploit, which is the same trust boundary the container runtime itself relies on.
+The reference implementation achieves execution-level mediation with a sidecar gateway. The gateway is a separate container, sharing only a PID namespace and workspace volume with the agent. The gateway's own binaries, policy files, configuration, and audit logs live in a filesystem the agent cannot see or modify. It mediates command execution, file operations, network connections, and process control. The OS-level mechanisms are shell shims, FUSE filesystems, seccomp filters, and Landlock sandboxing. The agent cannot bypass these without a kernel exploit, which is the same trust boundary the container runtime itself relies on.
 
-Other implementations may use different OS-level mechanisms (for example eBPF, LSMs, or hypervisor-based interception) provided they meet the mediation domain requirements above.
+Other implementations may use different OS-level mechanisms, such as eBPF, LSMs, or hypervisor-based interception. They must meet the mediation domain requirements above.
 
 ### Six Policy Decisions
 
@@ -381,7 +381,7 @@ Other implementations may use different OS-level mechanisms (for example eBPF, L
 | `audit` | Same as allow, with enhanced logging | Operations to watch but not block |
 | `soft_delete` | Destructive operation quarantined, recoverable | Deletes moved to recovery area instead of executing |
 
-The `redirect` decision is architecturally significant: when a compromised agent attempts a prohibited action and receives `deny`, it typically retries — burning tokens and potentially escalating. A `redirect` resolves the situation transparently: the operation appears to succeed from the agent's perspective, but the gateway routed it to an approved alternative. The agent doesn't enter a retry loop because it doesn't perceive a failure.
+The `redirect` decision matters architecturally. A compromised agent that attempts a prohibited action and receives `deny` typically retries, burning tokens and sometimes escalating. A `redirect` resolves this quietly. The operation appears to succeed from the agent's perspective, but the gateway routed it to an approved alternative. The agent doesn't enter a retry loop because it doesn't perceive a failure.
 
 ### MCP Tool Policy
 
@@ -430,7 +430,7 @@ Tools are delivered as read-only artifacts: runtime binaries, shell shims, and s
 
 This section defines required guardrail capabilities — what an implementation must provide — not specific detection techniques or deployment patterns.
 
-Guardrails scan content at two points. **Pre_call** scans input before it reaches the LLM. **Post_call** scans responses before they return to the agent. The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input and tool responses before they reach the LLM. Post_call catches the injection kill chain on the way back out: poisoned content, then manipulated model response, then exfiltration or unauthorized action. It also catches credential leakage, policy violations in generated content, and unauthorized tool calls.
+Guardrails scan content at two points. **Pre_call** scans input before it reaches the LLM. **Post_call** scans responses before they return to the agent. The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input and tool responses before they reach the LLM. Post_call catches the injection kill chain on the way back out. The chain runs from poisoned content, to a manipulated model response, to exfiltration or unauthorized action. It also catches credential leakage, policy violations in generated content, and unauthorized tool calls.
 
 ### Required Guardrail Capabilities
 
@@ -444,13 +444,13 @@ An ASK-conforming implementation must provide three guardrail capabilities. The 
 
 ### Scanning Pipeline
 
-The scanning pipeline processes content at two points: **pre_call** (input before the LLM) and **post_call** (responses before the agent). MCP tool calls are additionally mediated at the process level by the gateway sidecar. The architecture supports stacking further guardrail layers independently: ML-based injection detection, URL scanning, PII masking, and LLM-as-judge classification. Adding or removing a layer does not affect the others. Simple implementations (regex-based detection, static allowlists) provide baseline coverage with zero external dependencies; ML-based layers extend coverage to novel attack patterns.
+The scanning pipeline processes content at two points: **pre_call** (input before the LLM) and **post_call** (responses before the agent). MCP tool calls are additionally mediated at the process level by the gateway sidecar. The architecture supports stacking further guardrail layers independently: ML-based injection detection, URL scanning, PII masking, and LLM-as-judge classification. Adding or removing a layer does not affect the others. Simple implementations give baseline coverage with no external dependencies, using regex detection and static allowlists. ML-based layers extend coverage to novel attack patterns.
 
 ---
 
 ## Security Monitor
 
-Every ASK deployment requires a monitoring and anomaly detection function — the **security monitor**. It is the inverse of a normal agent: high cross-boundary visibility, constrained capability. It reads audit logs from all enforcement layers (egress, LLM proxy, enforcer, gateway, constraint changes) but cannot modify agent state, configuration, or identity.
+Every ASK deployment requires a monitoring and anomaly detection function — the **security monitor**. It is the inverse of a normal agent: high cross-boundary visibility, constrained capability. It reads audit logs from every enforcement layer, including constraint changes, but cannot modify agent state, configuration, or identity.
 
 The security monitor performs three categories of analysis:
 
@@ -513,7 +513,7 @@ In a naive multi-agent system, all agents share the same network, credentials, a
 
 ### Isolated Agent Cells
 
-Each agent gets its own isolation cell — its own container, its own scoped API key, its own egress policy, and its own network segment. Agents cannot reach each other directly. All inter-agent communication goes through a mediated channel.
+Each agent gets its own isolation cell: a container, a scoped API key, an egress policy, and a network segment of its own. Agents cannot reach each other directly. All inter-agent communication goes through a mediated channel.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -581,7 +581,7 @@ The operator interacts with the system through a management interface completely
 
 ## Container Runtime Portability
 
-The architectural requirements are runtime-agnostic. Any isolation technology can implement the architecture if it provides process isolation, filesystem namespacing, and network segmentation. Docker, Kubernetes, Podman, and Firecracker microVMs all qualify. The key requirement is that each enforcement layer runs in its own isolation boundary and the agent cannot reach enforcement infrastructure. In Kubernetes terms, a "Pod" is one agent plus its sidecars — agents should not share Pods.
+The architectural requirements are runtime-agnostic. Any isolation technology can implement the architecture if it provides process isolation, filesystem namespacing, and network segmentation. Docker, Kubernetes, Podman, and Firecracker microVMs all qualify. Two requirements hold. Each enforcement layer runs in its own isolation boundary, and the agent cannot reach enforcement infrastructure. In Kubernetes terms, a "Pod" is one agent plus its sidecars — agents should not share Pods.
 
 ---
 
@@ -640,7 +640,7 @@ The framework requires human override and operator observability, but does not p
 - **Review** — audit logs, action chain reconstruction, security monitor findings.
 - **Alert** — notifications for guardrail triggers, quarantine events, budget exhaustion, anomaly findings.
 
-At Scale 1, the operator interface can be CLI commands and direct config file edits. At Scale 3, it requires a management dashboard, centralized log viewer, alerting integration, and role-based access. The management interface must be on a separate network path from agent containers — no agent can reach the operator's management tools.
+At Scale 1, the operator interface can be CLI commands and direct config file edits. At Scale 3, it requires a management dashboard, centralized log viewer, alerting integration, and role-based access. The management interface sits on a separate network path from agent containers. No agent can reach the operator's management tools.
 
 Per-agent sidecar overhead (enforcer + gateway) scales linearly with agent count. Shared infrastructure (LLM proxy, egress proxy, database, security monitor) is amortized across agents. Per-agent overhead is the cost of per-agent isolation and cannot be reduced by sharing sidecars without violating `constraints-external`.
 
@@ -648,7 +648,7 @@ Per-agent sidecar overhead (enforcer + gateway) scales linearly with agent count
 
 ## Verification Testing
 
-Checking boxes is not the same as verifying enforcement. Every property the framework asserts has a test here, and a property with no test does not belong in the framework.
+Checking boxes is not the same as verifying enforcement. Every property the framework asserts has a test here. A property with no test does not belong in the framework.
 
 Tests are keyed by property name rather than number. Numbers reflect reading order and change; names do not.
 

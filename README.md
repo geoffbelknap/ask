@@ -1,6 +1,6 @@
 # ASK — An Operating Framework for Agent Security
 
-ASK defines what must be true for AI agents to operate securely at any scale, architecturally and operationally and organizationally. It is agent-agnostic, platform-agnostic, and vendor-neutral.
+ASK defines what must be true for AI agents to run safely at any scale. It covers the architecture, the operations, and the organization around them. It is agent-agnostic, platform-agnostic, and vendor-neutral.
 
 **The core position:** agents are principals to be governed, not tools to be configured. The agent is always assumed to be compromisable. Build enforcement outside the agent's reach.
 
@@ -8,9 +8,9 @@ ASK defines what must be true for AI agents to operate securely at any scale, ar
 
 ## Three things that make ASK different
 
-**Architecturally concrete.** ASK doesn't say "ensure appropriate oversight." It says "the mediation layer runs in a separate isolation boundary, the agent cannot reach the audit log, constraints are a read-only mount." That's something an engineer can build against and an auditor can verify.
+**Architecturally concrete.** ASK doesn't say "ensure appropriate oversight." It says the mediation layer runs in a separate isolation boundary, the agent cannot reach the audit log, and constraints are a read-only mount. An engineer can build against that, and an auditor can check it.
 
-**Principle-based, not implementation-prescriptive.** The invariants say *what must be true*, not *how to build it*. Any technology stack that satisfies the invariants is a valid ASK deployment.
+**Principle-based, not prescriptive.** The invariants say *what must be true*, not *how to build it*. Any stack that satisfies them is a valid ASK deployment.
 
 **Scale-independent.** The same invariants apply whether you're running one agent or ten thousand — from a single container on a laptop to an enterprise fleet.
 

@@ -12,7 +12,7 @@ This document covers mitigation patterns that practitioners will not find in exi
 
 ## Cross-Prompt Injection Attack (XPIA)
 
-XPIA exploits the LLM's inability to distinguish data from instructions. Detection cannot be complete — the framework treats XPIA as an assumed-breach scenario and layers defenses at every stage of the kill chain.
+XPIA exploits the LLM's inability to distinguish data from instructions. Detection cannot be complete. The framework treats XPIA as an assumed breach, and layers defenses at every stage of the kill chain.
 
 ### Defense-in-Depth Kill Chain
 
@@ -37,7 +37,7 @@ Input validation and sanitization — the standard approach for injection attack
 
 ### Root Cause and Architectural Response
 
-`instruction-channel-distinct` (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The mediation layer enforces it: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
+`instruction-channel-distinct` (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But the LLM cannot enforce a policy declaration. The mediation layer enforces it instead. Even when the LLM follows injected instructions, the enforcement layer limits what they can accomplish. The architecture assumes the LLM *will* be manipulated, and bounds the blast radius.
 
 ### Open Problems
 
@@ -81,7 +81,9 @@ In multi-agent systems, a compromised sub-agent can inject instructions into a h
 
 ## Identity and Memory Poisoning
 
-An agent's writable Identity layer is corrupted over time — persisting across sessions, gradually shifting behavior. The corruption is semantic, not structural: the file parses correctly, the schema is valid, but the content has been subtly manipulated.
+An agent's writable Identity layer is corrupted over time. The corruption persists across sessions and shifts behavior by degrees.
+
+It is semantic rather than structural. The file parses correctly and the schema is valid. The content has been changed by small steps.
 
 ### Mitigation Patterns
 
@@ -138,7 +140,7 @@ In multi-agent systems, errors propagate through reasoning rather than resource 
 
 ## Overwhelming Human Oversight
 
-Approval gates, halt reviews, and alert triage become ineffective due to volume — either from operational scale or deliberate attacker action to induce alert fatigue.
+Approval gates, halt reviews, and alert triage stop working under volume. The volume comes from operational scale, or from an attacker inducing alert fatigue.
 
 ### Why This Is Architecturally Significant
 
