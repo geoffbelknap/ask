@@ -219,9 +219,19 @@ Oversight demand is measured against a declared capacity threshold for the princ
 
 A principle is directional and judgment-bearing. It states what to optimize for. It cannot be mechanically checked, and calling it an invariant would be a lie.
 
-Principles are not lesser. `content-is-data` is arguably the most important thing ASK says. They are differently enforceable, and saying so is what makes the invariants credible: a reader who tests a principle and finds it unprovable has no reason to doubt the properties that are.
-
 Most principles are the judgment left behind when an invariant was sharpened. `least-privilege` is what remains of least privilege once "capability matches its declaration" was extracted as testable.
+
+Agent security is converging on properties that can be demonstrated rather than asserted, which raises a fair question: why state twelve things that cannot be? Four answers.
+
+**Deleting a principle does not delete the judgment.** Someone still decides whether a declared capability scope is the minimum a role requires. Dropping `least-privilege` would not make that decision mechanical. It would make it undocumented, and leave a framework that looks more complete than it is.
+
+**They are the risk register.** A reader given thirty-one demonstrable properties has to wonder what is missing. A reader given thirty-one demonstrable properties and twelve reviewed ones knows the shape of the whole thing. Regimes that ask for demonstrable controls also ask for risk assessments. The principles are the second half of the same submission.
+
+**They are the promotion queue.** Every invariant was once a judgment nobody had made testable. Writing the verification suite promoted two properties out of this tier: constraint changes became provable once the response was stated as halt rather than investigation, and organizational knowledge became provable once survival, refusal, and export were separated from the comparative claim around them. A principle marks where mechanism has not reached, and it is the list to attack next.
+
+**Some carry the reasoning.** `content-is-data` is not a control. It explains why `instruction-channel-distinct` exists and what to do at the edges a channel property cannot reach. Remove it and an implementer has a rule without its purpose.
+
+**What keeps this tier from becoming a dumping ground.** A principle must be the residue of a named invariant, not a free-floating aspiration. Eleven of the twelve are exactly that. `unknown-conflicts-yield` is the single exception, and it is marked as one.
 
 | # | Principle | Slug |
 |---|---|---|
