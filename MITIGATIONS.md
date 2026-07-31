@@ -94,7 +94,7 @@ An agent's writable Identity layer is corrupted over time — persisting across 
 
 - Detecting semantic drift in natural-language state requires judgment, not just pattern matching
 - Slow, incremental poisoning may stay below anomaly detection thresholds
-- There is no established methodology for validating the "integrity" of an agent's learned context
+- There is no established method for validating the "integrity" of an agent's learned context
 
 ---
 

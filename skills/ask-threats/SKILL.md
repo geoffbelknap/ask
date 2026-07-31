@@ -76,7 +76,7 @@ ASK categorizes threats into three groups requiring different mitigation strateg
 
 Traditional patterns that manifest distinctly in agent contexts — requiring both conventional security controls and agent-specific guardrails. Examples include compromised agents in multi-agent systems and web content weaponization.
 
-**Key principle:** "Use proven solutions for proven problems, and invest engineering effort in problems that are actually new."
+**Key principle:** "Use proven solutions for proven problems, and invest engineering effort in problems that are new."
 
 ---
 

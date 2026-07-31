@@ -12,13 +12,13 @@ The category determines how to reason about it. Traditional threats have proven 
 
 ## Why Categorization Matters
 
-AI agent security sits at the intersection of established enterprise security and genuinely new attack classes. Conflating the two is dangerous in both directions:
+AI agent security sits at the intersection of established enterprise security and new attack classes. Conflating the two is dangerous in both directions:
 
 - **Treating traditional threats as novel** leads to reinventing solutions that already exist. Credential management, supply chain security, network segmentation, and insider threat mitigation are solved problems with decades of operational practice. Agent deployments should adopt those practices, not invent bespoke alternatives.
 
 - **Treating novel threats as traditional** leads to applying the wrong controls. XPIA cannot be solved by a firewall. Context poisoning is not a network segmentation problem. The LLM's inability to distinguish data from instructions has no analogue in conventional computing. These threats require architectural approaches that don't yet have mature industry playbooks.
 
-The framework's position: **use proven solutions for proven problems, and invest engineering effort in the problems that are actually new.**
+The framework's position: **use proven solutions for proven problems, and invest engineering effort in the problems that are new.**
 
 ---
 
@@ -40,7 +40,7 @@ These threats have well-understood analogues in enterprise security. The mitigat
 
 ### Supply Chain Attacks (Malicious Skills and Plugins)
 
-**The threat.** Third-party code that runs inside or alongside the agent — a skill, plugin, or library — appears to provide useful functionality but also exfiltrates data, escalates privileges, or opens a backdoor.
+**The threat.** Third-party code that runs inside or alongside the agent — a skill, plugin, or library — appears to provide useful function but also exfiltrates data, escalates privileges, or opens a backdoor.
 
 **Why it's traditional.** This is the same supply chain threat as malicious npm packages, compromised PyPI libraries, or backdoored Docker images. The attack pattern (trusted-looking component with hidden malicious behavior) and the mitigation strategies (allowlisting, signing, sandboxing, review) are well-established.
 
@@ -196,7 +196,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 **Open problems.**
 - Detecting semantic drift in natural-language state requires judgment, not just pattern matching
 - Slow, incremental poisoning may stay below the security monitor's anomaly detection thresholds
-- There is no established methodology for validating the "integrity" of an agent's learned context
+- There is no established method for validating the "integrity" of an agent's learned context
 
 ### Behavioral Drift and Misalignment
 
@@ -228,7 +228,7 @@ No single layer is expected to catch every attack. The architecture succeeds whe
 - **Independent enforcement.** Each agent's mediation layer operates independently — a failure in one agent's enforcement does not degrade another's.
 
 **Open problems.**
-- Detecting that a plausible-sounding result is actually a propagated hallucination requires ground-truth verification that the framework does not provide
+- Detecting that a plausible-sounding result is a propagated hallucination requires ground-truth verification that the framework does not provide
 - Circuit breaker patterns for semantic errors (as opposed to resource errors) are not well-established
 - The framework does not define how many agents deep a delegation chain can go before error amplification becomes unacceptable
 

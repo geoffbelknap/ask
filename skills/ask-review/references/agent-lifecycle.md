@@ -251,7 +251,7 @@ Trust reduction can be immediate if triggered by security finding.
 
 ### Profile-Then-Lock
 A practical workflow for new agents:
-1. Run agent under permissive policy while observing actual behavior
+1. Run agent under permissive policy while observing its behavior
 2. After baseline period, generate restrictive policy matching observed pattern
 3. Human reviews baseline before locking
 

@@ -24,7 +24,7 @@ ASK applies the same structural governance to AI agents. It has one advantage ov
 
 This gives a better starting position than traditional workforce security. But "better" does not mean "solved." Agents will be tricked. Exploits will succeed. Controls will have gaps. The framework is designed around that reality. Success is measured by the speed and quality of detection, response, and learning when an incident occurs, not by the absence of incidents.
 
-AI agent security sits at the intersection of established enterprise security and genuinely new attack classes. Conflating the two is dangerous in both directions. Treating traditional threats as novel reinvents solutions that already exist. Treating novel threats as traditional applies the wrong controls.
+AI agent security sits at the intersection of established enterprise security and new attack classes. Conflating the two is dangerous in both directions. Treating traditional threats as novel reinvents solutions that already exist. Treating novel threats as traditional applies the wrong controls.
 
 The framework's position: **use proven solutions for proven problems.** Invest engineering effort in the problems that are new. The [threat catalog](THREATS.md) categorizes each risk by novelty, so a practitioner can tell which is which.
 

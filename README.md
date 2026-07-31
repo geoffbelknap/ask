@@ -22,7 +22,7 @@ ASK defines what must be true for AI agents to operate securely at any scale, ar
 → [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, invariants, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
 
 **Understand the threats**
-→ [THREATS.md](THREATS.md) — Threat catalog: traditional risks grounded in established best practices, genuinely novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
+→ [THREATS.md](THREATS.md) — Threat catalog: traditional risks grounded in established best practices, novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
 
 **Understand the technical architecture**
 → [ARCHITECTURE.md](ARCHITECTURE.md) — Enforcement layers, single-agent and multi-agent topology, runtime gateway, guardrails stack, scaling patterns.
@@ -91,7 +91,9 @@ ASK defines what must be true for AI agents to operate securely at any scale, ar
 - LLM proxy with XPIA guardrails
 - Per-agent enforcer sidecar
 - Container hardening and runtime gateway
-- Continuous monitoring Multi-agent coordination, the principal model, and trust evolution are designed but not yet implemented.
+- Continuous monitoring
+
+Multi-agent coordination, the principal model, and trust evolution are designed but not yet implemented.
 
 ---
 

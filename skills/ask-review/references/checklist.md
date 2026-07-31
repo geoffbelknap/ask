@@ -1,6 +1,6 @@
 # ASK Verification Testing — ASK 2026.08
 
-Concrete tests for verifying enforcement actually works. Checking boxes is not the same as verifying enforcement.
+Concrete tests for verifying that enforcement works. Checking boxes is not the same as verifying enforcement.
 
 ---
 
