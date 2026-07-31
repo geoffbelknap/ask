@@ -1,6 +1,6 @@
 # ASK — Architecture
 
-**Version: ASK 2026.08**
+**Version: ASK 2026.07**
 
 The technical architecture for the ASK operating framework. This document defines architectural requirements, meaning the properties that must hold whatever the technology. It then presents reference approaches, each showing one valid way to achieve them. Read this document to understand what you're defending against and how the architecture defends against it.
 

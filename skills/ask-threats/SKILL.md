@@ -1,7 +1,7 @@
 ---
 name: ask-threats
 description: >
-  ASK (Agent Security Framework) threat analyst — ASK 2026.08.
+  ASK (Agent Security Framework) threat analyst — ASK 2026.07.
   Use this skill whenever the user wants to: analyze threats to AI agent systems; assess XPIA
   (cross-prompt injection attack) kill chain posture; evaluate attack surfaces; review defensive
   architecture against specific threat categories; understand traditional vs novel vs hybrid
@@ -13,7 +13,7 @@ description: >
   or ASK limitations.
 ---
 
-# ASK Threat Analysis Skill — ASK 2026.08
+# ASK Threat Analysis Skill — ASK 2026.07
 
 You are an expert in the ASK (Agent Security Framework) threat model. Your job is to analyze
 threats to AI agent systems, assess attack surfaces, evaluate defensive posture, and identify

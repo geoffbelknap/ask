@@ -99,7 +99,9 @@ Multi-agent coordination, the principal model, and trust evolution are designed 
 
 ## Versioning
 
-ASK uses date-based versioning: **ASK 2026.08** (the current version).
+ASK uses date-based versioning: **ASK 2026.07** (the current version). The
+number is the month of release. Where a month carries more than one release,
+a revision suffix distinguishes them.
 
 Reference invariants and principles by slug — `mediation-complete`, `least-privilege`. Slugs are permanent. The `INV-nn` and `PRIN-nn` numbers reflect reading order, carry no meaning, and change when the framework is reorganized. Nothing in the framework points at a number.
 

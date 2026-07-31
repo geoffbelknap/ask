@@ -1,4 +1,4 @@
-# ASK Configuration Templates — ASK 2026.08
+# ASK Configuration Templates — ASK 2026.07
 
 Canonical configuration templates for ASK framework elements.
 Read this file when generating or reviewing constraints, Gateway, Egress, Enforcer, Delegation, or Audit Log configs.

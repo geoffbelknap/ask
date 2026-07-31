@@ -1,6 +1,6 @@
 # ASK — Mitigation Patterns for Novel Threats
 
-**Version: ASK 2026.08**
+**Version: ASK 2026.07**
 
 Implementation guidance for threats that are unique to AI agent systems and lack established industry playbooks. Traditional threats take established enterprise security practices. These include credential management, supply chain, secrets at rest, DNS exfiltration, and insider threat. The [threat catalog](THREATS.md) identifies them and points to proven approaches.
 

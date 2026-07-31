@@ -1,4 +1,4 @@
-# ASK Agent Lifecycle — ASK 2026.08
+# ASK Agent Lifecycle — ASK 2026.07
 
 Agent states, halt governance, startup sequence, constraint lifecycle, and service credential
 management. Read this file when reviewing agent lifecycle management or designing halt/quarantine

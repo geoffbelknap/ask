@@ -1,4 +1,4 @@
-# XPIA Attack Patterns & Defensive Architectures — ASK 2026.08
+# XPIA Attack Patterns & Defensive Architectures — ASK 2026.07
 
 Cross-Prompt Injection Attack (XPIA) patterns and ASK-compliant defenses.
 Read this file when analyzing XPIA kill chain posture or designing input safety controls.

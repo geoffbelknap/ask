@@ -1,6 +1,6 @@
 # ASK — Regulatory Alignment
 
-**Version: ASK 2026.08**
+**Version: ASK 2026.07**
 
 How an ASK deployment produces the evidence regulators ask for, and what it does not produce. Guidance, not legal advice.
 

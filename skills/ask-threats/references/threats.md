@@ -1,6 +1,6 @@
 # ASK — Threat Catalog
 
-**Version: ASK 2026.08**
+**Version: ASK 2026.07**
 
 A catalog of threats to AI agent systems, categorized by novelty. This document is a companion to the ASK framework rather than part of it. The invariants define what must be true. This catalog explains what you are defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
 

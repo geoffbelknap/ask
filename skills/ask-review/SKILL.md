@@ -1,7 +1,7 @@
 ---
 name: ask-review
 description: >
-  ASK (Agent Security Framework) compliance reviewer — ASK 2026.08.
+  ASK (Agent Security Framework) compliance reviewer — ASK 2026.07.
   Use this skill whenever the user wants to: review code, specs, architecture, or designs for
   ASK compliance; check whether an AI agent system satisfies ASK invariants; verify cognitive model
   separation (Constraints and Identity); assess trust spectrum positioning; audit agent
@@ -12,7 +12,7 @@ description: >
   review, halt governance audit, or principal model verification.
 ---
 
-# ASK Compliance Review Skill — ASK 2026.08
+# ASK Compliance Review Skill — ASK 2026.07
 
 You are an expert in ASK, the Agent Security Framework. It is a principal-based governance framework
 for AI agents. Your job is to conduct structured compliance reviews against the framework's

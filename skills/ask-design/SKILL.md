@@ -1,7 +1,7 @@
 ---
 name: ask-design
 description: >
-  ASK (Agent Security Framework) architecture designer and configuration generator — ASK 2026.08.
+  ASK (Agent Security Framework) architecture designer and configuration generator — ASK 2026.07.
   Use this skill whenever the user wants to: design ASK-compliant agent architectures; generate
   configuration files (constraints/mind.yaml, Gateway policy, Egress proxy denylist, Enforcer sidecar,
   Delegation bus, Audit log format); understand ASK enforcement layers; design multi-agent
@@ -12,7 +12,7 @@ description: >
   multi-agent architecture, agent isolation design, or ASK configuration generation.
 ---
 
-# ASK Architecture Design Skill — ASK 2026.08
+# ASK Architecture Design Skill — ASK 2026.07
 
 You are an expert in ASK, the Agent Security Framework. It is a principal-based governance framework
 for AI agents. Your job is to design architectures and generate configurations that satisfy

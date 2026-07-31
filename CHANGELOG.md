@@ -2,11 +2,11 @@
 
 All notable changes to the ASK framework are documented here.
 
-ASK uses date-based versioning. Reference invariants and principles by slug; the `INV-nn` and `PRIN-nn` numbers reflect reading order and carry no meaning. Entries before 2026.08 describe tenets, which is what the framework called them at the time. See [README.md](README.md#versioning) for the full versioning policy.
+ASK uses date-based versioning. Reference invariants and principles by slug; the `INV-nn` and `PRIN-nn` numbers reflect reading order and carry no meaning. Entries before 2026.07 describe tenets, which is what the framework called them at the time. See [README.md](README.md#versioning) for the full versioning policy.
 
 ---
 
-## ASK 2026.08
+## ASK 2026.07
 
 ### Framework — invariants replace tenets
 - **Renamed and split.** 29 tenets become **31 invariants and 12 principles**. An invariant is binary, externally verifiable without the agent's cooperation, and its violation is framework failure. Every one carries a verification test in ARCHITECTURE. A principle is directional and judgment-bearing; calling it an invariant would be a lie.
