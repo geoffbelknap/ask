@@ -43,6 +43,8 @@ Two readings of ASK's purpose were available.
 
 **Broad.** ASK takes on outward duty as a first-class obligation — a fifth element, or a category covering what an operator owes parties outside the governance domain.
 
+**California legislated this incident class while the proposal was being written.** SB 53, in force since 1 January 2026, requires frontier developers to report critical safety incidents to Cal OES within 15 days, or 24 hours where death or serious injury is imminent. Its covered incidents include a model deliberately evading developer safeguards, and loss of control resulting in injury or major property damage. Those describe the escape and the intrusion respectively. The duty binds large frontier developers rather than every deployer, but the taxonomy is the first legal definition of the agent as originator, and other jurisdictions will copy it. See [the regulatory alignment proposal](proposed-regulatory-alignment.md).
+
 **Decided: narrow, plus deployment context as a structural addition.** The broad version is defensible and may become necessary. Liability is moving toward it: cyber insurers are writing AI exclusions, and policy analysis now treats autonomous cyber operations as a governance gap. But that argument is moving fast enough that writing the obligation now means rewriting it within two versions. Take the parts that are stable.
 
 ---
