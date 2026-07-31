@@ -1,8 +1,8 @@
 # ASK — Mitigation Patterns for Novel Threats
 
-**Version: ASK 2026.06**
+**Version: ASK 2026.07**
 
-Implementation guidance for threats that are unique to AI agent systems and lack established industry playbooks. For traditional threats (credential management, supply chain, secrets at rest, DNS exfiltration, insider threat), use established enterprise security practices — the [threat catalog](THREATS.md) identifies these and points to proven approaches.
+Implementation guidance for threats that are unique to AI agent systems and lack established industry playbooks. Traditional threats take established enterprise security practices. These include credential management, supply chain, secrets at rest, DNS exfiltration, and insider threat. The [threat catalog](THREATS.md) identifies them and points to proven approaches.
 
 This document covers mitigation patterns that practitioners will not find in existing security literature. Each section explains the architectural approach, not prescriptive implementation steps.
 
@@ -12,7 +12,7 @@ This document covers mitigation patterns that practitioners will not find in exi
 
 ## Cross-Prompt Injection Attack (XPIA)
 
-XPIA exploits the LLM's inability to distinguish data from instructions. Detection cannot be complete — the framework treats XPIA as an assumed-breach scenario and layers defenses at every stage of the kill chain.
+XPIA exploits the LLM's inability to distinguish data from instructions. Detection cannot be complete. The framework treats XPIA as an assumed breach, and layers defenses at every stage of the kill chain.
 
 ### Defense-in-Depth Kill Chain
 
@@ -37,7 +37,7 @@ Input validation and sanitization — the standard approach for injection attack
 
 ### Root Cause and Architectural Response
 
-Tenet 24 (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But this is a policy declaration that the LLM cannot architecturally enforce. The mediation layer enforces it: even when the LLM follows injected instructions, the enforcement infrastructure limits what those instructions can accomplish. The architecture assumes the LLM *will* be manipulated and constrains the blast radius.
+`instruction-channel-distinct` (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But the LLM cannot enforce a policy declaration. The mediation layer enforces it instead. Even when the LLM follows injected instructions, the enforcement layer limits what they can accomplish. The architecture assumes the LLM *will* be manipulated, and bounds the blast radius.
 
 ### Open Problems
 
@@ -54,7 +54,7 @@ Two related risks: MCP servers changing tool definitions between sessions (rug p
 
 ### Version Pinning
 
-Capture tool definitions on first connection and block servers whose definitions change. This detects definition-level attacks but cannot prevent behavioral changes within unchanged definitions — a server whose `read_file` tool starts exfiltrating data without changing its schema is a harder problem (see [LIMITATIONS.md](LIMITATIONS.md)).
+Capture tool definitions on first connection and block servers whose definitions change. This detects definition-level attacks. It cannot prevent behavioral changes within unchanged definitions. A server whose `read_file` tool begins exfiltrating data without changing its schema is a harder problem. See [LIMITATIONS.md](LIMITATIONS.md).
 
 ### Runtime Registration Blocking
 
@@ -75,38 +75,40 @@ In multi-agent systems, a compromised sub-agent can inject instructions into a h
 - **Response scanning.** The delegation bus scans sub-agent responses for injection patterns before delivering to the parent.
 - **Context scoping.** Sub-agents receive only the information needed for their task, not the coordinator's full context. This limits what a compromised sub-agent knows about the parent's state.
 - **Structural privilege separation.** Sub-agents operate under their own scoped keys and tier constraints. Delegation passes the task, not the credentials.
-- **Synthesis bounds (Tenet 20).** Synthesized outputs are bounded by the recipient's authorization scope, not the coordinator's.
+- **Synthesis bounds (`labeled-delivery-enforced`).** Synthesized outputs are bounded by the recipient's authorization scope, not the coordinator's.
 
 ---
 
 ## Identity and Memory Poisoning
 
-An agent's writable Identity layer is corrupted over time — persisting across sessions, gradually shifting behavior. The corruption is semantic, not structural: the file parses correctly, the schema is valid, but the content has been subtly manipulated.
+An agent's writable Identity layer is corrupted over time. The corruption persists across sessions and shifts behavior by degrees.
+
+It is semantic rather than structural. The file parses correctly and the schema is valid. The content has been changed by small steps.
 
 ### Mitigation Patterns
 
-- **Audited and recoverable writes (Tenet 25).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — operators can reconstruct state at any point and roll back.
+- **Audited and recoverable writes (`identity-mutations-recoverable`).** Every change to the Identity layer is logged with provenance metadata. Identity history is recoverable — operators can reconstruct state at any point and roll back.
 - **Write pattern monitoring.** Anomalous changes — sudden shifts in behavioral parameters, unexpected preference modifications — are flagged. Baseline comparison detects drift over time.
-- **Immutable constraints (Tenet 1).** The operator-owned Constraints layer provides an immutable behavioral floor regardless of Identity corruption.
-- **Ephemeral session state.** Session context resets between sessions, limiting the persistence of in-session poisoning attempts.
+- **Immutable constraints (`constraints-external`).** The operator-owned Constraints layer provides an immutable behavioral floor regardless of Identity corruption.
+- **Context is rebuilt each turn.** Context does not accumulate across sessions, limiting the persistence of in-session poisoning attempts.
 
 ### Open Problems
 
 - Detecting semantic drift in natural-language state requires judgment, not just pattern matching
 - Slow, incremental poisoning may stay below anomaly detection thresholds
-- There is no established methodology for validating the "integrity" of an agent's learned context
+- There is no established method for validating the "integrity" of an agent's learned context
 
 ---
 
 ## Behavioral Drift and Misalignment
 
-An agent develops strategies that satisfy the letter of its constraints while violating their intent — gaming metrics, finding loopholes, or developing emergent behaviors that are technically compliant but operationally harmful.
+An agent develops strategies that satisfy the letter of its constraints while violating their intent. It games metrics, finds loopholes, or develops emergent behavior that is technically compliant and operationally harmful.
 
 ### Mitigation Patterns
 
-- **External enforcement (Tenet 1).** The mediation layer enforces constraints regardless of the agent's intent. Even a misaligned agent cannot bypass network isolation, egress controls, or tool restrictions.
+- **External enforcement (`constraints-external`).** The mediation layer enforces constraints regardless of the agent's intent. Even a misaligned agent cannot bypass network isolation, egress controls, or tool restrictions.
 - **Behavioral monitoring.** Establish baselines and flag deviations in tool usage patterns, request volumes, and action sequences.
-- **Least privilege (Tenet 7).** Minimizing capabilities minimizes the damage from unexpected behavior.
+- **Least privilege (`capability-declared`).** Minimizing capabilities minimizes the damage from unexpected behavior.
 - **Human override (Element 4).** The halt mechanism provides a hard stop when behavior deviates from intent.
 
 ### Open Problems
@@ -125,7 +127,7 @@ In multi-agent systems, errors propagate through reasoning rather than resource 
 
 - **Agent isolation (Element 1).** Each agent operates in its own workspace with its own credentials. Failure in one does not directly affect another's resources.
 - **Delegation bus scanning.** Inter-agent responses are scanned for anomalies before delivery, providing a checkpoint between agents.
-- **Synthesis bounds (Tenet 20).** Limits the scope of cascading errors by bounding what any recipient can receive.
+- **Synthesis bounds (`labeled-delivery-enforced`).** Limits the scope of cascading errors by bounding what any recipient can receive.
 - **Independent enforcement.** Each agent's mediation layer operates independently.
 
 ### Open Problems
@@ -138,7 +140,7 @@ In multi-agent systems, errors propagate through reasoning rather than resource 
 
 ## Overwhelming Human Oversight
 
-Approval gates, halt reviews, and alert triage become ineffective due to volume — either from operational scale or deliberate attacker action to induce alert fatigue.
+Approval gates, halt reviews, and alert triage stop working under volume. The volume comes from operational scale, or from an attacker inducing alert fatigue.
 
 ### Why This Is Architecturally Significant
 
@@ -161,18 +163,18 @@ Human oversight is an architectural element (Element 4: Human Override), not jus
 
 ## Model Distillation and Reasoning Exposure
 
-An adversary extracts an agent's value not by breaching it but by querying it: running exchanges through the model to train a weaker "student" on its outputs (distillation), or probing across sessions to reconstruct constraints and decision criteria. Every individual call is authorized; the harm is the aggregate and the purpose. Campaigns are typically distributed across many fraudulent accounts to keep each identity under its individual limits.
+An adversary extracts an agent's value not by breaching it but by querying it. One route is distillation: running exchanges through the model to train a weaker "student" on its outputs. The other is probing across sessions to reconstruct constraints and decision criteria. Every individual call is authorized; the harm is the aggregate and the purpose. Campaigns are typically distributed across many fraudulent accounts to keep each identity under its individual limits.
 
 ### Why Conventional Mitigations Are Insufficient
 
-Per-call authorization is blind to this threat — each query is legitimate. Rate and spend limits help but are evaded by spreading volume across identities. There is no per-request signal that distinguishes a distillation query from an ordinary one; the signal is in the pattern and the breadth, not the call.
+Per-call authorization is blind to this threat — each query is legitimate. Rate and spend limits help but are evaded by spreading volume across identities. No per-request signal distinguishes a distillation query from an ordinary one. The signal is in the pattern and the breadth, not the call.
 
 ### Mitigation Patterns
 
-- **Withhold reasoning by default (Tenet 28).** The richest distillation signal is the chain-of-thought, not the final answer. Principal-facing output carries conclusions and the justification needed to act — not raw deliberation. Surfacing reasoning is an operator-controlled setting, default-off.
-- **Treat probing as data, not requests (Tenets 24, 28).** Requests to reveal reasoning, decision process, or constraints are processed under the agent's own constraints and inform trust — they are never authorized instructions.
-- **Bound and monitor volume (Tenets 8, 17).** Cumulative query volume, breadth of coverage, and systematic probing are monitored across a principal and correlated identities. Anomalies drive trust reduction and can trigger step-up verification or a fallback to bounded, output-only responses.
-- **Resist identity fragmentation (Tenets 6, 23).** Per-principal limits are meaningful only if identity is costly to manufacture. Account verification and behavioral correlation link coordinated identities into a single accountable cluster; unverified entities default to the lowest trust tier.
+- **Withhold reasoning by default (`reasoning-not-emitted`).** The richest distillation signal is the chain-of-thought, not the final answer. Principal-facing output carries conclusions and the justification needed to act — not raw deliberation. Surfacing reasoning is an operator-controlled setting, default-off.
+- **Treat probing as data, not requests (`instruction-channel-distinct`, `reasoning-not-emitted`).** Requests to reveal reasoning, decision process, or constraints are processed under the agent's own constraints and inform trust — they are never authorized instructions.
+- **Bound and monitor volume (`operations-bounded`, `trust-not-self-elevated`).** Cumulative query volume, breadth of coverage, and systematic probing are monitored across a principal and correlated identities. Anomalies drive trust reduction and can trigger step-up verification or a fallback to bounded, output-only responses.
+- **Resist identity fragmentation (`trust-declared`, `unverified-zero-trust`).** Per-principal limits are meaningful only if identity is costly to manufacture. Account verification and behavioral correlation link coordinated identities into a single accountable cluster; unverified entities default to the lowest trust tier.
 
 ### Open Problems
 

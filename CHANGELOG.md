@@ -2,9 +2,52 @@
 
 All notable changes to the ASK framework are documented here.
 
-ASK uses date-based versioning. Tenet numbers reflect reading order and may change between versions when tenets are reorganized — reference tenets by name for stability across versions. See [README.md](README.md#versioning) for the full versioning policy.
+ASK uses date-based versioning. Reference invariants and principles by slug; the `INV-nn` and `PRIN-nn` numbers reflect reading order and carry no meaning. Entries before 2026.07 describe tenets, which is what the framework called them at the time. See [README.md](README.md#versioning) for the full versioning policy.
 
 ---
+
+## ASK 2026.07
+
+### Framework — invariants replace tenets
+- **Five categories replace seven.** The old set had accreted rather than been designed: Foundation held sixteen members and Human Oversight held one, and the headings were filing labels rather than claims. The new headings each state something a reader can agree or disagree with before reading a single invariant — enforcement sits outside the agent; everything is on the record; capability is granted, never taken; trust is explicit, never assumed; humans can always stop it. Distribution is 8/8/8/6/8. ARCHITECTURE's verification tests follow the same order, so there is one taxonomy rather than two.
+- **Renamed and split.** 29 tenets become **31 invariants and 12 principles**. An invariant is binary, externally verifiable without the agent's cooperation, and its violation is framework failure. Every one carries a verification test in ARCHITECTURE. A principle is directional and judgment-bearing; calling it an invariant would be a lie.
+- **Slugs are the reference identity.** Every cross-reference now reads `mediation-complete` rather than Tenet 3. `INV-nn` and `PRIN-nn` reflect reading order, carry no meaning, and appear once each as their own headings. Renumbering is no longer a breaking change.
+- **Twelve items split** into an invariant plus the judgment left behind. Least privilege became `capability-declared`, which has a test, plus `least-privilege`, which does not. Instructions only come from verified principals became `instruction-channel-distinct`, a property of channels, plus `content-is-data`, which the framework already conceded was enforced by containment rather than by the model.
+- **One item has no invariant core.** `unknown-conflicts-yield` describes agent behavior, and the framework assumes the agent is compromisable. It is listed as a principle so the absence is deliberate.
+- **Ten new invariants.** Three from the split itself: `capability-composition-governed` (grants are evaluated as a set — private data, untrusted content, and unmediated outbound action must not coexist), `constraints-survive-compaction` (constraints survive any runtime transformation of Context, or the agent halts), and `model-output-mediated` (model output is inert until a policy decision admits it as an action).
+- Seven more from three research threads, each with a verification test:
+  - `boundary-violation-halts` — an agent detected outside a declared boundary halts automatically rather than raising an alert someone reads later. Fail-closed applied to the agent rather than the enforcement layer.
+  - `containment-matches-context` — every deployment declares its context, and a context that weakens a control at one layer declares and verifies the compensating control at another before startup.
+  - `trajectory-recorded` — the audit record links objective to actions to external effects as one reconstructible chain. Individual actions can each be unremarkable while the sequence is an attack.
+  - `authority-derived-from-principal` — an agent acting for a principal exercises no more authority than that principal holds. Closes the confused deputy structurally; the framework previously described it in three places and prevented it nowhere.
+  - `verification-proportional` — required verification rises with an action's impact, and the agent cannot satisfy or waive it.
+  - `provenance-mediated` — output provenance is applied by the mediation layer, for the same reason audit logs are.
+  - `incident-record-complete` — when a violation is detected the record already contains what a notification requires. Completeness is a property of detection, not a task that follows it.
+- **Two new principles:** `trajectory-reviewed` and `impact-classified`, the judgment left behind when trajectory recording and impact classification were made testable.
+- **38 invariants and 14 principles**, each invariant with a verification test.
+- **Policy hierarchy corrected.** Invariants were listed as the top policy layer and intersected with permission sets. They are a precondition on the whole hierarchy: no layer can grant a permission that violates one.
+
+### Architecture
+- **A verification test for every invariant.** ARCHITECTURE had seven test blocks; it now has 38, one per invariant, keyed by slug. Where a property has a part no test can reach, that part is named under Judgment rather than left implied.
+
+### Threat catalog
+- **New section: Agent as Originator.** Every existing section covers risks *to* the agent system. This one covers harm the deployment causes, including to parties outside its governance domain: evaluation containment escape, specification gaming with external effect, third-party harm from an authorized agent, autonomous attack chaining, and the structural form of the confused deputy.
+- New entries: agent framework remote code execution, agent data injection, and time-of-check to time-of-use against computer-use agents.
+- Model distillation updated for the February 2026 tri-lab disclosure and the shift of defense from prevention toward attribution.
+
+### Regulatory
+- **REGULATORY.md rebuilt** around obligation classes rather than framework-by-framework tables. Each class names the invariants that satisfy it and the test that evidences it. Adds California (SB 53, AB 2013, CPPA ADMT, SB 942), the Council of Europe convention, Korea, Singapore, DORA, NYDFS, ISO/IEC 42001, AIUC-1, and NIST COSAiS. Names what ASK does not provide, including bias testing, privacy determinations, and trust and safety.
+
+### Framework
+- Cognitive model: retired Mind/Body/Workspace for **Model / Context / Runtime / Workspace**, cut so that a framework property sits on every boundary between layers. The old decomposition cut at anthropomorphic joints, which is not where enforcement happens: no tenet depended on Mind or Workspace, and only one on Body.
+  - **Model** — the inference endpoint. Vendor-owned and untrusted permanently. The framework governs what reaches it and what its output can cause, never what it does internally.
+  - **Context** — what reaches the Model on a turn, assembled by the Runtime and rebuilt each turn. The only layer with deliberately mixed trust: operator constraints and attacker-controlled content share one buffer. Previously unnamed, though the framework already treated prompt assembly as a security boundary in RELATED-WORK.
+  - **Runtime** — formerly Body. Renamed to the word the documents already used whenever they needed to be unambiguous.
+  - **Workspace** — unchanged.
+- Removed the independent-replaceability claim. A Mind was never portable across Bodies: context management, compaction, tool-call schemas, and memory formats are all runtime-specific. Portability is a property of the Constraints layer, which does travel between runtimes unchanged.
+- Session retired as a layer. It was naming two different things — the assembled context and the reasoning trace. The first is now Context; the second is internal to the Model, governed by Tenet 28, and becomes part of Context when a runtime feeds it back into the next turn.
+- Constraints and Identity keep their meaning and are now stated as the state model: what persists between turns, and who owns it.
+- New section: **What ASK Governs**. The framework had never stated what it is not. ASK governs the operation of agents, not models and not outcomes, and provides mechanism rather than determination. Model behavior, privacy determinations, trust and safety, and management-system obligations are named as outside it.
 
 ## ASK 2026.06
 
@@ -17,7 +60,7 @@ ASK uses date-based versioning. Tenet numbers reflect reading order and may chan
   - Tenet 5 (Runtime is a known quantity): extends to runtime-acquired capability — tools, MCP servers, and plugins loaded after startup are subject to the same attestation; an agent cannot acquire capability operators cannot verify
   - Tenet 7 (Least privilege): capability is operator-defined and cannot be self-expanded at runtime — runtime-acquired tools/servers/plugins get the same approval and scoping as startup grants (capability analog of Tenet 17)
   - Tenet 24 (Instructions only come from verified principals): instruction-like text is data regardless of the channel it arrives on or the form it takes; the agent's own invocation surface is not a verified principal channel
-- Cognitive model: clarified that the Session reasoning trace, when captured for audit, is mediation-written and agent-unsuppressable (Tenet 2) while remaining non-principal-facing (Tenet 28); added a maturity note that Tenets 26–27 are less battle-tested than the foundation tenets
+- Cognitive model: clarified that the Session reasoning trace, when captured for audit, is mediation-written and agent-unsuppressable (Tenet 2) while remaining non-principal-facing (Tenet 28); added a maturity statement that Tenets 26–27 are less battle-tested than the foundation tenets
 - 29 tenets across 7 categories (was 27 across 6)
 
 ### Threat Model

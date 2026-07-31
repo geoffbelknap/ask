@@ -1,0 +1,20 @@
+{
+  "name": "ask-framework",
+  "version": "4.0.0",
+  "description": "ASK (Agent Security Framework) compliance reviewer, architecture designer, and threat analyst. Three skills: ask-review (compliance audit), ask-design (enforcement architecture and config generation), ask-threats (threat model and XPIA analysis). Updated for ASK 2026.07.",
+  "author": {
+    "name": "Geoff Belknap",
+    "url": "https://github.com/geoffbelknap"
+  },
+  "license": "CC-BY-4.0",
+  "keywords": [
+    "security",
+    "ai-agents",
+    "compliance",
+    "threat-model",
+    "xpia",
+    "governance"
+  ],
+  "homepage": "https://github.com/geoffbelknap/ask",
+  "skills": "./skills/"
+}
