@@ -73,6 +73,7 @@ ASK defines what must be true — architecturally, operationally, and organizati
 └── archive/               ← Proposals: pending, and integrated ones kept for provenance
     ├── proposed-invariants-split.md    ← Pending: rename tenets to invariants, split the tier
     ├── proposed-cognitive-model-replacement.md ← Integrated: Model/Context/Runtime/Workspace
+    ├── proposed-agent-as-originator.md ← Pending: outward harm and deployment context
     ├── proposed-tenet-reasoning-exposure.md ← Integrated: reasoning is not principal-facing
     └── proposed-tenets-knowledge.md    ← Integrated as the Organizational Knowledge tenets
 ```
