@@ -2,11 +2,25 @@
 
 All notable changes to the ASK framework are documented here.
 
-ASK uses date-based versioning. Tenet numbers reflect reading order and may change between versions when tenets are reorganized — reference tenets by name for stability across versions. See [README.md](README.md#versioning) for the full versioning policy.
+ASK uses date-based versioning. Reference invariants and principles by slug; the `INV-nn` and `PRIN-nn` numbers reflect reading order and carry no meaning. Entries before 2026.08 describe tenets, which is what the framework called them at the time. See [README.md](README.md#versioning) for the full versioning policy.
 
 ---
 
-## ASK 2026.08 (unreleased)
+## ASK 2026.08
+
+### Framework — invariants replace tenets
+- **Renamed and split.** 29 tenets become **31 invariants and 12 principles**. An invariant is binary, externally verifiable without the agent's cooperation, and its violation is framework failure. Every one carries a verification test in ARCHITECTURE. A principle is directional and judgment-bearing; calling it an invariant would be a lie.
+- **Slugs are the reference identity.** Every cross-reference now reads `mediation-complete` rather than Tenet 3. `INV-nn` and `PRIN-nn` reflect reading order, carry no meaning, and appear once each as their own headings. Renumbering is no longer a breaking change.
+- **Twelve items split** into an invariant plus the judgment left behind. Least privilege became `capability-declared`, which has a test, plus `least-privilege`, which does not. Instructions only come from verified principals became `instruction-channel-distinct`, a property of channels, plus `content-is-data`, which the framework already conceded was enforced by containment rather than by the model.
+- **One item has no invariant core.** `unknown-conflicts-yield` describes agent behavior, and the framework assumes the agent is compromisable. It is listed as a principle so the absence is deliberate.
+- **Three new invariants:** `capability-composition-governed` (grants are evaluated as a set — private data, untrusted content, and unmediated outbound action must not coexist), `constraints-survive-compaction` (constraints survive any runtime transformation of Context, or the agent halts), and `model-output-mediated` (model output is inert until a policy decision admits it as an action).
+- **Policy hierarchy corrected.** Invariants were listed as the top policy layer and intersected with permission sets. They are a precondition on the whole hierarchy: no layer can grant a permission that violates one.
+
+### Architecture
+- **A verification test for every invariant.** ARCHITECTURE had seven test blocks; it now has one per property, keyed by slug. Where a property has a part no test can reach, that part is named under Judgment rather than left implied.
+
+### Regulatory
+- **REGULATORY.md rebuilt** around obligation classes rather than framework-by-framework tables. Each class names the invariants that satisfy it and the test that evidences it. Adds California (SB 53, AB 2013, CPPA ADMT, SB 942), the Council of Europe convention, Korea, Singapore, DORA, NYDFS, ISO/IEC 42001, AIUC-1, and NIST COSAiS. Names what ASK does not provide, including bias testing, privacy determinations, and trust and safety.
 
 ### Framework
 - Cognitive model: retired Mind/Body/Workspace for **Model / Context / Runtime / Workspace**, cut so that a framework property sits on every boundary between layers. The old decomposition cut at anthropomorphic joints, which is not where enforcement happens: no tenet depended on Mind or Workspace, and only one on Body.

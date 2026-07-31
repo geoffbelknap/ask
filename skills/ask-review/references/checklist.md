@@ -1,4 +1,4 @@
-# ASK Verification Testing — ASK 2026.06
+# ASK Verification Testing — ASK 2026.08
 
 Concrete tests for verifying enforcement actually works. Checking boxes is not the same as verifying enforcement.
 
