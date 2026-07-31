@@ -92,7 +92,7 @@ Not a new threat — a truthfulness gap. The framework asserts a uniform epistem
 
 The rule in this proposal is that an invariant with no test is a principle wearing a costume. Writing the test suite in `ARCHITECTURE.md` applied that rule and moved three items. The classification below reflects the result, not the first draft.
 
-- **T9 (constraint changes) promoted to a clean invariant.** The residue looked like "an unacknowledged change is investigated," which is process. Stating it as *halt* rather than *investigate* makes it mechanical: suppress the acknowledgment and the enforcement layer halts the agent. Sharpen the wording when the property is restated.
+- **T9 (constraint changes) promoted to a clean invariant.** What was left over looked like "an unacknowledged change is investigated," which is process. Stating it as *halt* rather than *investigate* makes it mechanical: suppress the acknowledgment and the enforcement layer halts the agent. Sharpen the wording when the property is restated.
 - **T26 (organizational knowledge) promoted to a clean invariant.** Survival across a decommission, refusal of unilateral deletion, and export in a standard format are all testable. Nothing was left over.
 - **T19 (delegation scope) demoted to a split.** Permission-set validation is mechanical, but the clause treating implicit requirements the same as explicit grants needs semantic inference. No test reaches it.
 
@@ -225,7 +225,7 @@ Permission-set validation is mechanical. The clause that treats implicit require
 
 ### T20 — Synthesis cannot exceed individual authorization
 
-`LIMITATIONS.md` already describes the partial automation. Promote it to the invariant and keep the residue as the principle.
+`LIMITATIONS.md` already describes the partial automation. Promote it to the invariant and keep the judgment as the principle.
 
 - **Invariant.** Knowledge items and agent outputs carry an authorization-scope label. Delivering a labeled component to a recipient not cleared for that label is refused mechanically.
 - **Principle.** Combinations that produce emergent sensitivity beyond their labeled components require human review before delivery.

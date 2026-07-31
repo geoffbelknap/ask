@@ -22,7 +22,7 @@ ASK uses date-based versioning. Reference invariants and principles by slug; the
   - `verification-proportional` — required verification rises with an action's impact, and the agent cannot satisfy or waive it.
   - `provenance-mediated` — output provenance is applied by the mediation layer, for the same reason audit logs are.
   - `incident-record-complete` — when a violation is detected the record already contains what a notification requires. Completeness is a property of detection, not a task that follows it.
-- **Two new principles:** `trajectory-reviewed` and `impact-classified`, the judgment residues of trajectory recording and impact classification.
+- **Two new principles:** `trajectory-reviewed` and `impact-classified`, the judgment left behind when trajectory recording and impact classification were made testable.
 - **38 invariants and 14 principles**, each invariant with a verification test.
 - **Policy hierarchy corrected.** Invariants were listed as the top policy layer and intersected with permission sets. They are a precondition on the whole hierarchy: no layer can grant a permission that violates one.
 

@@ -266,7 +266,7 @@ Agent security is converging on properties that can be demonstrated rather than 
 
 **Some carry the reasoning.** `content-is-data` is not a control. It explains why `instruction-channel-distinct` exists and what to do at the edges a channel property cannot reach. Remove it and an implementer has a rule without its purpose.
 
-**What keeps this tier from becoming a dumping ground.** A principle must be the residue of a named invariant, not a free-floating aspiration. Eleven of the twelve are exactly that. `unknown-conflicts-yield` is the single exception, and it is marked as one.
+**What keeps this tier from becoming a dumping ground.** Every principle names the invariant it was separated from. A principle that cannot name one is not a principle: it is either an invariant nobody has made testable yet, or an aspiration that does not belong in the framework. Thirteen of the fourteen name their invariant. `unknown-conflicts-yield` is the single exception, and it is marked as one.
 
 | # | Principle | Slug |
 |---|---|---|
