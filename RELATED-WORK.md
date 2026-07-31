@@ -26,7 +26,7 @@ A [defense-in-depth approach](https://adversa.ai/blog/top-agentic-ai-security-re
 
 ### AIUC-1 (2026)
 
-The [first certification standard written for AI agents](https://www.aiuc-1.com/). Six control families — data and privacy, security, safety, reliability, accountability, and society — across 51 named controls, with crosswalks to NIST AI RMF, MITRE ATLAS, ISO/IEC 42001, and the OWASP agentic lists. Developed with Orrick, the Cloud Security Alliance, and MITRE. Certificates run twelve months with quarterly technical testing, and Schellman became the first authorized auditor in February 2026. Its Q2 2026 update added controls for coding agents covering agent identity, just-in-time credentials, MCP runtime containment, and tool-call logging. Certification is backed by Lloyd's of London insurance: the body that issues the certificate also underwrites the risk.
+The [first certification standard written for AI agents](https://www.aiuc-1.com/). Fifty-one named controls across six families: data and privacy, security, safety, reliability, accountability, and society. It crosswalks to NIST AI RMF, MITRE ATLAS, ISO/IEC 42001, and the OWASP agentic lists. Developed with Orrick, the Cloud Security Alliance, and MITRE. Certificates run twelve months with quarterly technical testing, and Schellman became the first authorized auditor in February 2026. Its Q2 2026 update added controls for coding agents covering agent identity, just-in-time credentials, MCP runtime containment, and tool-call logging. Certification is backed by Lloyd's of London insurance: the body that issues the certificate also underwrites the risk.
 
 **Relationship to ASK.** Complementary, and the division is clean. ASK states what must be true and provides the test. AIUC-1 certifies and prices the result. Several AIUC-1 controls describe mechanisms for properties ASK states — MCP runtime containment and tool-call logging correspond to `mediation-complete` and `actions-traced`. An ASK-conforming deployment should generate much of the evidence an AIUC-1 audit asks for. The insurance coupling matters commercially: it turns agent security controls into an underwriting question rather than a discretionary spend.
 
@@ -42,7 +42,7 @@ The [first agentic-specific governance framework](https://responsibleailabs.ai/k
 
 ### NIST AI Agent Standards Initiative (2026)
 
-NIST's Center for AI Standards and Innovation (CAISI) [launched the AI Agent Standards Initiative](https://www.nist.gov/caisi/ai-agent-standards-initiative) in February 2026, with three pillars: industry-led standards development, open source protocol support, and research on agent security and identity. The initiative includes:
+NIST's Center for AI Standards and Innovation (CAISI) [launched the AI Agent Standards Initiative](https://www.nist.gov/caisi/ai-agent-standards-initiative) in February 2026. It has three pillars: industry-led standards development, open source protocol support, and research on agent security and identity. The initiative includes:
 
 - **RFI on AI Agent Security** (NIST-2025-0035). Closed March 9, 2026. 932 public comments received. Sought input on threats, mitigations, assessment methods, and best practices for AI agent systems. The questions asked — how to constrain agent environments, how to monitor agent actions, how to maintain human override — map directly to ASK's four elements.
 - **NCCoE Concept Paper: Software and AI Agent Identity and Authorization** ([draft](https://www.nccoe.nist.gov/projects/software-and-ai-agent-identity-and-authorization), comment period through April 2, 2026). Proposes a demonstration project applying identity standards (OAuth 2.0/2.1, OIDC, SPIFFE/SPIRE, SCIM, NGAC) to agentic architectures. Focuses on identification, authentication, authorization, delegation, logging, and prompt injection mitigation for enterprise-internal agents. External/untrusted agents are explicitly scoped out of this initial effort.
@@ -94,7 +94,14 @@ Standards for digital identity verification, authentication, and federation.
 
 ### OWASP Top 10 for Agentic Applications (2026)
 
-A [threat catalog and mitigation playbook](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) for agentic AI systems. It identifies ten risk categories (ASI01–ASI10): agent goal hijack, tool misuse, identity and privilege abuse, supply chain risks, unexpected code execution, memory and context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation, rogue agents. Developed through collaboration with 100+ industry experts.
+A [threat catalog and mitigation playbook](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) for agentic AI systems. It identifies ten risk categories (ASI01–ASI10):
+
+- Agent goal hijack, and tool misuse
+- Identity and privilege abuse
+- Supply chain risks, and unexpected code execution
+- Memory and context poisoning
+- Insecure inter-agent communication, and cascading failures
+- Human-agent trust exploitation, and rogue agents Developed through collaboration with 100+ industry experts.
 
 **Relationship to ASK.** OWASP enumerates threats and recommends mitigations across the full application stack; ASK defines the architectural properties that must hold at the runtime enforcement level. ASK's threat model ([THREATS.md](THREATS.md)) covers the agent runtime threats that overlap with OWASP's catalog; OWASP's coverage of application-level concerns (authentication flows, API security, user interface risks) addresses areas outside ASK's scope.
 
@@ -106,13 +113,13 @@ A [seven-layer threat classification taxonomy](https://cloudsecurityalliance.org
 
 ### MITRE ATLAS (Adversarial Threat Landscape for AI Systems)
 
-A [threat taxonomy](https://atlas.mitre.org) for AI systems maintained by MITRE, extending the ATT&CK framework to adversarial machine learning. Includes agent-specific techniques (AML.T0051 LLM Prompt Injection, AML.T0058 AI Agent Context Poisoning, AML.T0068 AI Agent Tool Credential Harvesting, AML.T0071 AI Supply Chain Rug Pull, and others).
+A [threat taxonomy](https://atlas.mitre.org) for AI systems maintained by MITRE, extending the ATT&CK framework to adversarial machine learning. It includes agent-specific techniques. Examples are AML.T0051 LLM Prompt Injection, AML.T0058 AI Agent Context Poisoning, AML.T0068 AI Agent Tool Credential Harvesting, and AML.T0071 AI Supply Chain Rug Pull.
 
 **Relationship to ASK.** ASK's [threat catalog](THREATS.md) cross-references ATLAS technique IDs throughout — every risk in the catalog that maps to an ATLAS technique includes the AML.Txxxx identifier. ATLAS provides the broader adversarial taxonomy; ASK's catalog focuses on the runtime enforcement perspective. Practitioners should use both: ATLAS for understanding adversary behavior, ASK for understanding what architectural properties defend against it.
 
 ### CoSAI MCP Security White Paper (2026)
 
-The [Coalition for Secure AI](https://www.cosai.owasp.org/) published a comprehensive MCP security framework identifying 12 threat categories and nearly 40 distinct threats specific to Model Context Protocol deployments.
+The [Coalition for Secure AI](https://www.cosai.owasp.org/) published an MCP security framework. It identifies 12 threat categories and nearly 40 distinct threats specific to Model Context Protocol deployments.
 
 **Relationship to ASK.** Directly relevant to ASK's MCP tool policy, gateway enforcement, and the MCP-specific threats covered in [THREATS.md](THREATS.md). The CoSAI taxonomy provides finer-grained threat classification for the MCP attack surface than ASK's current coverage. Implementers should use CoSAI's threat categories to inform gateway MCP policy configuration.
 

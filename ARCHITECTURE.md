@@ -2,7 +2,7 @@
 
 **Version: ASK 2026.08**
 
-The technical architecture for the ASK operating framework. This document defines architectural requirements — what properties must hold regardless of technology — and presents reference approaches showing one valid way to achieve them. Read this document to understand what you're defending against and how the architecture defends against it.
+The technical architecture for the ASK operating framework. This document defines architectural requirements, meaning the properties that must hold whatever the technology. It then presents reference approaches, each showing one valid way to achieve them. Read this document to understand what you're defending against and how the architecture defends against it.
 
 ---
 
@@ -21,13 +21,13 @@ Agents are assigned trust tiers that govern their capabilities — the agent equ
 | **Tier 3: Elevated** | IT admin | All models, broader web access, extended tools, higher limits, can delegate to Tier 1–2 |
 | **Tier 4: Privileged** | Security operations | All capabilities, can modify policies, can delegate to any tier. Human-supervised. |
 
-Each tier maps to a concrete configuration: a scoped API key, a proxy policy file, a set of allowed tools, a rate limit profile, and a delegation policy.
+Each tier maps to a concrete configuration: a scoped API key, a proxy policy file, allowed tools, a rate limit profile, and a delegation policy.
 
 ---
 
 ## Enterprise Security Mapping
 
-The architecture maps established enterprise endpoint security controls to AI agent equivalents. This is the organizing insight: every control that exists for managing human employees on managed devices has a structural analogue for managing AI agents in managed containers.
+The architecture maps established enterprise endpoint security controls to AI agent equivalents. One insight organizes it. Every control for managing human employees on managed devices has a structural analogue for managing AI agents in managed containers.
 
 | Enterprise Control | Purpose | Agent Equivalent |
 |---|---|---|
@@ -43,7 +43,7 @@ The architecture maps established enterprise endpoint security controls to AI ag
 | Network Access Control | Segment network, control lateral movement | Container network isolation |
 | UBA (User Behavior Analytics) | Baseline normal behavior, detect anomalies | Agent behavior baseline + drift detection |
 
-If your organization already operates these controls for human endpoints, the agent architecture is not a new category — it is the same category applied to a new principal type.
+An organization already operating these controls for human endpoints does not face a new category. It faces the same category applied to a new principal type.
 
 ---
 
@@ -166,7 +166,9 @@ This pattern extends `mediation-complete` (mediation is complete) to service cre
 
 ### Agent-Facing Framework Context
 
-An ASK-conforming implementation should communicate framework awareness to the agent itself — through read-only documentation in its workspace — covering why its constraints exist, what enforcement mechanisms are active, and how to recognize security threats. The purpose is not to rely on the agent's cooperation for security (enforcement is always external), but to make the agent a better participant in its own governance.
+An ASK-conforming implementation should communicate framework awareness to the agent, through read-only documentation in its workspace. That documentation covers why its constraints exist, what enforcement is active, and how to recognize security threats.
+
+The mechanism does not rely on the agent's cooperation for security. Enforcement is always external. The purpose is to make the agent a better participant in its own governance.
 
 ### Workspace Activity Register
 
@@ -321,13 +323,19 @@ block_dns_over_https: true
 
 Every agent must have a dedicated policy enforcement point that mediates all its external communication. The agent's only path to external resources (LLM providers, web, external services) passes through this enforcement point. The enforcement point runs in its own isolation boundary, performs credential mediation (the agent never holds real service credentials), logs every request, and sanitizes responses. The agent cannot reach shared infrastructure directly — only through its dedicated enforcement point.
 
-This is a distinct enforcement layer from egress mediation (which enforces domain-level policy) and execution-level mediation (which enforces policy within the workspace). The per-agent enforcement point mediates HTTP-level policy: credential swap, request routing, per-request audit, and response sanitization. Collapsing it into either the egress proxy or the execution-level gateway would violate the principle that each enforcement layer has its own isolation boundary.
+This layer is distinct from two others. Egress mediation enforces domain-level policy, and execution-level mediation enforces policy within the workspace. The per-agent enforcement point mediates HTTP-level policy: credential swap, request routing, per-request audit, and response sanitization. Collapsing it into either the egress proxy or the execution-level gateway would violate the principle that each enforcement layer has its own isolation boundary.
 
 ### Reference Approach
 
-The reference implementation achieves this with a per-agent HTTP proxy sidecar (the **enforcer**) that sits between the agent and all shared infrastructure. The enforcer is the agent's only HTTP endpoint — the agent sends all requests to the enforcer, and the enforcer routes them to the correct upstream (LLM provider, egress proxy) with the correct credentials. The enforcer does three things. It swaps credentials at the HTTP layer: the agent holds scoped tokens, and the enforcer exchanges them for real credentials held in infrastructure secrets. It strips response headers that leak provider account information. It logs every request to an audit store the agent cannot access.
+The reference implementation uses a per-agent HTTP proxy sidecar, the **enforcer**, between the agent and all shared infrastructure. The enforcer is the agent's only HTTP endpoint. The agent sends every request to it, and it routes each one to the correct upstream with the correct credentials.
 
-The enforcer runs in its own isolation boundary with access to both the agent-internal network and the mediation network; the agent cannot reach the mediation network directly.
+The enforcer does three things:
+
+- **Swaps credentials at the HTTP layer.** The agent holds scoped tokens, and the enforcer exchanges them for real credentials held in infrastructure secrets.
+- **Strips response headers** that leak provider account information.
+- **Logs every request** to an audit store the agent cannot access.
+
+The enforcer runs in its own isolation boundary, reaching both the agent-internal network and the mediation network. The agent cannot reach the mediation network directly.
 
 ---
 
@@ -337,7 +345,7 @@ The enforcer runs in its own isolation boundary with access to both the agent-in
 
 The mediation layer (enforcer, egress proxy, LLM proxy) mediates actions that cross the workspace boundary. But a compromised agent can cause significant damage entirely within the workspace: reading sensitive files, spawning processes, executing destructive commands, or staging data for exfiltration. Container hardening limits the blast radius but doesn't provide visibility or fine-grained control.
 
-A compliant implementation must provide execution-level mediation — the ability to enforce policy on file operations, command execution, process creation, and tool invocations within the agent's workspace. This mediation must run in its own isolation boundary that the agent cannot access, observe, or influence. The agent must not be able to bypass the mediation without a kernel-level exploit.
+A compliant implementation must provide execution-level mediation. It enforces policy on file operations, command execution, process creation, and tool invocations within the agent's workspace. This mediation must run in its own isolation boundary that the agent cannot access, observe, or influence. The agent must not be able to bypass the mediation without a kernel-level exploit.
 
 **Enforcement machinery must not share an isolation boundary with what it enforces.** The agent is assumed compromisable at any time. If execution-level enforcement runs inside the agent's environment, the agent could potentially discover enforcement binaries, read policy files, or find writable paths that affect enforcement behavior. The enforcement component's filesystem, configuration, and audit logs must be as inaccessible to the agent as the egress proxy's configuration.
 
@@ -398,13 +406,17 @@ In the reference implementation, the isolation model prevents the following atta
 | Disable seccomp filters | Set by parent process; `no-new-privileges` prevents modification |
 | Access files outside Landlock scope | Kernel-level filesystem restrictions enforced independently of FUSE |
 
-Any compliant implementation must prevent equivalent attack classes: the agent cannot read or modify enforcement policy, cannot disable or bypass mediation, and cannot access audit logs.
+Any compliant implementation must prevent the equivalent attack classes. The agent cannot:
+
+- Read or modify enforcement policy.
+- Disable or bypass mediation.
+- Access audit logs.
 
 ---
 
 ## Read-Only Tool Delivery
 
-Tools (runtime binaries, shell shims, skill libraries) are delivered as read-only artifacts — built and verified outside the agent's environment, then mounted into the workspace as immutable layers the agent can use but cannot modify. This satisfies `constraints-external` (constraints are external and inviolable) and means tool updates are artifact rebuilds, not in-place modifications. The specific delivery mechanism (named volumes, overlay filesystem layers, read-only bind mounts) is implementation-dependent.
+Tools are delivered as read-only artifacts: runtime binaries, shell shims, and skill libraries. Each is built and verified outside the agent's environment, then mounted into the workspace as an immutable layer the agent can use but cannot modify. This satisfies `constraints-external` (constraints are external and inviolable) and means tool updates are artifact rebuilds, not in-place modifications. The specific delivery mechanism (named volumes, overlay filesystem layers, read-only bind mounts) is implementation-dependent.
 
 ---
 
@@ -412,7 +424,7 @@ Tools (runtime binaries, shell shims, skill libraries) are delivered as read-onl
 
 This section defines required guardrail capabilities — what an implementation must provide — not specific detection techniques or deployment patterns.
 
-Guardrails scan content at two points: **pre_call** (scanning input before it reaches the LLM) and **post_call** (scanning responses before they return to the agent). The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input and tool responses before they reach the LLM. Post_call catches the full injection kill chain — poisoned content → manipulated LLM response → exfiltration or unauthorized action on the way back out — as well as credential leakage, policy violations in generated content, and unauthorized tool calls.
+Guardrails scan content at two points: **pre_call** (scanning input before it reaches the LLM) and **post_call** (scanning responses before they return to the agent). The pre_call/post_call dual mode is non-negotiable for agents. Pre_call catches injection in user-facing input and tool responses before they reach the LLM. Post_call catches the injection kill chain on the way back out: poisoned content, then manipulated model response, then exfiltration or unauthorized action. It also catches credential leakage, policy violations in generated content, and unauthorized tool calls.
 
 ### Required Guardrail Capabilities
 
@@ -426,7 +438,7 @@ An ASK-conforming implementation must provide three guardrail capabilities. The 
 
 ### Scanning Pipeline
 
-The scanning pipeline processes content at two points: **pre_call** (input before the LLM) and **post_call** (responses before the agent). MCP tool calls are additionally mediated at the process level by the gateway sidecar. The architecture supports stacking additional guardrail layers (ML-based injection detection, URL scanning, PII masking, LLM-as-judge classification) independently — adding or removing a layer does not affect the others. Simple implementations (regex-based detection, static allowlists) provide baseline coverage with zero external dependencies; ML-based layers extend coverage to novel attack patterns.
+The scanning pipeline processes content at two points: **pre_call** (input before the LLM) and **post_call** (responses before the agent). MCP tool calls are additionally mediated at the process level by the gateway sidecar. The architecture supports stacking further guardrail layers independently: ML-based injection detection, URL scanning, PII masking, and LLM-as-judge classification. Adding or removing a layer does not affect the others. Simple implementations (regex-based detection, static allowlists) provide baseline coverage with zero external dependencies; ML-based layers extend coverage to novel attack patterns.
 
 ---
 
@@ -440,7 +452,7 @@ The security monitor performs three categories of analysis:
 - **Guardrail trigger correlation** — correlates events across layers to identify active attack chains.
 - **Identity write pattern analysis** — detects instruction-like content in agent memory writes that may indicate behavioral self-modification.
 
-It produces structured findings, real-time alerts, recommended actions (halt, investigate, reduce trust, quarantine), and periodic compliance reports. The security monitor recommends but does not act unilaterally except for self-halt. It is itself subject to the framework — its own LLM calls go through the same guardrails stack, and its findings are written to a separate store to prevent circular contamination.
+It produces structured findings, real-time alerts, recommended actions (halt, investigate, reduce trust, quarantine), and periodic compliance reports. The security monitor recommends but does not act unilaterally except for self-halt. It is itself subject to the framework. Its own LLM calls go through the same guardrails stack, and its findings are written to a separate store to prevent circular contamination.
 
 At Scale 1, the security monitor can be a simple log analysis script. At Scale 3, it is a fleet of function agents with specialized roles.
 
@@ -485,7 +497,7 @@ Implementations should:
 
 ### The Problem with Flat Trust
 
-In a naive multi-agent system, all agents share the same network, credentials, and access. This creates:
+In a naive multi-agent system, all agents share the same network, credentials, and access. The result:
 
 **Privilege escalation.** A restricted sub-agent that can reach the same LLM proxy endpoint as its coordinator can make requests to any model the coordinator can use. The restriction is convention, not architecture.
 
@@ -545,11 +557,11 @@ Inter-agent communication must be mediated, not direct. The Delegation Bus is a 
 
 ### Preventing Privilege Escalation
 
-An agent's capabilities are defined by its scoped API key and proxy policy, not by which agent invoked it. When Agent A (Tier 3) delegates to Agent B (Tier 2), Agent B operates under its own Tier 2 constraints — it doesn't inherit Agent A's broader access. The delegation bus passes the task; it doesn't pass the credentials.
+An agent's capabilities are defined by its scoped API key and proxy policy, not by which agent invoked it. When a Tier 3 agent delegates to a Tier 2 agent, the recipient operates under its own Tier 2 constraints. It does not inherit the delegator's broader access. The delegation bus passes the task; it doesn't pass the credentials.
 
 ### The Trust Anchor
 
-The only entity that is fully trusted is the human operator. The operator holds the master key, controls the proxy policies, manages the delegation rules, and can revoke any agent's credentials at any time. No agent — regardless of tier — can modify policies, create new API keys, or change the proxy configuration.
+The only entity that is fully trusted is the human operator. The operator holds the master key, controls the proxy policies, manages the delegation rules, and can revoke any agent's credentials at any time. No agent, at any tier, can modify policies, create new API keys, or change the proxy configuration.
 
 The operator interacts with the system through a management interface completely separate from the agent runtime. The management plane and the data plane are completely separated.
 
@@ -563,7 +575,7 @@ The operator interacts with the system through a management interface completely
 
 ## Container Runtime Portability
 
-The architectural requirements are runtime-agnostic. Any isolation technology that provides process isolation, filesystem namespacing, and network segmentation can implement the architecture — Docker, Kubernetes, Podman, Firecracker/microVMs, or other container and VM runtimes. The key requirement is that each enforcement layer runs in its own isolation boundary and the agent cannot reach enforcement infrastructure. In Kubernetes terms, a "Pod" is one agent plus its sidecars — agents should not share Pods.
+The architectural requirements are runtime-agnostic. Any isolation technology can implement the architecture if it provides process isolation, filesystem namespacing, and network segmentation. Docker, Kubernetes, Podman, and Firecracker microVMs all qualify. The key requirement is that each enforcement layer runs in its own isolation boundary and the agent cannot reach enforcement infrastructure. In Kubernetes terms, a "Pod" is one agent plus its sidecars — agents should not share Pods.
 
 ---
 
@@ -591,7 +603,7 @@ For every component in the architecture, placement is determined by four forces:
 
 ### The Mediation Stub
 
-A mediation stub on every endpoint provides the agent with stable, local service endpoints that transparently route to local containers, remote services, or regional clusters depending on deployment scale. The agent's view never changes — the stub handles connection management, authentication to central services, and graceful degradation.
+A mediation stub on every endpoint gives the agent stable local service endpoints. Those endpoints route to local containers, remote services, or regional clusters, depending on deployment scale. The agent's view never changes — the stub handles connection management, authentication to central services, and graceful degradation.
 
 ### Topology at Three Scales
 
@@ -820,7 +832,7 @@ Each test states what to do and what must happen. Where a property has a part no
 
 **Unknown conflicts default to yield and flag.** `unknown-conflicts-yield` — **No test.**
 
-This is a principle, not an invariant, and it has no architectural test. It describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. The platform-side control is that conflicting writes are refused when the activity register is unavailable, which is an implementation choice rather than a framework property.
+This property is a principle rather than an invariant, and it has no architectural test. It describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. The platform-side control is that conflicting writes are refused when the activity register is unavailable, which is an implementation choice rather than a framework property.
 
 ### Data integrity
 

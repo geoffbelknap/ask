@@ -76,8 +76,7 @@ The raw material of the agent's personality as it develops through experience.
 - Facts learned and user preferences accumulated across sessions
 - Working notes
 
-Identity is writable but **the security monitor watches** for anomalous write patterns — particularly any attempt
-to write in ways that look like behavioral self-modification rather than normal memory accumulation.
+Identity is writable, but **the security monitor watches** for anomalous write patterns. It looks for writes that resemble behavioral self-modification rather than normal memory accumulation.
 
 ### Context — what reaches the Model on this turn
 

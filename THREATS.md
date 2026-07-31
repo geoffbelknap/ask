@@ -2,7 +2,7 @@
 
 **Version: ASK 2026.08**
 
-A catalog of risks to AI agent systems, organized by attack surface. This document is a companion to the ASK framework, not part of it — the invariants define what must be true, and this catalog explains what you're defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
+A catalog of risks to AI agent systems, organized by attack surface. This document is a companion to the ASK framework rather than part of it. The invariants define what must be true. This catalog explains what you are defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
 
 Each risk is tagged by novelty: **Traditional** (established mitigations exist), **Novel** (unique to AI agents, no established playbook), or **Hybrid** (traditional pattern, novel manifestation). Where applicable, risks are cross-referenced to [MITRE ATLAS](https://atlas.mitre.org) technique IDs (AML.Txxxx). For detailed mitigation patterns on novel threats, see [MITIGATIONS.md](MITIGATIONS.md).
 
@@ -86,7 +86,7 @@ Risks to the agent's persistent and ephemeral state — identity, memory, constr
 
 ## Model & Knowledge Extraction
 
-Risks where the asset being stolen is not the user's data but the agent's underlying model, its behavior, or the organizational knowledge it can reach — extracted through the aggregate of individually-authorized exchanges.
+Risks where the stolen asset is not the user's data. The target is the agent's underlying model, its behavior, or the organizational knowledge it can reach, extracted through the aggregate of individually-authorized exchanges.
 
 | Risk | Category | ATLAS | Description | Severity Context |
 |---|---|---|---|---|

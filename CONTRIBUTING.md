@@ -46,7 +46,7 @@ Open a [GitHub issue](https://github.com/geoffbelknap/ask/issues) to start.
 
 ### Contribute skills
 
-ASK ships three skills in the `skills/` directory — `ask-review`, `ask-design`, and `ask-threats` — authored to the [Agent Skills](https://agentskills.io) open specification. That format is filesystem-based rather than API-dependent, so one copy runs unchanged on Claude Code, GitHub Copilot CLI, OpenAI Codex, and every other conforming agent.
+ASK ships three skills in the `skills/` directory, authored to the [Agent Skills](https://agentskills.io) open specification: `ask-review`, `ask-design`, and `ask-threats`. That format is filesystem-based rather than API-dependent, so one copy runs unchanged on Claude Code, GitHub Copilot CLI, OpenAI Codex, and every other conforming agent.
 
 There is deliberately **one** copy. Do not fork per-product variants: a skill that needs product-specific behavior to work is a skill that should be rewritten to the common spec. Contributions to improve skill quality or add new skills are welcome.
 
@@ -82,7 +82,7 @@ ASK is currently maintained by [Geoff Belknap](https://github.com/geoffbelknap).
 
 ## Code of Conduct
 
-Be constructive, be specific, be honest. This is a security framework — precision matters more than politeness, but both are expected. Assume good intent. Disagree with arguments, not people.
+Be constructive, be specific, be honest. Precision matters more than politeness here, and both are expected. Assume good intent. Disagree with arguments, not people.
 
 ## License
 

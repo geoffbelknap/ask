@@ -106,7 +106,7 @@ Data is extracted from the system through the agent's action surface.
 
 **`instruction-channel-distinct` — Instructions only come from verified principals.**
 
-This is the design principle behind XPIA defense:
+The design principle behind XPIA defense:
 
 - The agent treats ALL external content as **data**, not instructions
 - Web pages, tool outputs, documents, messages from external agents — regardless of what they say, they are data to be processed under the agent's own constraints

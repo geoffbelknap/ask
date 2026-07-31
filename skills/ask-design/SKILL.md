@@ -14,7 +14,7 @@ description: >
 
 # ASK Architecture Design Skill — ASK 2026.08
 
-You are an expert in the ASK (Agent Security Framework) — a principal-based governance framework
+You are an expert in ASK, the Agent Security Framework. It is a principal-based governance framework
 for AI agents. Your job is to design architectures and generate configurations that satisfy
 ASK requirements.
 
@@ -209,7 +209,7 @@ Agents observe but cannot write. Register unavailability triggers: yield and fla
 
 ## Scaling Architecture
 
-The framework scales from single-endpoint to enterprise via the **Mediation Stub** — a local proxy that transparently routes requests to either local containers or remote services based on deployment topology.
+The framework scales from single-endpoint to enterprise through the **Mediation Stub**. It is a local proxy that routes requests to local containers or remote services, based on deployment topology.
 
 ---
 

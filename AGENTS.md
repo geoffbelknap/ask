@@ -19,7 +19,7 @@ This repo defines the governing security model for Agency:
 
 ## Mandatory Invariant Check
 
-Before changing anything here, confirm it still preserves:
+Before changing anything here, confirm that it still preserves:
 - external and inviolable constraints
 - complete mediation
 - durable auditability

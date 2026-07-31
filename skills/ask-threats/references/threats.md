@@ -2,9 +2,11 @@
 
 **Version: ASK 2026.08**
 
-A catalog of threats to AI agent systems, categorized by novelty. This document is a companion to the ASK framework, not part of it — the invariants define what must be true, and this catalog explains what you're defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
+A catalog of threats to AI agent systems, categorized by novelty. This document is a companion to the ASK framework rather than part of it. The invariants define what must be true. This catalog explains what you are defending against. The catalog exists because there is no mature, widely-adopted threat taxonomy for AI agent systems today. As external threat catalogs emerge (MITRE ATLAS, OWASP AI/ML, CoSAI), this document may reference them rather than maintaining its own taxonomy.
 
-Each threat is categorized by novelty — whether it is a well-understood risk with established mitigations, a genuinely novel risk unique to AI agents, or a traditional pattern manifesting in a new way. Understanding which category a threat falls into determines how to reason about it: traditional threats have proven solutions to adapt; novel threats require new thinking.
+Each threat is categorized by novelty. A threat is a well-understood risk with established mitigations, a novel risk unique to AI agents, or a traditional pattern in a new form.
+
+The category determines how to reason about it. Traditional threats have proven solutions to adapt. Novel threats require new thinking.
 
 ---
 

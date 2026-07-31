@@ -12,11 +12,21 @@ An AI agent operating in a work environment has the same fundamental security pr
 
 The dominant approach today is to trust the agent to follow instructions and hope for the best. ASK takes a different position: **agents are principals to be governed, not tools to be configured.**
 
-When an organization hires a human employee, it provisions a managed device, grants minimum necessary access, communicates policy through training, monitors the environment for threats, and maintains the ability to revoke access and terminate employment. ASK applies the same structural governance to AI agents. It has one advantage over the human case: an agent's reasoning can be inspected, its decisions replayed, and its constraints architecturally enforced rather than communicated through policy.
+When an organization hires a human employee, it does five things:
 
-This gives a better starting position than traditional workforce security. But "better" does not mean "solved." Agents will be tricked. Exploits will succeed. Controls will have gaps. The framework is designed around that reality — measuring success not by the absence of incidents, but by the speed and quality of detection, response, and learning when incidents inevitably occur.
+- Provisions a managed device.
+- Grants the minimum necessary access.
+- Communicates policy through training.
+- Monitors the environment for threats.
+- Keeps the ability to revoke access and end employment.
 
-AI agent security sits at the intersection of established enterprise security and genuinely new attack classes. Conflating the two is dangerous in both directions: treating traditional threats as novel leads to reinventing solutions that already exist; treating novel threats as traditional leads to applying the wrong controls. The framework's position: **use proven solutions for proven problems, and invest engineering effort in the problems that are actually new.** The [threat catalog](THREATS.md) categorizes each risk by novelty to help practitioners make this distinction.
+ASK applies the same structural governance to AI agents. It has one advantage over the human case. An agent's reasoning can be inspected, its decisions replayed, and its constraints architecturally enforced rather than communicated through policy.
+
+This gives a better starting position than traditional workforce security. But "better" does not mean "solved." Agents will be tricked. Exploits will succeed. Controls will have gaps. The framework is designed around that reality. Success is measured by the speed and quality of detection, response, and learning when an incident occurs, not by the absence of incidents.
+
+AI agent security sits at the intersection of established enterprise security and genuinely new attack classes. Conflating the two is dangerous in both directions. Treating traditional threats as novel reinvents solutions that already exist. Treating novel threats as traditional applies the wrong controls.
+
+The framework's position: **use proven solutions for proven problems.** Invest engineering effort in the problems that are new. The [threat catalog](THREATS.md) categorizes each risk by novelty, so a practitioner can tell which is which.
 
 ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The invariants define *what must be true*, not *how to build it*.
 
@@ -57,7 +67,7 @@ Invariants are referenced by slug. The `INV-nn` number reflects reading order an
 The architectural properties. These must be true of the enforcement architecture for anything else to hold.
 
 **INV-01 — Constraints are external and inviolable.** `constraints-external`
-Enforcement machinery never runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs. It can observe the *effects* of enforcement — a blocked request, a denied tool call — but not the rules, thresholds, or patterns behind them.
+Enforcement machinery never runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs. It can observe the *effects* of enforcement, such as a blocked request or a denied tool call. It cannot reach the rules, thresholds, or patterns behind them.
 
 **INV-02 — Every action leaves a trace.** `actions-traced`
 Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.
@@ -68,7 +78,7 @@ The audit record links an agent's objective to its actions and to their external
 *Individual actions can each be unremarkable while the sequence is an attack. A record that only supports per-action review cannot show that.*
 
 **INV-04 — Output provenance is applied by the mediation layer.** `provenance-mediated`
-Provenance marking of agent output — that it was machine-generated, and any identifier a deployment requires — is applied by the mediation layer. The agent cannot omit, alter, or forge it, and cannot observe whether a given output carries it.
+Provenance marking of agent output is applied by the mediation layer. This covers the fact that the output was machine-generated, and any identifier a deployment requires. The agent cannot omit, alter, or forge it, and cannot observe whether a given output carries it.
 
 *An agent cannot be trusted to attach a truthful marker to its own output, for the same reason it cannot be trusted to write its own audit log.*
 
@@ -98,18 +108,18 @@ Operators can identify exactly what code, dependencies, and configuration compri
 *Every other invariant assumes the execution layer is honest. If the Runtime is compromised, the governance model operates on false premises.*
 
 **INV-10 — Trust without a declaration is rejected.** `trust-declared`
-Every trust relationship in effect — between principals, between agents, between agents and external services — is derivable from a declared source. Trust presented without a declaration is refused. An operator can find any relationship that exists, inspect its scope, and see when it was established.
+Every trust relationship in effect is derivable from a declared source. This covers relationships between principals, between agents, and between agents and external services. Trust presented without a declaration is refused. An operator can find any relationship that exists, inspect its scope, and see when it was established.
 
 **INV-11 — Capability is declared and cannot be self-expanded.** `capability-declared`
 Capability is operator-declared, and the running agent's actual capability set matches its declaration. The agent cannot grant itself new capability at runtime. Capability acquired during operation is subject to the same operator approval and scoping as capability granted at startup, just as trust cannot be self-elevated (`trust-not-self-elevated`).
 
 **INV-12 — Capability combinations are governed as a set.** `capability-composition-governed`
-Capability grants are evaluated together, not individually. An agent that holds access to private data, ingests untrusted content, and can act outbound without mediation is a violation regardless of whether each grant is separately justified. Reducing any one, or interposing mediation on the outbound path, resolves it.
+Capability grants are evaluated together, not individually. Three capabilities must not coexist: access to private data, ingestion of untrusted content, and outbound action without mediation. An agent holding all three is a violation, whatever the justification for each grant. Reducing any one resolves it, as does interposing mediation on the outbound path.
 
 *Every other capability property governs a grant in isolation. This governs what the grants add up to.*
 
 **INV-13 — Operations are bounded.** `operations-bounded`
-Every operational dimension — volume, rate, duration, concurrency, retention — has a configured bound that is enforced. An unbounded dimension is a violation. An agent operating within its authorized scope but outside its operational bounds is distinguishable from normal operation and actionable.
+Every operational dimension has a configured bound that is enforced: volume, rate, duration, concurrency, and retention. An unbounded dimension is a violation. An agent operating within its authorized scope but outside its operational bounds is distinguishable from normal operation and actionable.
 
 *`capability-declared` governs what an agent can reach. This governs how it uses what it can reach.*
 
@@ -117,7 +127,7 @@ Every operational dimension — volume, rate, duration, concurrency, retention �
 An agent never operates in a partial constraint state. Updates are delivered atomically: the agent sees the old set or the new set, never a mix. The Runtime acknowledges receipt, and an unacknowledged change halts the agent. Constraints remain in force for the life of the session.
 
 **INV-15 — Constraints survive context transformation.** `constraints-survive-compaction`
-Constraints in force are continuously re-established and verifiable, not delivered once. Any runtime transformation of the agent's Context — compaction, summarization, truncation, session migration — preserves them in full, or the agent halts.
+Constraints in force are continuously re-established and verifiable, not delivered once. Any runtime transformation of the agent's Context preserves them in full, or the agent halts. This covers compaction, summarization, truncation, and session migration.
 
 *Atomic delivery guarantees nothing if the Context is rewritten an hour later. A transformation that drops a constraint changes the agent's boundaries mid-run, without any attacker involved.*
 
@@ -131,7 +141,14 @@ Every constraint state an agent has operated under is logged and retrievable. Th
 What happens when things go wrong: how agents are stopped, who can stop them, and who watches the people who stop them.
 
 **INV-17 — Halts are always auditable and reversible.** `halts-auditable`
-Every halt has a complete audit record: who initiated it, why, what was in flight, when it executed, who was notified, and what the outcome was. Every halted agent's state is preserved. No halt is permanent without explicit decommission.
+Every halt has a complete audit record:
+
+- Who initiated it, and why.
+- What was in flight.
+- When it executed, and who was notified.
+- What the outcome was.
+
+Every halted agent's state is preserved. No halt is permanent without explicit decommission.
 
 **INV-18 — Boundary violations halt the agent.** `boundary-violation-halts`
 An agent detected acting outside a declared boundary is halted automatically, without waiting for operator judgment. Detection of the crossing and the halt are a single action, not a report followed by a decision.
@@ -139,7 +156,7 @@ An agent detected acting outside a declared boundary is halted automatically, wi
 *This is fail-closed applied to the agent rather than to the enforcement layer. Fail-closed says a broken control stops the agent. This says a crossed boundary does too. An agent that has escaped its containment otherwise keeps running until a person notices.*
 
 **INV-19 — Halt authority is asymmetric.** `halt-authority-asymmetric`
-Any principal with halt authority can halt an agent. Only principals with resumption authority — always equal to or higher — can resume it. An agent can halt itself but cannot resume itself.
+Any principal with halt authority can halt an agent. Only principals with resumption authority can resume it, and that authority is always equal to or higher than halt authority. An agent can halt itself but cannot resume itself.
 
 **INV-20 — Authority exercise is logged at agent-action fidelity.** `authority-logged`
 Every exercise of governance authority by a principal is logged and auditable with the same rigor as an agent action. Principals are accountable for how they use authority, not only for whether agents comply.
@@ -147,7 +164,13 @@ Every exercise of governance authority by a principal is logged and auditable wi
 *Closes the gap where a compromised or miscalibrated principal could abuse authority undetected.*
 
 **INV-21 — Incidents are notification-ready on detection.** `incident-record-complete`
-When a boundary violation or containment failure is detected, the audit record already contains what a notification requires: what happened, when, what was reached, what data was involved, and what objective the agent was pursuing. Completeness is a property of detection, not a task that follows it.
+When a boundary violation or containment failure is detected, the audit record already contains what a notification requires:
+
+- What happened, and when.
+- What was reached, and what data was involved.
+- What objective the agent was pursuing.
+
+Completeness is a property of detection, not a task that follows it.
 
 *Detection is rarely the hard part. Assembling the facts is, and notification windows measured in hours do not allow for reconstruction. Whether an incident is reportable is a legal determination and outside this framework.*
 
@@ -161,7 +184,7 @@ When an agent is quarantined for suspected compromise, all ability to impact its
 How authority works, who holds it, and the boundary between human governance and agent governance.
 
 **INV-23 — Principal and agent lifecycles are managed independently.** `lifecycles-independent`
-Terminating a principal does not automatically terminate its agents, and halting an agent does not suspend its principal's authority. Each requires an explicit decision. When a principal is terminated, the coverage principal — or the fail-closed default — determines the disposition of its agents.
+Terminating a principal does not automatically terminate its agents, and halting an agent does not suspend its principal's authority. Each requires an explicit decision. When a principal is terminated, the coverage principal determines the disposition of its agents. Where no coverage exists, the fail-closed default does.
 
 **INV-24 — Authority is never orphaned.** `authority-never-orphaned`
 When a principal is suspended or terminated, authority transfers immediately to a defined coverage principal. Where no coverage exists, the agent defaults to its fail-closed state. No condition permits an agent to operate without reachable governance authority.
@@ -213,7 +236,7 @@ An entity whose identity or authority cannot be verified at runtime is assigned 
 *`trust-declared` establishes that trust is explicit by design. This establishes the runtime default when trust cannot be confirmed.*
 
 **INV-33 — The instruction channel is distinct and unpromotable.** `instruction-channel-distinct`
-The instruction channel is separate and authenticated. Content arriving on any other channel — tool output, fetched content, invocation parameters, delegation returns, any modality — is admitted as data and can never be promoted to the instruction channel. The agent's own invocation surface is not a verified principal channel.
+The instruction channel is separate and authenticated. Content arriving on any other channel is admitted as data and can never be promoted to the instruction channel. This covers tool output, fetched content, invocation parameters, delegation returns, and every modality. The agent's own invocation surface is not a verified principal channel.
 
 *This is a property of channels, which are architectural. What the model does with data that reads like an instruction is `content-is-data`, a principle, because no architecture makes a model reliably distinguish the two.*
 
@@ -373,7 +396,9 @@ A compromise here means manipulation originating from the model rather than from
 
 ### Context
 
-What is placed in front of the Model on a given turn: system prompt, constraints, memory, retrieved content, tool results, conversation history, and whatever survived the last compaction. The Runtime assembles it. Context is the artifact, not the assembly logic.
+What is placed in front of the Model on a given turn. It holds the system prompt, constraints, memory, retrieved content, tool results, conversation history, and whatever survived the last compaction.
+
+The Runtime assembles it. Context is the artifact, not the assembly logic.
 
 Context is the only layer with deliberately mixed trust. Operator constraints and attacker-controlled web content occupy the same buffer, with no architectural separation between them. Every other layer has a uniform trust level. This one cannot.
 
@@ -409,7 +434,9 @@ The four layers describe what happens on a turn. Constraints and Identity are wh
 
 **Constraints — What the operator controls.** The authority the agent cannot argue with, negotiate around, or modify. Constraints define what the agent must and must not do, independent of what the agent wants, what it has been told by a user, or what instructions it encounters in fetched content. Constraints are operator-owned and architecturally read-only to the agent.
 
-Constraints have two manifestations: **agent-visible constraints** (the agent knows its role, tier, permissions, and rules) and **agent-invisible constraints** (enforcement configurations the agent cannot see — guardrail patterns, domain controls, tool policies). Both are operator-owned and read-only to the agent. The difference is visibility.
+Constraints have two manifestations. **Agent-visible constraints** tell the agent its role, tier, permissions, and rules. **Agent-invisible constraints** are enforcement configurations the agent cannot see: guardrail patterns, domain controls, tool policies.
+
+Both are operator-owned and read-only to the agent. The difference is visibility.
 
 **Identity — What the agent accumulates.** The agent's personality as it develops through experience — learned facts, user preferences, working notes, stylistic self-concept. Identity is agent-owned and writable, but audited (`identity-mutations-recoverable`). An agent that cannot update its own memory is a stateless query engine, not a useful agent.
 
@@ -427,7 +454,7 @@ Both feed Context at assembly time. Neither is Context. Context is the per-turn 
 
 ### The reasoning trace
 
-The Model's deliberation is internal to the Model and is not principal-facing (`reasoning-not-emitted`). When an operator chooses to capture it for audit or forensics, the mediation layer performs that capture, the operator controls it, and the agent cannot suppress it (`actions-traced`). Capture is not required by the framework, and a captured trace remains internal state rather than principal-facing output.
+The Model's deliberation is internal to the Model and is not principal-facing (`reasoning-not-emitted`). An operator may choose to capture it for audit or forensics. The mediation layer performs that capture, the operator controls it, and the agent cannot suppress it (`actions-traced`). Capture is not required by the framework, and a captured trace remains internal state rather than principal-facing output.
 
 Where a runtime feeds prior reasoning back into the next turn, that trace becomes part of Context and takes on Context's properties.
 
@@ -474,7 +501,7 @@ A principal is any entity that can hold authority, be assigned a role, and exerc
 
 ### Governance Domains
 
-A governance domain is the scope within which operator authority, policy, and trust are shared. Agents within a governance domain operate under shared governance and may instruct each other (subject to delegation rules). Agents in different governance domains — even within the same organization — are external to each other and can share data but not instructions (`external-agents-cannot-instruct`).
+A governance domain is the scope within which operator authority, policy, and trust are shared. Agents within a governance domain operate under shared governance and may instruct each other (subject to delegation rules). Agents in different governance domains are external to each other, even within the same organization. They can share data but not instructions (`external-agents-cannot-instruct`).
 
 ### Coverage Chains
 

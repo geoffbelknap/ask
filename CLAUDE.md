@@ -4,7 +4,7 @@ Pure documentation repository. Contains the ASK agent security framework: invari
 
 ## Framework Invariants — Do Not Violate
 
-These apply to all work on this repository. Before proposing or implementing any change, verify it does not break these invariants. If a proposed design requires violating any of them, stop and flag it — the design is wrong, not the invariant. See `FRAMEWORK.md` for the full set and [ARCHITECTURE.md](ARCHITECTURE.md) for the test that proves each one.
+These apply to all work on this repository. Before proposing or implementing any change, verify that it does not break these invariants. If a proposed design requires violating any of them, stop and flag it — the design is wrong, not the invariant. See `FRAMEWORK.md` for the full set and [ARCHITECTURE.md](ARCHITECTURE.md) for the test that proves each one.
 
 - `constraints-external` — enforcement machinery never runs inside the agent's isolation boundary. The agent cannot influence or circumvent enforcement.
 - `actions-traced` — logs are written by the mediation layer, not the agent. The agent has no write access and cannot suppress or alter them.
@@ -18,4 +18,4 @@ These apply to all work on this repository. Before proposing or implementing any
 
 Enforcement layers keep their own isolation boundaries. Network isolation, egress proxy, LLM proxy, enforcer, container hardening, and the runtime gateway are separate mechanisms. Do not collapse them or let one subsume another's role.
 
-The judgment-bearing counterparts — `least-privilege` among them — are principles rather than invariants. They guide scoping decisions and cannot be mechanically checked.
+The judgment-bearing counterparts are principles rather than invariants, `least-privilege` among them. They guide scoping decisions and cannot be mechanically checked.

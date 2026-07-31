@@ -1,6 +1,6 @@
 # ASK — An Operating Framework for Agent Security
 
-ASK defines what must be true — architecturally, operationally, and organizationally — for AI agents to operate securely at any scale. It is agent-agnostic, platform-agnostic, and vendor-neutral.
+ASK defines what must be true for AI agents to operate securely at any scale, architecturally and operationally and organizationally. It is agent-agnostic, platform-agnostic, and vendor-neutral.
 
 **The core position:** agents are principals to be governed, not tools to be configured. The agent is always assumed to be compromisable. Build enforcement outside the agent's reach.
 
@@ -85,7 +85,13 @@ ASK defines what must be true — architecturally, operationally, and organizati
 
 ## Reference implementation
 
-[Agency](https://github.com/geoffbelknap/agency) is the reference implementation of ASK. It implements the single-agent architecture with all core enforcement layers: network isolation, egress proxy, LLM proxy with XPIA guardrails, per-agent enforcer sidecar, container hardening, runtime gateway, and continuous monitoring. Multi-agent coordination, the principal model, and trust evolution are designed but not yet implemented.
+[Agency](https://github.com/geoffbelknap/agency) is the reference implementation of ASK. It implements the single-agent architecture with every core enforcement layer:
+
+- Network isolation and egress proxy
+- LLM proxy with XPIA guardrails
+- Per-agent enforcer sidecar
+- Container hardening and runtime gateway
+- Continuous monitoring Multi-agent coordination, the principal model, and trust evolution are designed but not yet implemented.
 
 ---
 

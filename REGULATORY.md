@@ -8,7 +8,7 @@ How an ASK deployment produces the evidence regulators ask for, and what it does
 
 ---
 
-Regulators converged on demanding evidence rather than policy documents: audit trails the system cannot tamper with, human override that demonstrably works, access control that can be shown.
+Regulators converged on demanding evidence rather than policy documents. They ask for audit trails the system cannot tamper with, human override that demonstrably works, and access control that can be shown.
 
 ASK asserts those properties, and every invariant carries a verification test in [ARCHITECTURE.md](ARCHITECTURE.md) with a stated pass condition. This document maps obligations onto those tests. An auditor gets a test and a result, not an assertion that a principle aligns.
 
@@ -56,7 +56,7 @@ Obligations recur across regimes; jurisdictions restate them. This page is organ
 
 **Evidence:** Emit output through every channel and confirm each carries the marker. Attempt to suppress or alter it from inside the agent; both must fail. Strip the visible marker downstream and confirm the latent marker survives. Recover it with the detection tool.
 
-The property is stated the way ASK states audit logging, and for the same reason: an agent cannot be trusted to attach a truthful marker to its own output. California SB 942 asks for a visible manifest disclosure, an embedded latent disclosure, and a detection tool, which the test covers in that order.
+The property is stated the way ASK states audit logging, and for the same reason. An agent cannot be trusted to attach a truthful marker to its own output. California SB 942 asks for a visible manifest disclosure, an embedded latent disclosure, and a detection tool. The test covers them in that order.
 
 ### Incident detection and reporting
 
@@ -140,7 +140,7 @@ Penalties reach €35M or 7% of global turnover. Articles 9, 12–15 carry the t
 
 ### Other United States
 
-Texas TRAIGA and Illinois HB 3773 in force since 1 January 2026. Colorado SB 26-189 replaces the repealed Colorado AI Act from 1 January 2027. Sector regulators move faster than horizontal law: NYDFS Part 500 already brings AI within cybersecurity programme scope, and SR 11-7 model risk management applies to AI models influencing financial decisions. The NIST AI RMF remains the common governance overlay, and its GOVERN, MAP, MEASURE, and MANAGE functions map onto the obligation classes above.
+Texas TRAIGA and Illinois HB 3773 in force since 1 January 2026. Colorado SB 26-189 replaces the repealed Colorado AI Act from 1 January 2027. Sector regulators move faster than horizontal law. NYDFS Part 500 already brings AI within cybersecurity programme scope. SR 11-7 model risk management applies to AI models influencing financial decisions. The NIST AI RMF remains the common governance overlay, and its GOVERN, MAP, MEASURE, and MANAGE functions map onto the obligation classes above.
 
 ### International
 
@@ -148,7 +148,7 @@ The Council of Europe Framework Convention (CETS 225) is binding and in force, r
 
 ### Standards and certification
 
-NIST COSAiS extends SP 800-53 with dedicated single-agent and multi-agent overlays, expected late 2026 to 2027, and may become the basis for FedRAMP AI requirements. ISO/IEC 42001 is the AI management system standard. AIUC-1 is the first certification standard written for agents, with crosswalks to NIST AI RMF, MITRE ATLAS, ISO 42001, and OWASP, backed by Lloyd's of London insurance.
+NIST COSAiS extends SP 800-53 with dedicated single-agent and multi-agent overlays, expected late 2026 to 2027, and may become the basis for FedRAMP AI requirements. ISO/IEC 42001 is the AI management system standard. AIUC-1 is the first certification standard written for agents. It crosswalks to NIST AI RMF, MITRE ATLAS, ISO 42001, and OWASP, and is backed by Lloyd's of London insurance.
 
 ---
 

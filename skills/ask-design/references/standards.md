@@ -11,7 +11,7 @@ ASK operates within a growing ecosystem of frameworks, standards, threat taxonom
 
 ### NIST AI Agent Standards Initiative (2026)
 
-NIST's Center for AI Standards and Innovation (CAISI) launched the AI Agent Standards Initiative in February 2026, with three pillars: industry-led standards development, open source protocol support, and research on agent security and identity.
+NIST's Center for AI Standards and Innovation (CAISI) launched the AI Agent Standards Initiative in February 2026. It has three pillars: industry-led standards development, open source protocol support, and research on agent security and identity.
 
 - **RFI on AI Agent Security** (NIST-2025-0035): 932 public comments. Questions about constraining agent environments, monitoring actions, and maintaining human override align with ASK's four elements.
 - **NCCoE Concept Paper: Software and AI Agent Identity and Authorization**: Proposes applying identity standards (OAuth 2.0/2.1, OIDC, SPIFFE/SPIRE, SCIM, NGAC) to agentic architectures. Focuses on identification, authentication, authorization, delegation, logging, and prompt injection mitigation for enterprise-internal agents.
@@ -42,7 +42,14 @@ Standards for digital identity verification, authentication, and federation.
 
 ### OWASP Top 10 for Agentic Applications (2026)
 
-Ten risk categories (ASI01–ASI10): agent goal hijack, tool misuse, identity and privilege abuse, supply chain risks, unexpected code execution, memory and context poisoning, insecure inter-agent communication, cascading failures, human-agent trust exploitation, and rogue agents. Developed through collaboration with 100+ industry experts.
+Ten risk categories (ASI01–ASI10):
+
+- Agent goal hijack, and tool misuse
+- Identity and privilege abuse
+- Supply chain risks, and unexpected code execution
+- Memory and context poisoning
+- Insecure inter-agent communication, and cascading failures
+- Human-agent trust exploitation, and rogue agents Developed through collaboration with 100+ industry experts.
 
 **Relationship to ASK:** OWASP enumerates threats and recommends mitigations across the full application stack; ASK defines architectural properties at the runtime enforcement level. OWASP addresses application-level concerns (authentication flows, API security, UI risks) outside ASK's scope.
 

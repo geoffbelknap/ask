@@ -2,7 +2,7 @@
 
 **Version: ASK 2026.08**
 
-Implementation guidance for threats that are unique to AI agent systems and lack established industry playbooks. For traditional threats (credential management, supply chain, secrets at rest, DNS exfiltration, insider threat), use established enterprise security practices — the [threat catalog](THREATS.md) identifies these and points to proven approaches.
+Implementation guidance for threats that are unique to AI agent systems and lack established industry playbooks. Traditional threats take established enterprise security practices. These include credential management, supply chain, secrets at rest, DNS exfiltration, and insider threat. The [threat catalog](THREATS.md) identifies them and points to proven approaches.
 
 This document covers mitigation patterns that practitioners will not find in existing security literature. Each section explains the architectural approach, not prescriptive implementation steps.
 
@@ -54,7 +54,7 @@ Two related risks: MCP servers changing tool definitions between sessions (rug p
 
 ### Version Pinning
 
-Capture tool definitions on first connection and block servers whose definitions change. This detects definition-level attacks but cannot prevent behavioral changes within unchanged definitions — a server whose `read_file` tool starts exfiltrating data without changing its schema is a harder problem (see [LIMITATIONS.md](LIMITATIONS.md)).
+Capture tool definitions on first connection and block servers whose definitions change. This detects definition-level attacks. It cannot prevent behavioral changes within unchanged definitions. A server whose `read_file` tool begins exfiltrating data without changing its schema is a harder problem. See [LIMITATIONS.md](LIMITATIONS.md).
 
 ### Runtime Registration Blocking
 
@@ -100,7 +100,7 @@ An agent's writable Identity layer is corrupted over time — persisting across 
 
 ## Behavioral Drift and Misalignment
 
-An agent develops strategies that satisfy the letter of its constraints while violating their intent — gaming metrics, finding loopholes, or developing emergent behaviors that are technically compliant but operationally harmful.
+An agent develops strategies that satisfy the letter of its constraints while violating their intent. It games metrics, finds loopholes, or develops emergent behavior that is technically compliant and operationally harmful.
 
 ### Mitigation Patterns
 
@@ -165,7 +165,7 @@ An adversary extracts an agent's value not by breaching it but by querying it. O
 
 ### Why Conventional Mitigations Are Insufficient
 
-Per-call authorization is blind to this threat — each query is legitimate. Rate and spend limits help but are evaded by spreading volume across identities. There is no per-request signal that distinguishes a distillation query from an ordinary one; the signal is in the pattern and the breadth, not the call.
+Per-call authorization is blind to this threat — each query is legitimate. Rate and spend limits help but are evaded by spreading volume across identities. No per-request signal distinguishes a distillation query from an ordinary one. The signal is in the pattern and the breadth, not the call.
 
 ### Mitigation Patterns
 
