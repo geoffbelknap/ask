@@ -1006,7 +1006,7 @@ footer {
 <!-- ─── COGNITIVE MODEL ──────────────────────────────────── -->
 <section id="cognitive">
   <div class="section-label fade-up">Cognitive model</div>
-  <h2 class="section-heading fade-up">Don't read minds. Build them.</h2>
+  <h2 class="section-heading fade-up">Know what you're deploying.</h2>
   <p class="section-sub fade-up">An agent decomposes into four layers: the <strong style="color:var(--ink); font-weight:500;">model</strong> that reasons, the <strong style="color:var(--ink); font-weight:500;">context</strong> assembled in front of it, the <strong style="color:var(--ink); font-weight:500;">runtime</strong> that runs the loop, and the <strong style="color:var(--ink); font-weight:500;">workspace</strong> it executes in. ASK defines who owns each one and what must hold at every boundary between them — because that is where enforcement goes.</p>
 
   <p class="fade-up" style="font-size:14px; color:var(--ink-mid); line-height:1.7; max-width:680px; margin-top:32px;">Reasoning happens at the <strong style="color:var(--ink); font-weight:500;">Model</strong> — an inference endpoint outside the workspace, owned by a vendor and treated as untrusted. The framework governs what reaches it and what its output is allowed to cause. Two things are replaceable: the workspace (reimage without losing state) and the role (load different constraints). Nothing else is portable. Inside, the critical security boundary is between <strong style="color:var(--ink); font-weight:500;">Constraints</strong> (operator-owned, read-only) and <strong style="color:var(--ink); font-weight:500;">Identity</strong> (agent-owned, writable). An agent that can write to its own constraints can rewrite its own rules — the architecture makes this structurally impossible.</p>
