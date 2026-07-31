@@ -17,6 +17,7 @@ ASK uses date-based versioning. Tenet numbers reflect reading order and may chan
 - Removed the independent-replaceability claim. A Mind was never portable across Bodies: context management, compaction, tool-call schemas, and memory formats are all runtime-specific. Portability is a property of the Constraints layer, which does travel between runtimes unchanged.
 - Session retired as a layer. It was naming two different things — the assembled context and the reasoning trace. The first is now Context; the second is internal to the Model, governed by Tenet 28, and becomes part of Context when a runtime feeds it back into the next turn.
 - Constraints and Identity keep their meaning and are now stated as the state model: what persists between turns, and who owns it.
+- New section: **What ASK Governs**. The framework had never stated what it is not. ASK governs the operation of agents, not models and not outcomes, and provides mechanism rather than determination. Model behavior, privacy determinations, trust and safety, and management-system obligations are named as outside it.
 
 ## ASK 2026.06
 

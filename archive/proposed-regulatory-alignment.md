@@ -54,14 +54,16 @@ The evidence column is the change. A DORA resilience-testing obligation is satis
 
 ## What ASK does not provide
 
-Stating this plainly is what makes the rest credible.
+Stating this plainly is what makes the rest credible. `FRAMEWORK.md` now carries the general statement; this list is the compliance-facing detail.
 
 - **Conformity assessment, CE marking, and registration.** EU AI Act Chapter III procedure.
 - **Model and system documentation.** Technical files, model cards, published transparency reports.
 - **Training-data disclosure.** California AB 2013 requires published dataset documentation. ASK governs runtime, not provenance of training corpora.
 - **Risk-management process and governance structure.** This is an AI management system. Pair with ISO/IEC 42001.
 - **Fundamental-rights impact assessment.** EU AI Act Art 27.
-- **Bias and discrimination testing.** Illinois HB 3773 and Colorado SB 26-189 govern discriminatory outcomes in consequential decisions. ASK is a security framework and says nothing about fairness. Do not let a security control stand in for a fairness control.
+- **Bias and discrimination testing.** Illinois HB 3773 and Colorado SB 26-189 govern discriminatory outcomes in consequential decisions. These are properties of the model and of the decision, not of the agent's operation.
+- **Privacy determinations.** ASK supplies the access control, retention bounds, and audit trail that GDPR, HIPAA, and the CPPA regulations require as evidence. It does not supply lawful basis, purpose limitation, consent, data subject rights, or transfer assessments.
+- **Trust and safety.** Harmful content, harassment, self-harm, misinformation, and age-appropriate design are a separate discipline. ASK's injection defenses protect the agent from manipulation and do not make its output safe.
 - **The legal determination that an incident is reportable.** ASK makes the facts available. A lawyer decides.
 
 **Division of labour.** ASK states what must be true and proves it. ISO/IEC 42001 governs the management system around it. AIUC-1 certifies and insures the result. These are complementary, and an implementer needs all three.

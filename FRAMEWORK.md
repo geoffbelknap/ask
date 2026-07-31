@@ -22,6 +22,24 @@ ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The tenets define 
 
 ---
 
+## What ASK Governs
+
+ASK governs the operation of agents. It does not govern models, and it does not govern outcomes.
+
+One rule follows from that boundary: **ASK provides mechanism, not determination.** It enforces limits that someone else sets. It can prove an agent could not reach data it was not granted. It cannot tell you whether granting that data was lawful, fair, or wise.
+
+Four things sit outside the framework. Each has its own discipline and its own controls.
+
+**Model behavior.** Bias, accuracy, alignment, and capability are properties of the model. ASK treats the model as untrusted, governs what reaches it, and governs what its output is permitted to cause. It says nothing about what the model does internally. Discrimination in consequential decisions is regulated in its own right, and a security control is not a fairness control.
+
+**Privacy determinations.** ASK supplies the access control, retention bounds, and audit trail that privacy regimes require as evidence. It does not supply lawful basis, purpose limitation, consent, data subject rights, or transfer assessments. Nor does it decide what counts as minimal. The mechanics are architecture; the determinations are law.
+
+**Trust and safety.** What an agent says is a separate discipline: harmful content, harassment, self-harm, misinformation, age-appropriate design. ASK's injection defenses protect the agent from manipulation. They do not make its output safe. Where an agent causes harm, ASK covers the security kind — unauthorized access, intrusion, exfiltration — and not the content kind.
+
+**Management-system obligations.** Conformity assessment, model documentation, registration, and the risk-management process around a deployment are the work of an AI management system. Pair ASK with one.
+
+A framework that claims everything proves nothing. Naming the edges is what makes the properties inside them worth testing.
+
 ## The Tenets
 
 The tenets are properties that must hold for the framework to function. They are binary conditions, not goals. A tenet either holds or it is violated. If any tenet is violated, the framework has failed and must be repaired.
