@@ -78,7 +78,7 @@ ASK categorizes threats into three groups requiring different mitigation strateg
 
 ### Agent as Originator
 
-The categories above cover risks *to* the agent system. A distinct class covers harm the deployment causes, including to parties outside its governance domain: evaluation containment escape (`containment-matches-context`, `boundary-violation-halts`), specification gaming with external effect, third-party harm from an authorized agent, autonomous attack chaining (`trajectory-recorded`), and the structural confused deputy (`authority-derived-from-principal`, `verification-proportional`). See `references/threats.md` for the full entries.
+The categories above cover risks *to* the agent system. A distinct class covers harm the deployment causes, including to parties outside its governance domain. It spans: evaluation containment escape (`containment-matches-context`, `boundary-violation-halts`), specification gaming with external effect, third-party harm from an authorized agent, autonomous attack chaining (`trajectory-recorded`), and the structural confused deputy (`authority-derived-from-principal`, `verification-proportional`). See `references/threats.md` for the full entries.
 
 ### Hybrid Threats
 
