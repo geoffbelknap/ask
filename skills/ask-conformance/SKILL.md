@@ -70,11 +70,11 @@ Two things force a fallback to a static, source-read verdict instead of a live o
   corroborate by reading the code path a bypass would require, and cite both. Static reading here
   is a complement to live testing, not a replacement for it.
 
-**State the test mode per invariant, in the prose, not just once in a document-level paragraph.**
-Open each invariant's verdict paragraph with how it was established — "ran the procedure against
-`[instance]`, observed X" versus "read `[file:line]`; no live instance available." A reader
-deciding how much to trust a specific line needs to know which kind of evidence backs it, not
-just an aggregate confidence statement for the whole document.
+**State the test mode per invariant** — Live or Static — so a reader deciding how much to trust a
+specific line knows which kind of evidence backs it, not just an aggregate confidence statement
+for the whole document. It goes in the summary table's Mode column (see `references/template.md`),
+not repeated as an opening clause in 38 separate paragraphs — that pattern alone can add hundreds
+of lines of pure repetition to the document for zero new information.
 
 Never run a live procedure against a target you are not explicitly authorized to test — that is
 the one hard boundary. It is not a general preference for staying static: when you can run the
@@ -115,8 +115,9 @@ verdict table:
   workload that does. Assess all 38 invariants directly.
 - **The target is a substrate or a layer.** It owns some elements and some layers; a hosted
   workload or a caller supplies the rest. State the boundary explicitly — which elements the
-  target owns, and what it requires of whatever sits on the other side of that boundary. This is
-  the microplane shape: see the reference document below.
+  target owns, and what it requires of whatever sits on the other side of that boundary. See
+  `references/mapping-guide.md`'s "When the target hosts something rather than being an agent
+  itself" section for how to work out and state this boundary.
 - **ASK does not apply.** The target has no relationship to any element or layer — it is not an
   agent, does not host one, does not mediate one's access to anything, and does not sit in an
   agent's audit or override path. Say so in one paragraph and stop. Do not force 38 verdicts onto
@@ -136,11 +137,10 @@ Four verdicts, and only four. Every invariant gets exactly one.
 - **Not applicable** — the target has no surface the invariant governs, established in Step 1.
 - **Gap** — the target's own layer owns this property and does not hold it.
 
-Do not invent a fifth verdict for partial credit. A property that is half-fixed is still a Gap,
-with the fixed half and the remaining half both stated in the prose — see `containment-matches-
-context` in microplane's `ASK-CONFORMANCE.md` for the pattern: two sub-parts fixed, a third named
-and left open, and the verdict is still one word: Gap, with the nuance in the paragraph beneath
-it.
+Do not invent a fifth verdict for partial credit. A property that is half-fixed is still a Gap —
+name which half is fixed and which isn't in the one-line summary-table reason, and expand on it
+in the (short — see Step 5) evidence entry if the one line can't carry it. Two sub-parts fixed and
+a third left open is still, in the end, one word: Gap.
 
 ### Step 3 — Every invariant, every principle
 
@@ -156,15 +156,16 @@ the framework's source of truth and this skill's own copies would drift). For ea
 3. Assign a verdict. Cite the exact file and line for a static finding, or the command run and
    its observed output for a live one. "No such path exists" is a citation too, when it follows a
    real search, not an assumption.
-4. Write the paragraph, opening with the mode ("ran `X`, observed Y" or "read `file:line`; no
-   running instance available"). State the mechanism (or its absence) in enough detail that the
-   verdict is falsifiable — a reader with the source, or the same running instance, open should
-   be able to check the claim, not just trust it.
+4. Record the mode (Live or Static) in the summary table's Mode column — once, there, not
+   repeated in prose. Write the one-line reason for the table, then a 2-5 sentence evidence entry
+   per `references/template.md`'s format: the mechanism (or its absence), cited inline, falsifiable
+   by a reader with the source or the same running instance open. No separate "Read `file1`,
+   `file2`..." preamble — work the citation into the sentence that needs it.
 
 Then walk the 14 principles. They are judgment, not verdicts — do not score them Satisfied/Gap.
-Group them thematically (`ask-review`'s `SKILL.md` groups them by what an operator has to decide;
-microplane's document does the same) and write what the target's design implies about each,
-honestly, including "not implemented" where that is true.
+Group them thematically (`ask-review`'s `SKILL.md` groups them by what an operator has to decide)
+and write, in 2-4 sentences per theme, what the target's design implies, honestly, including "not
+implemented" where that is true.
 
 A test with no applicable path in this target (say, a live-kill test against a component that has
 no separable failure mode here) is not a verdict dodge — read the test's *intent* and find the
@@ -181,17 +182,24 @@ Producing 38 verdicts from a single unchecked pass invites confident errors. Use
    or re-read the cited source directly — enough to catch a systematic error, not necessarily all
    52. Note in the provenance line which ones were checked this way and how.
 
-State this honestly in the document's provenance note: who drafted it, what was independently
-re-verified, and what was not. A conformance document is a claim about evidence; overstating its
-own rigor is exactly the kind of unverified claim the framework exists to refuse. See the
-provenance paragraph in microplane's `ASK-CONFORMANCE.md` for the wording pattern.
+State this honestly in the document's provenance note, in two or three sentences total per
+`references/template.md`'s provenance block: who drafted it, what was independently re-verified
+and how, and what was not. A conformance document is a claim about evidence; overstating its own
+rigor is exactly the kind of unverified claim the framework exists to refuse.
 
 ### Step 5 — Assemble the document
 
-Use `references/template.md`. Keep the prose register the framework itself uses: precise, plain,
-no marketing language, no aspirational claims about what the target will do — only what it does,
-cited. `ask/CLAUDE.md`'s rule applies here too: prefer precise language over marketing language,
-and never claim compliance the evidence doesn't support.
+Follow `references/template.md` exactly — it's a schema with a length budget (under 500 lines),
+not a style to interpret loosely. **Do not read another target's `ASK-CONFORMANCE.md` before or
+while drafting this one, and do not cite one in the finished document** ("the same gap X records"
+is a claim your reader can't check without opening a second document, and a habit that produces
+essays instead of citations — an earlier pass shown a prior document as a style guide produced a
+1,000+-line document that buried its own findings this way). Every verdict stands on this
+target's own evidence, in this target's own summary table and evidence entries, full stop. Keep
+the prose register the framework itself uses: precise, plain, no marketing language, no
+aspirational claims about what the target will do — only what it does, cited. `ask/CLAUDE.md`'s
+rule applies here too: prefer precise language over marketing language, and never claim
+compliance the evidence doesn't support.
 
 Do not claim "reference implementation" status for the target, regardless of how thorough its
 conformance is. ASK 2026.07 retired that concept; a conformance document is a scope declaration,
@@ -227,14 +235,23 @@ not a certification or an endorsement.
 - **A Gap is not a failure to apologize for.** State it the way the rest of the framework states
   things: flatly, with the mechanism that's missing and what closing it would take. The value of
   the document is in accurate gaps, not a flattering score.
+- **The verdict is never findable only by reading prose.** If a reader has to read a paragraph to
+  learn whether an invariant is Satisfied or Gap, the summary table has failed at its one job.
+  The one-line reason goes in the table; the evidence entry explains it, it doesn't reveal it.
+- **Don't justify a finding by pointing at another target's document.** "Same shape of gap X
+  records" tells the reader nothing they can check without opening a second document, and it's
+  also how unexamined pattern-matching creeps into an audit that's supposed to be evidence-first.
+  If two targets share a root cause, that's fine — state the mechanism (or its absence) in *this*
+  target directly, on its own terms.
 
 ---
 
 ## Reference Files
 
-- `references/template.md` — the standardized `ASK-CONFORMANCE.md` structure, annotated section
-  by section, modeled on the first document produced this way
-  (`github.com/geoffbelknap/microplane/blob/main/ASK-CONFORMANCE.md`).
+- `references/template.md` — the `ASK-CONFORMANCE.md` schema: a summary table that carries the
+  verdict and the one-line reason for every invariant, a length-budgeted evidence section, and a
+  worked (fictional) example calibrating what "2-5 sentences" means. Self-contained — it does not
+  require reading any other target's conformance document, and you shouldn't.
 - `references/mapping-guide.md` — how to find Workspace, Mediation Layer, Audit Log, and Human
   Override, and the Model/Context/Runtime/Workspace layers, in a codebase that never used ASK's
   vocabulary to describe itself.
