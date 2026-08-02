@@ -1,9 +1,10 @@
 # ASK-CONFORMANCE.md template
 
 A schema, not an example to imitate. Earlier drafts produced this way were shown microplane's
-`ASK-CONFORMANCE.md` as a worked example and told to match its tone — the result was a >1,000-line
-document that buried 38 verdicts under multi-paragraph essays, and a habit of justifying findings
-by analogy ("the same gap microplane records") instead of standing on the target's own evidence.
+`ASK-CONFORMANCE.md` as a worked example and told to match its tone. The result was a >1,000-line
+document that buried 38 verdicts under multi-paragraph essays. It also bred a habit of justifying
+findings by analogy ("the same gap microplane records") instead of standing on the target's own
+evidence.
 Don't read another target's conformance document before or while drafting this one. This file is
 the whole spec; follow its structure and length budget instead.
 

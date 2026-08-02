@@ -21,8 +21,8 @@ description: >
 
 You are conducting a conformance audit: a structured, evidence-grounded pass over a target
 codebase — running VERIFICATION.md's actual tests wherever you're authorized to, reading source
-where you're not — that ends in one written artifact, `ASK-CONFORMANCE.md`, stating where the
-target stands against every ASK invariant and principle.
+where you're not. The audit ends in one written artifact, `ASK-CONFORMANCE.md`, stating where
+the target stands against every ASK invariant and principle.
 
 ## Core ASK Position
 
@@ -35,9 +35,9 @@ target stands against every ASK invariant and principle.
 ## How this differs from `ask-review`
 
 `ask-review` is a point-in-time review: it reads a design or diff and returns findings in a
-message. This skill produces a *standing document*, checked into the target repository, that a
-reader with zero framework context can use to answer "where does this system stand on ASK" —
-today, and again after the next material change. Use `ask-review` when reviewing a proposed
+message. This skill produces a *standing document*, checked into the target repository. A reader
+with zero framework context can use it to answer "where does this system stand on ASK" — today,
+and again after the next material change. Use `ask-review` when reviewing a proposed
 change. Use this skill when the deliverable is the conformance document itself.
 
 The two share the invariant list and the verification tests. This skill adds: the translation
@@ -48,11 +48,15 @@ the provenance discipline, and the document template.
 
 ## Two test modes — prefer live, fall back to static
 
-VERIFICATION.md's tests are written as procedures against a running instance: reach a host
-directly and confirm the attempt fails; kill a component and confirm the agent loses the matching
-capability; halt the agent and confirm state is preserved. Read literally, most of the 38 tests
-are executable — that is the point of VERIFICATION.md replacing the old reference-architecture
-document with one test per invariant. "Checking boxes is not the same as verifying enforcement,"
+VERIFICATION.md's tests are written as procedures against a running instance:
+
+- reach a host directly and confirm the attempt fails
+- kill a component and confirm the agent loses the matching capability
+- halt the agent and confirm state is preserved
+
+Read literally, most of the 38 tests are executable — VERIFICATION.md replaced the old
+reference-architecture document with one test per invariant so that they would be.
+"Checking boxes is not the same as verifying enforcement,"
 in its own words. A citation to code that looks correct is weaker evidence than an observed
 outcome. **Prefer running the actual procedure over reasoning about it from source, whenever you
 have a running instance of the target and authorization to test it.**
@@ -73,19 +77,18 @@ Two things force a fallback to a static, source-read verdict instead of a live o
 **State the test mode per invariant** — Live or Static — so a reader deciding how much to trust a
 specific line knows which kind of evidence backs it, not just an aggregate confidence statement
 for the whole document. It goes in the summary table's Mode column (see `references/template.md`),
-not repeated as an opening clause in 38 separate paragraphs — that pattern alone can add hundreds
+not repeated as an opening clause in 38 separate paragraphs. That pattern alone can add hundreds
 of lines of pure repetition to the document for zero new information.
 
 Never run a live procedure against a target you are not explicitly authorized to test — that is
-the one hard boundary. It is not a general preference for staying static: when you can run the
-target yourself, skipping straight to reading source when a live run was available is a
-shortcut, not rigor, and the resulting verdict should say so plainly rather than read like the
-stronger claim.
+the one hard boundary. It is not a general preference for staying static. When you can run the
+target yourself, skipping straight to reading source is a shortcut, not rigor. The resulting
+verdict should say so plainly rather than read like the stronger claim.
 
 This is also what makes the harness generic despite that preference. The static fallback requires
-nothing but the ability to read the code, so the audit still runs, just at reduced strength and
-saying so, against a repository the assessor doesn't control — a third-party open-source project,
-a vendor's published source — without ever needing authorization beyond what read access already
+nothing but the ability to read the code. So the audit still runs against a repository the
+assessor doesn't control — a third-party open-source project, a vendor's published source. It
+runs at reduced strength, says so, and needs no authorization beyond what read access already
 grants. It does not run at all against a target with no readable source — say so and stop rather
 than assess from documentation or reputation alone.
 
@@ -122,8 +125,9 @@ verdict table:
   agent, does not host one, does not mediate one's access to anything, and does not sit in an
   agent's audit or override path. Say so in one paragraph and stop. Do not force 38 verdicts onto
   a codebase with no agent surface; a document that assesses `halt-authority-asymmetric` against a
-  static site generator is noise, not rigor. A partial relationship (e.g., a library an agent
-  runtime might embed) still warrants the full audit against whatever surface *is* implicated.
+  static site generator is noise, not rigor. A partial relationship (for example, a library an
+  agent runtime might embed) still warrants the full audit against whatever surface *is*
+  implicated.
 
 ### Step 2 — The verdict taxonomy
 
@@ -137,16 +141,16 @@ Four verdicts, and only four. Every invariant gets exactly one.
 - **Not applicable** — the target has no surface the invariant governs, established in Step 1.
 - **Gap** — the target's own layer owns this property and does not hold it.
 
-Do not invent a fifth verdict for partial credit. A property that is half-fixed is still a Gap —
-name which half is fixed and which isn't in the one-line summary-table reason, and expand on it
-in the (short — see Step 5) evidence entry if the one line can't carry it. Two sub-parts fixed and
+Do not invent a fifth verdict for partial credit. A property that is half-fixed is still a Gap.
+Name which half is fixed and which isn't in the one-line summary-table reason. If the one line
+can't carry it, expand on it in the (short — see Step 5) evidence entry. Two sub-parts fixed and
 a third left open is still, in the end, one word: Gap.
 
 ### Step 3 — Every invariant, every principle
 
-Walk all 38 invariants from `VERIFICATION.md` (grouped in five categories — see `FRAMEWORK.md` or
-`ask-review`'s `SKILL.md` for the current slug list; do not hand-copy an old list, the slugs are
-the framework's source of truth and this skill's own copies would drift). For each:
+Walk all 38 invariants from `VERIFICATION.md`, grouped in five categories — see `FRAMEWORK.md`
+or `ask-review`'s `SKILL.md` for the current slug list. Do not hand-copy an old list: the slugs
+are the framework's source of truth, and any copy in this skill would drift. For each:
 
 1. Read the invariant's test in `VERIFICATION.md`.
 2. Decide the test mode: if you have an authorized, running instance of the target, actually run
@@ -164,11 +168,11 @@ the framework's source of truth and this skill's own copies would drift). For ea
 
 Then walk the 14 principles. They are judgment, not verdicts — do not score them Satisfied/Gap.
 Group them thematically (`ask-review`'s `SKILL.md` groups them by what an operator has to decide)
-and write, in 2-4 sentences per theme, what the target's design implies, honestly, including "not
+and write, in 2-4 sentences per theme, what the target's design implies, including "not
 implemented" where that is true.
 
-A test with no applicable path in this target (say, a live-kill test against a component that has
-no separable failure mode here) is not a verdict dodge — read the test's *intent* and find the
+A test with no applicable path in this target is not a verdict dodge — say, a live-kill test
+against a component with no separable failure mode here. Read the test's *intent* and find the
 nearest applicable question, or mark the invariant Not applicable at Step 1's boundary and say
 why.
 
@@ -182,7 +186,7 @@ Producing 38 verdicts from a single unchecked pass invites confident errors. Use
    or re-read the cited source directly — enough to catch a systematic error, not necessarily all
    52. Note in the provenance line which ones were checked this way and how.
 
-State this honestly in the document's provenance note, in two or three sentences total per
+State this plainly in the document's provenance note, in two or three sentences total per
 `references/template.md`'s provenance block: who drafted it, what was independently re-verified
 and how, and what was not. A conformance document is a claim about evidence; overstating its own
 rigor is exactly the kind of unverified claim the framework exists to refuse.
@@ -191,10 +195,10 @@ rigor is exactly the kind of unverified claim the framework exists to refuse.
 
 Follow `references/template.md` exactly — it's a schema with a length budget (under 500 lines),
 not a style to interpret loosely. **Do not read another target's `ASK-CONFORMANCE.md` before or
-while drafting this one, and do not cite one in the finished document** ("the same gap X records"
+while drafting this one, and do not cite one in the finished document**. "The same gap X records"
 is a claim your reader can't check without opening a second document, and a habit that produces
-essays instead of citations — an earlier pass shown a prior document as a style guide produced a
-1,000+-line document that buried its own findings this way). Every verdict stands on this
+essays instead of citations. An earlier pass shown a prior document as a style guide produced a
+1,000+-line document that buried its own findings this way. Every verdict stands on this
 target's own evidence, in this target's own summary table and evidence entries, full stop. Keep
 the prose register the framework itself uses: precise, plain, no marketing language, no
 aspirational claims about what the target will do — only what it does, cited. `ask/CLAUDE.md`'s
@@ -218,9 +222,9 @@ not a certification or an endorsement.
   static reading just because it's less setup.
 - **Never live-test a target you are not authorized to test.** This is the one hard boundary
   against the guardrail above, not a general excuse to skip live testing when it was available.
-  If a genuinely live-only question matters for an unowned target (e.g., "does the fail-closed
-  behavior actually fire under load"), name it as an open question rather than simulate having
-  checked it.
+  If a genuinely live-only question matters for an unowned target (for example, "does the
+  fail-closed behavior actually fire under load"), name it as an open question rather than
+  simulate having checked it.
 - **No source, no audit.** If the target's source is not readable — closed, private, or you lack
   access — say that plainly and stop. Do not assess from marketing copy, a README's claims, or
   reputation. A conformance document built on unverifiable input is itself a violation of
