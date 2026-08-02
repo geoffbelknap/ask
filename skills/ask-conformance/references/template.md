@@ -66,6 +66,20 @@ Four verdicts:
 - **Gap** — [target]'s own layer owns this property and doesn't hold it. No partial credit: a
   half-fixed property is still Gap, with which half is fixed stated in the one-line reason.
 
+| Verdict | Count |
+|---|---|
+| Satisfied | [n] |
+| Delegated | [n] |
+| Not applicable | [n] |
+| Gap | [n] |
+
+[If Gaps cluster around a small number of root causes, name the roots here as a short bulleted
+list, each naming which slugs it drives. This is the one place extra density is worth it — it's
+what keeps a large Gap count legible instead of just alarming, and it belongs right next to the
+count it explains, not several dozen rows later. Omit if they don't cluster.]
+
+### Full table
+
 | Slug | Verdict | Mode | Why (one line) |
 |---|---|---|---|
 | `constraints-external` | [Satisfied/Delegated/N-A/Gap] | [Live/Static] | [≤15 words, the actual reason, not "see below"] |
@@ -106,17 +120,6 @@ Four verdicts:
 | `authority-never-orphaned` | | | |
 | `lifecycles-independent` | | | |
 | `oversight-capacity-enforced` | | | |
-
-| Verdict | Count |
-|---|---|
-| Satisfied | [n] |
-| Delegated | [n] |
-| Not applicable | [n] |
-| Gap | [n] |
-
-[If Gaps cluster around a small number of root causes, name the roots here as a short bulleted
-list, each naming which slugs it drives. This is the one place extra density is worth it — it's
-what keeps a large Gap count legible instead of just alarming. Omit if they don't cluster.]
 
 ---
 
