@@ -4,13 +4,13 @@ Thank you for your interest in contributing to the ASK operating framework.
 
 ## What This Project Is
 
-ASK is a security framework for AI agent systems — invariants, a cognitive model, a threat catalog, and mitigation patterns. It is agent-agnostic, platform-agnostic, and vendor-neutral. Contributions are to the framework documentation, not to software.
+ASK is a security framework for AI agent systems — [invariants](GLOSSARY.md#the-framework), a cognitive model, a threat catalog, and mitigation patterns. It is agent-agnostic, platform-agnostic, and vendor-neutral. Contributions are to the framework documentation, not to software.
 
 **The core documents:**
 
 | Document | Purpose |
 |---|---|
-| [FRAMEWORK.md](FRAMEWORK.md) | The invariants, cognitive model, trust spectrum, policy model |
+| [FRAMEWORK.md](FRAMEWORK.md) | The invariants, cognitive model, [trust spectrum](GLOSSARY.md#trust), policy model |
 | [THREATS.md](THREATS.md) | Threat catalog organized by attack surface |
 | [MITIGATIONS.md](MITIGATIONS.md) | Implementation guidance for novel threats |
 | [VERIFICATION.md](VERIFICATION.md) | A test for every invariant |

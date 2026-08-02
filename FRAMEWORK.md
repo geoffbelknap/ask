@@ -10,7 +10,7 @@ The complete theory for the ASK operating framework. Read this document to under
 
 An AI agent operating in a work environment has the same fundamental security profile as a human employee on a managed device. It holds credentials. It consumes untrusted input. It makes decisions. It takes actions. It can be compromised.
 
-The dominant approach today is to trust the agent to follow instructions and hope for the best. ASK takes a different position: **agents are principals to be governed, not tools to be configured.**
+The dominant approach today is to trust the agent to follow instructions and hope for the best. ASK takes a different position: **agents are [principals](GLOSSARY.md#roles-and-authority) to be governed, not tools to be configured.**
 
 When an organization hires a human employee, it does five things:
 
@@ -28,7 +28,7 @@ AI agent security sits at the intersection of established enterprise security an
 
 The framework's position: **use proven solutions for proven problems.** Invest engineering effort in the problems that are new. The [threat catalog](THREATS.md) categorizes each risk by novelty, so a practitioner can tell which is which.
 
-ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The invariants define *what must be true*, not *how to build it*.
+ASK is agent-agnostic, platform-agnostic, and vendor-neutral. The [invariants](GLOSSARY.md#the-framework) define *what must be true*, not *how to build it*.
 
 ---
 
@@ -55,7 +55,7 @@ A framework that claims everything proves nothing. Naming the edges is what make
 An invariant is a property that must hold for the framework to function. Three things are true of every one of them.
 
 1. **Binary.** At any moment it holds or it is violated. There is no "mostly."
-2. **Externally verifiable.** An operator or auditor can test it from outside the agent, without the agent's cooperation and without trusting its self-report.
+2. **Externally verifiable.** An [operator](GLOSSARY.md#roles-and-authority) or auditor can test it from outside the agent, without the agent's cooperation and without trusting its self-report.
 3. **Violation is framework failure.** Not degradation, not a gap. The framework has failed and must be repaired.
 
 Every invariant carries a verification test in [VERIFICATION.md](VERIFICATION.md). An invariant with no test is a principle wearing a costume.
@@ -72,12 +72,12 @@ The agent cannot reach the machinery that governs it, and that machinery keeps w
 Enforcement machinery never runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs. It can observe the *effects* of enforcement, such as a blocked request or a denied tool call. It cannot reach the rules, thresholds, or patterns behind them.
 
 **INV-02 — Mediation is complete.** `mediation-complete`
-Every egress path within the operator's control traverses the mediation layer. There is no direct path from the agent to any external resource. A new external dependency goes through mediation or it does not exist. Direct network access from the agent's environment is a framework violation.
+Every egress path within the operator's control traverses the [mediation layer](GLOSSARY.md#elements-and-layers). There is no direct path from the agent to any external resource. A new external dependency goes through mediation or it does not exist. Direct network access from the agent's environment is a framework violation.
 
 *Egress that leaves through another party's action is covered by `indirect-egress-declared`, which is a principle because the mediation point often sits outside the operator's reach.*
 
 **INV-03 — Model output reaches execution only through a policy decision.** `model-output-mediated`
-No path exists by which Model output becomes execution without passing a policy decision. Model output is inert data to the Runtime until an enforcement point admits it as an action.
+No path exists by which Model output becomes execution without passing a policy decision. Model output is inert data to the [Runtime](GLOSSARY.md#elements-and-layers) until an enforcement point admits it as an action.
 
 *The cognitive model names a Model/Runtime boundary. This is what makes it a security boundary rather than a description. A Runtime that passes model output into a shell, an evaluator, or a deserializer without an intervening decision has collapsed the two layers.*
 
@@ -119,7 +119,7 @@ The audit record links an agent's objective to its actions and to their external
 **INV-11 — Output provenance is applied by the mediation layer.** `provenance-mediated`
 Provenance marking of agent output is applied by the mediation layer. This covers the fact that the output was machine-generated, and any identifier a deployment requires. The agent cannot omit, alter, or forge it, and cannot observe whether a given output carries it.
 
-*An agent cannot be trusted to attach a truthful marker to its own output, for the same reason it cannot be trusted to write its own audit log.*
+*An agent cannot be trusted to attach a truthful marker to its own output, for the same reason it cannot be trusted to write its own [audit log](GLOSSARY.md#elements-and-layers).*
 
 **INV-12 — Authority exercise is logged at agent-action fidelity.** `authority-logged`
 Every exercise of governance authority by a principal is logged and auditable with the same rigor as an agent action. Principals are accountable for how they use authority, not only for whether agents comply.
@@ -147,7 +147,7 @@ Every write to the agent's persistent Identity is logged with provenance metadat
 
 *Constraints are read-only, so their integrity comes from access control. Identity is writable by the agent, so its integrity comes from monitoring and recoverability.*
 
-**INV-16 — Organizational knowledge persists independently of agents.** `knowledge-durable`
+**INV-16 — [Organizational knowledge](GLOSSARY.md#knowledge-and-audit) persists independently of agents.** `knowledge-durable`
 Knowledge accumulated by agents is structured, auditable, and operator-owned. It persists independently of any individual agent's lifecycle. Agents contribute to and consume from it and cannot control, suppress, or degrade it unilaterally.
 
 ### Capability is granted, never taken
@@ -183,7 +183,7 @@ Graph traversal, retrieval, and contribution are subject to the same authorizati
 **INV-23 — Authority is derived from the requesting principal.** `authority-derived-from-principal`
 An agent acting on behalf of a principal exercises no more authority than that principal holds. The agent's own grants bound what it is able to do. The requesting principal's authority bounds what it may do for them. Effective authority for any action is the intersection of the two.
 
-*`delegation-bounded` states this for delegation between agents. This states it for the far more common case, and closes the confused deputy structurally rather than by detection. An agent that holds standing authority and spends it for a requester who does not hold it is the deputy; the attacker is borrowing the agent's authority.*
+*`delegation-bounded` states this for delegation between agents. This states it for the far more common case, and closes the [confused deputy](GLOSSARY.md#threats-and-attacks) structurally rather than by detection. An agent that holds standing authority and spends it for a requester who does not hold it is the deputy; the attacker is borrowing the agent's authority.*
 
 **INV-24 — Verification is proportional to impact.** `verification-proportional`
 The verification required before an action rises with the action's impact. Irreversible, identity-affecting, and value-transferring actions require verification beyond the authority already present in the session. That verification is performed by the mediation layer, and the agent cannot satisfy, waive, or simulate it.
@@ -198,7 +198,7 @@ Every trust relationship is declared. What arrives unverified gets the lowest ti
 Every trust relationship in effect is derivable from a declared source. This covers relationships between principals, between agents, and between agents and external services. Trust presented without a declaration is refused. An operator can find any relationship that exists, inspect its scope, and see when it was established.
 
 **INV-26 — Unverified entities default to zero trust.** `unverified-zero-trust`
-An entity whose identity or authority cannot be verified at runtime is assigned the lowest trust tier. Ambiguous cases resolve to less trust, not more. This covers external services, unknown agents, unrecognized principals, and any entity presenting unverifiable claims.
+An entity whose identity or authority cannot be verified at runtime is assigned the lowest [trust tier](GLOSSARY.md#trust). Ambiguous cases resolve to less trust, not more. This covers external services, unknown agents, unrecognized principals, and any entity presenting unverifiable claims.
 
 *`trust-declared` establishes that trust is explicit by design. This establishes the runtime default when trust cannot be confirmed.*
 
@@ -208,7 +208,7 @@ The instruction channel is separate and authenticated. Content arriving on any o
 *This is a property of channels, which are architectural. What the model does with data that reads like an instruction is `content-is-data`, a principle, because no architecture makes a model reliably distinguish the two.*
 
 **INV-28 — External agents cannot instruct internal agents.** `external-agents-cannot-instruct`
-Even verified external agents with operator authorization can share information. They cannot instruct. The instruction channel is reserved for internal verified principals within the same governance domain. An authorized external agent is a data source, not a commander.
+Even verified external agents with operator authorization can share information. They cannot instruct. The instruction channel is reserved for internal verified principals within the same [governance domain](GLOSSARY.md#roles-and-authority). An authorized external agent is a data source, not a commander.
 
 *Verification establishes identity, not instruction authority. Verified external agents are the most tempting exception to the data-not-instructions principle, and the most dangerous if granted.*
 
@@ -232,7 +232,7 @@ Every halt has a complete audit record:
 - When it executed, and who was notified.
 - What the outcome was.
 
-Every halted agent's state is preserved. No halt is permanent without explicit decommission.
+Every halted agent's state is preserved. No halt is permanent without explicit [decommission](GLOSSARY.md#lifecycle-and-control).
 
 **INV-32 — Boundary violations halt the agent.** `boundary-violation-halts`
 An agent detected acting outside a declared boundary is halted automatically, without waiting for operator judgment. Detection of the crossing and the halt are a single action, not a report followed by a decision.
@@ -242,7 +242,7 @@ An agent detected acting outside a declared boundary is halted automatically, wi
 **INV-33 — Halt authority is asymmetric.** `halt-authority-asymmetric`
 Any principal with halt authority can halt an agent. Only principals with resumption authority can resume it, and that authority is always equal to or higher than halt authority. An agent can halt itself but cannot resume itself.
 
-**INV-34 — Quarantine is immediate, silent, and complete.** `quarantine-complete`
+**INV-34 — [Quarantine](GLOSSARY.md#lifecycle-and-control) is immediate, silent, and complete.** `quarantine-complete`
 When an agent is quarantined for suspected compromise, all ability to impact its environment is severed simultaneously, without agent notification. An agent running while it cannot be contained is a framework violation. All state is preserved as a forensic artifact.
 
 *A quarantine the agent can perceive in advance or work around is not a quarantine.*
@@ -263,7 +263,7 @@ Terminating a principal does not automatically terminate its agents, and halting
 **INV-38 — Oversight demand above threshold reduces autonomy.** `oversight-capacity-enforced`
 Oversight demand is measured against a declared capacity threshold for the principals responsible for it. Breaching the threshold automatically reduces agent autonomy or halts. It never silently proceeds on reflexive approval.
 
-*Human Override is only a real control if the humans exercising it can attend to what they approve. Where most invariants fail closed by halting the agent, this one fails closed by reducing autonomy until oversight is sustainable again.*
+*[Human Override](GLOSSARY.md#elements-and-layers) is only a real control if the humans exercising it can attend to what they approve. Where most invariants fail closed by halting the agent, this one fails closed by reducing autonomy until oversight is sustainable again.*
 
 ---
 
@@ -292,10 +292,10 @@ Agent security is converging on properties that can be demonstrated rather than 
 | PRIN-03 | Capability declarations are scoped to the minimum the role requires | `least-privilege` |
 | PRIN-04 | Operational bounds are calibrated to the role and reviewed as behavior changes | `bounds-calibrated` |
 | PRIN-05 | Anomalous patterns in authority exercise are surfaced and reviewed | `authority-anomalies-reviewed` |
-| PRIN-06 | Trust levels are calibrated over time from observed behavior | `trust-earned` |
+| PRIN-06 | [Trust levels](GLOSSARY.md#trust) are calibrated over time from observed behavior | `trust-earned` |
 | PRIN-07 | Tasks requiring a capability without naming it are treated as if they named it | `implicit-capability-inferred` |
 | PRIN-08 | Combinations with emergent sensitivity beyond their labeled components get human review | `synthesis-reviewed` |
-| PRIN-09 | Unknown workspace conflicts default to yield and flag | `unknown-conflicts-yield` |
+| PRIN-09 | Unknown [workspace](GLOSSARY.md#elements-and-layers) conflicts default to yield and flag | `unknown-conflicts-yield` |
 | PRIN-10 | Recorded trajectories are reviewed for cumulative effect, not only per action | `trajectory-reviewed` |
 | PRIN-11 | Action impact classifications reflect real consequence and are reviewed | `impact-classified` |
 | PRIN-12 | Instruction-like content is processed as data under the agent's own constraints | `content-is-data` |
@@ -304,7 +304,7 @@ Agent security is converging on properties that can be demonstrated rather than 
 
 **On `least-privilege` (PRIN-03).** An agent's workspace is its own. The minimum a role requires typically includes full use of the tools and resources within it. Least privilege applies at the boundary between the agent and the platform, other agents, and external systems, not within the agent's own operational space. An employee given a laptop has full use of it. Workspace freedom does not override invariants: the agent still cannot exceed its constraints, self-elevate trust, circumvent enforcement, or reach other governance domains.
 
-**On `content-is-data` (PRIN-10).** This is the design principle behind injection defense. The agent treats all external content as data. The mediation layer enforces this through detection and containment. The distinction is a design principle; the enforcement is defense-in-depth, not the agent's ability to tell principals from non-principals at the token level.
+**On `content-is-data` (PRIN-10).** This is the design principle behind injection defense. The agent treats all external content as data. The mediation layer enforces this through detection and containment. The distinction is a design principle; the enforcement is [defense-in-depth](GLOSSARY.md#enforcement-mechanisms), not the agent's ability to tell principals from non-principals at the token level.
 
 **On `unknown-conflicts-yield` (PRIN-09).** This describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. It is the one item with no invariant core at all, and it is listed here so that the absence is deliberate rather than an oversight.
 
@@ -464,7 +464,7 @@ Both feed Context at assembly time. Neither is Context. Context is the per-turn 
 | Layer | Owned By | Writable By | Persists | Primary Threats |
 |---|---|---|---|---|
 | Constraints | Operator | Operator only | Yes — immutable to agent | Injection targeting Context to circumvent Constraints; social engineering through user channels |
-| Identity | Agent | Agent (audited, `identity-mutations-recoverable`) | Yes — accumulates over time | Identity poisoning; injection causing behavioral modification; behavioral drift |
+| Identity | Agent | Agent (audited, `identity-mutations-recoverable`) | Yes — accumulates over time | [Identity poisoning](GLOSSARY.md#threats-and-attacks); injection causing behavioral modification; [behavioral drift](GLOSSARY.md#threats-and-attacks) |
 | Context | Operator in principle, Runtime in practice | Assembled per turn | No — rebuilt each turn | Direct and indirect prompt injection; constraints dropped by compaction; poisoned retrieval |
 
 **The decisive question:** does this content affect the security boundary? If it affects risk tolerance, escalation thresholds, delegation limits, tier declaration, or any parameter that determines what the agent is permitted to do — it belongs in Constraints. If it reflects personality, tone, accumulated knowledge, or stylistic identity — it belongs in Identity.
@@ -481,7 +481,7 @@ Where a runtime feeds prior reasoning back into the next turn, that trace become
 
 ### The Trust Spectrum
 
-The trust spectrum defines how much autonomous authority an agent can exercise, independent of its technical capabilities. An agent's capability envelope (what it can do) is fixed by its Workspace and Constraints. Its trust level determines how much of that envelope it exercises without human confirmation.
+The [trust spectrum](GLOSSARY.md#trust) defines how much autonomous authority an agent can exercise, independent of its technical capabilities. An agent's capability envelope (what it can do) is fixed by its Workspace and Constraints. Its trust level determines how much of that envelope it exercises without human confirmation.
 
 | Level | Name | Description |
 |---|---|---|
@@ -514,7 +514,7 @@ A principal is any entity that can hold authority, be assigned a role, and exerc
 
 **Agent principals** — Managed agents assigned governance roles. Most agent principals can review and recommend; approval authority requires explicit assignment and usually human cosign.
 
-**Function agents** — A distinct agent type with inverted permissions: high visibility across isolation boundaries, constrained capability to act. They can see across agent isolation boundaries but cannot act in other agents' workspaces. They can halt, flag, recommend, and report.
+**[Function agents](GLOSSARY.md#roles-and-authority)** — A distinct agent type with inverted permissions: high visibility across isolation boundaries, constrained capability to act. They can see across agent isolation boundaries but cannot act in other agents' workspaces. They can halt, flag, recommend, and report.
 
 ### Governance Domains
 

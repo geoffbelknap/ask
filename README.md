@@ -2,15 +2,15 @@
 
 ASK defines what must be true for AI agents to run safely at any scale. It covers the architecture, the operations, and the organization around them. It is agent-agnostic, platform-agnostic, and vendor-neutral.
 
-**The core position:** agents are principals to be governed, not tools to be configured. The agent is always assumed to be compromisable. Build enforcement outside the agent's reach.
+**The core position:** agents are [principals](GLOSSARY.md#roles-and-authority) to be governed, not tools to be configured. The agent is always assumed to be compromisable. Build enforcement outside the agent's reach.
 
 ---
 
 ## Three things that make ASK different
 
-**Architecturally concrete.** ASK doesn't say "ensure appropriate oversight." It says the mediation layer runs in a separate isolation boundary, the agent cannot reach the audit log, and constraints are a read-only mount. An engineer can build against that, and an auditor can check it.
+**Architecturally concrete.** ASK doesn't say "ensure appropriate oversight." It says the [mediation layer](GLOSSARY.md#elements-and-layers) runs in a separate isolation boundary, the agent cannot reach the [audit log](GLOSSARY.md#elements-and-layers), and constraints are a read-only mount. An engineer can build against that, and an auditor can check it.
 
-**Principle-based, not prescriptive.** The invariants say *what must be true*, not *how to build it*. Any stack that satisfies them is a valid ASK deployment.
+**Principle-based, not prescriptive.** The [invariants](GLOSSARY.md#the-framework) say *what must be true*, not *how to build it*. Any stack that satisfies them is a valid ASK deployment.
 
 **Scale-independent.** The same invariants apply whether you're running one agent or ten thousand — from a single container on a laptop to an enterprise fleet.
 
@@ -19,10 +19,10 @@ ASK defines what must be true for AI agents to run safely at any scale. It cover
 ## Reading paths
 
 **Understand the framework theory**
-→ [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, invariants, trust spectrum, policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
+→ [FRAMEWORK.md](FRAMEWORK.md) — Elements, cognitive model, invariants, [trust spectrum](GLOSSARY.md#trust), policy model, principal model, agent lifecycle, multi-agent operation, adoption model.
 
 **Understand the threats**
-→ [THREATS.md](THREATS.md) — Threat catalog: traditional risks grounded in established best practices, novel agent-specific threats, and hybrid threats. XPIA kill chain. The evolving threat landscape.
+→ [THREATS.md](THREATS.md) — Threat catalog: traditional risks grounded in established best practices, novel agent-specific threats, and hybrid threats. [XPIA](GLOSSARY.md#threats-and-attacks) [kill chain](GLOSSARY.md#threats-and-attacks). The evolving threat landscape.
 
 **Verify a deployment**
 → [VERIFICATION.md](VERIFICATION.md) — A test for every invariant, with the outcome each one must produce.
@@ -34,7 +34,7 @@ ASK defines what must be true for AI agents to run safely at any scale. It cover
 → [REGULATORY.md](REGULATORY.md) — Mapping of ASK invariants to EU AI Act, NIST AI RMF, SOC 2, HIPAA, GDPR, and SEC AI Guidance. Working document — contributions welcome.
 
 **Understand the landscape**
-→ [RELATED-WORK.md](RELATED-WORK.md) — How ASK relates to NIST standards, OWASP, MAESTRO, A2A, MCP security research, and industry findings.
+→ [RELATED-WORK.md](RELATED-WORK.md) — How ASK relates to NIST standards, OWASP, MAESTRO, A2A, [MCP](GLOSSARY.md#mcp) security research, and industry findings.
 
 ---
 
