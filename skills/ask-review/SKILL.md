@@ -37,6 +37,8 @@ invariants, four non-negotiable elements, and cognitive model requirements.
 
 For architecture design and configuration generation, use the `ask-design` skill.
 For threat model analysis and XPIA kill chain assessment, use the `ask-threats` skill.
+For a standing conformance document (`ASK-CONFORMANCE.md`), rather than a one-off review, use the
+`ask-conformance` skill — including for a target that was never built with ASK in mind.
 
 ---
 

@@ -39,6 +39,7 @@ gaps in agent security architectures.
 
 For compliance review and invariant audit, use the `ask-review` skill.
 For architecture design and configuration, use the `ask-design` skill.
+For a standing `ASK-CONFORMANCE.md` scope declaration, use the `ask-conformance` skill.
 
 ---
 
@@ -290,5 +291,6 @@ For detailed attack patterns and defensive architectures, see:
 
 For compliance review: use the `ask-review` skill.
 For architecture design: use the `ask-design` skill.
+For a conformance document: use the `ask-conformance` skill.
 
 Full framework documentation: https://github.com/geoffbelknap/ask
