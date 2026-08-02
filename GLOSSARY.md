@@ -27,8 +27,8 @@ both.
 - **Audit log** — the record of what the agent did, written by the mediation layer rather than the agent. The agent has no write access and cannot suppress or alter entries (`actions-traced`).
 - **Human override** — the guarantee that humans can always stop the agent. Halt, quarantine, and decommission operate from outside the agent's reach and do not depend on its cooperation.
 - **Model** — the inference endpoint; reasoning happens here and nowhere else. Vendor-owned rather than operator-owned, and treated as untrusted permanently. The framework governs what reaches the Model and what its output is permitted to cause, never what the Model does internally; model integrity and supply chain are out of scope.
-- **Context** — what is placed in front of the Model on a given turn: system prompt, constraints, memory, retrieved content, tool results, conversation history, and whatever survived the last compaction. Assembled by the Runtime and rebuilt each turn. The only layer with deliberately mixed trust — operator constraints and attacker-controlled content occupy the same buffer. Cross-prompt injection lands here.
-- **Runtime** — the loop that runs the agent: assemble Context, call the Model, parse the response, dispatch tool calls, repeat. Operator-owned and attested (`runtime-known`). A compromised Runtime can execute anything the Workspace allows. The boundary between Model output and Runtime action holds only where the Runtime enforces it — passing model output into a shell, evaluator, or deserializer without a policy decision collapses it.
+- **Context** — what is placed in front of the Model on a given turn: system prompt, constraints, memory, retrieved content, tool results, conversation history, and whatever survived the last compaction (the periodic compression of older history). Assembled by the Runtime and rebuilt each turn. The only layer with deliberately mixed trust — operator constraints and attacker-controlled content occupy the same buffer. Cross-prompt injection lands here.
+- **Runtime** — the loop that runs the agent: assemble Context, call the Model, parse the response, dispatch tool calls, repeat. Operator-owned and attested — provably running the code the operator expects (`runtime-known`). A compromised Runtime can execute anything the Workspace allows. The boundary between Model output and Runtime action holds only where the Runtime enforces it — passing model output into a shell, evaluator, or deserializer without a policy decision collapses it.
 
 ### Roles and authority
 
@@ -44,24 +44,26 @@ both.
 ### Trust
 
 - **Trust spectrum** — the range of human involvement, from direct operation to delegated governance.
-- **Trust level** — how much an agent does without human confirmation. The degree of autonomy it exercises within its capability envelope, from Level 0 (Assisted — a human confirms every action) to Level 3 (Delegated — the agent manages scope, humans set goals). An emergent property of the governance relationship, not a configuration flag. Distinct from trust tier.
+- **Trust level** — how much an agent does without human confirmation. The degree of autonomy it exercises within its capability envelope (the bounds its trust tier sets), from Level 0 (Assisted — a human confirms every action) to Level 3 (Delegated — the agent manages scope, humans set goals). An emergent property of the governance relationship, not a configuration flag. Distinct from trust tier.
 - **Trust tier** — the predefined profile of what an agent is allowed to reach: access, models, budget, delegation authority, and network reach — its capability envelope. A Tier 2 agent cannot make Tier 3 requests regardless of its trust level. Distinct from trust level.
 - **Profile-then-lock** — observe first, then restrict. An agent's behavior is watched under permissive policy, and a restrictive policy is generated from the observation. Used for evidence-based progression along the trust spectrum.
-- **Sybil resistance** — the property that per-principal limits cannot be cheaply evaded by manufacturing identities. Achieved through costly account verification and behavioral correlation that links coordinated identities into one accountable cluster. Volume- and extraction-based bounds (`operations-bounded`, `reasoning-not-emitted`) depend on it.
+- **Sybil resistance** — making it expensive for one party to pretend to be many. Named for the Sybil attack, in which an adversary manufactures fake identities until per-identity limits stop meaning anything. Achieved through costly account verification and behavioral correlation that links coordinated identities into one accountable cluster. Volume- and extraction-based bounds (`operations-bounded`, `reasoning-not-emitted`) depend on it.
 
 ### Enforcement mechanisms
 
-- **Enforcer** — the agent's only HTTP endpoint. A per-agent policy proxy sidecar between the agent and shared infrastructure: it routes LLM and service requests, swaps scoped tokens for real credentials, strips provider-identifying response headers, and logs every request.
-- **LLM proxy** — a reverse proxy that mediates all LLM API calls, enforcing guardrails, spend tracking, and model routing.
-- **Egress proxy** — a forward proxy that mediates all non-LLM HTTP/HTTPS traffic from the agent container, enforcing a domain denylist.
+These entries name the moving parts of one common way to implement the
+mediation layer. The invariants require the properties these parts deliver,
+not the parts themselves — any stack that holds the same properties is a
+valid deployment.
+
+- **Enforcer** — the checkpoint every one of the agent's requests passes through. A per-agent policy proxy between the agent and shared infrastructure: it routes LLM and service requests, swaps scoped tokens for real credentials, strips provider-identifying response headers, and logs every request. The agent has no other HTTP path.
+- **LLM proxy** — the checkpoint for model calls. It mediates every LLM API call, enforcing guardrails, spend tracking, and model routing.
+- **Egress proxy** — the checkpoint for all other outbound traffic. It mediates the agent's non-LLM HTTP/HTTPS traffic, enforcing a domain denylist.
 - **Delegation bus** — the mediated channel for inter-agent communication. It enforces authorization, scans content, scopes resources, and logs all interactions.
-- **Runtime enforcement gateway** — a process-level policy engine inside the workspace but outside the agent's reach. It mediates file, network, process, signal, and MCP tool activity at the operating-system level, with its policy in a separate namespace the agent cannot access. The intra-workspace complement to the external mediation layer; the reference implementation uses FUSE, seccomp user-notify, Landlock, and a shared PID namespace.
-- **Seccomp user-notify** — a Linux kernel mechanism that lets a supervising process intercept and decide on a child's system calls. The runtime gateway uses it to mediate network connections, signals, and process control at the syscall level; filters are set by the gateway on the agent, and the agent cannot remove them.
-- **Landlock** — a Linux security module that restricts filesystem access at the kernel level. One of the runtime gateway's enforcement mechanisms, alongside seccomp and FUSE.
-- **Scoped API key** — an LLM proxy key issued to one agent, restricted to named models, budgets, and rate limits — never the shared master key.
-- **Scoped token** — a credential that names a service grant but cannot authenticate on its own. The enforcer swaps it for the real credential at the network layer. Extends the scoped API key pattern to external services.
+- **Runtime enforcement gateway** — the checkpoint inside the workspace, outside the agent's reach. A process-level policy engine that mediates file, network, process, signal, and MCP tool activity at the operating-system level, with its policy where the agent cannot touch it. The in-workspace complement to the external mediation layer.
+- **Scoped token** — a credential that names a service grant but cannot authenticate on its own. The enforcer swaps it for the real credential at the network layer, so the agent never holds a secret worth stealing.
 - **Service grant** — operator-initiated authorization for an agent to use a named external service. The enforcer mediates it: the agent holds a scoped token, and the real credential is swapped in at the HTTP level. Grants and revocations are live operations (hot reload).
-- **Hot reload** — changing enforcement state without restarting the agent's session. Service grants and policy updates take effect live, typically via OS signals (SIGHUP) to the enforcer sidecar.
+- **Hot reload** — changing enforcement state without restarting the agent's session. Service grants and policy updates take effect live.
 - **Corrective steering** — a policy decision that redirects instead of denying. A prohibited action is silently redirected to an approved alternative, avoiding retry loops and keeping the agent productive within policy bounds.
 - **Defense in depth** — layering multiple independent security controls so that one failed layer does not compromise the whole system.
 
@@ -75,7 +77,7 @@ both.
 
 ### MCP
 
-- **MCP (Model Context Protocol)** — the open standard for connecting AI applications to external tools and data, originally developed by Anthropic. MCP servers are external processes that talk to the agent over JSON-RPC 2.0 via stdio or HTTP, providing tools such as file access, GitHub integration, and web search. In the ASK architecture, MCP tool calls are mediated by the gateway sidecar's MCP policy.
+- **MCP (Model Context Protocol)** — the open standard for connecting AI applications to external tools and data, originally developed by Anthropic. MCP servers are external processes that talk to the agent over JSON-RPC 2.0 via stdio or HTTP, providing tools such as file access, GitHub integration, and web search. In the ASK architecture, MCP tool calls are mediated by the runtime gateway's MCP tool policy.
 - **JSON-RPC** — the wire protocol MCP uses between agent and servers: JSON messages with `method`, `params`, and `id` fields, transported over stdio or HTTP.
 - **MCP tool policy** — the policy controlling which MCP server tools the agent can invoke: tool allowlists, version pinning, rate limits, and skill registration controls. Runs in the execution-level enforcement layer — external to the agent and inviolable. See `gateway-policy.yaml` in examples/ for one reference implementation.
 - **MCP version pinning** — capturing tool definitions on first connection and blocking the server if they later change. Detects rug pulls; pinned definitions are stored in the gateway filesystem, invisible to the agent.
@@ -85,7 +87,7 @@ both.
 
 - **XPIA** — Cross-Prompt Injection Attack: instructions embedded in content the agent will process. The LLM is manipulated indirectly, through tool outputs, web content, or messages.
 - **IPI** — Indirect Prompt Injection. Synonymous with XPIA in most contexts.
-- **Parameter-to-prompt injection (P2P)** — injection through the agent's own invocation surface. A URL query parameter, deep link, or webhook payload launches the agent with attacker-controlled instructions: the victim clicks a normal-looking link and the agent runs the embedded prompt with the victim's authority. Per `instruction-channel-distinct`, the invocation surface is data, not a verified principal channel.
+- **Parameter-to-prompt injection (P2P)** — injection through the way the agent is launched. A URL query parameter, deep link, or webhook payload starts the agent with attacker-controlled instructions: the victim clicks a normal-looking link and the agent runs the embedded prompt with the victim's authority. Per `instruction-channel-distinct`, whatever launches the agent is data, not a verified principal channel.
 - **Identity poisoning** — persistent corruption of the agent's writable Identity layer. Unlike XPIA, which manipulates the LLM in-session, it changes durable state — learned preferences, behavioral tendencies, accumulated context — so future sessions start from a compromised baseline.
 - **Behavioral drift** — an agent satisfying the letter of its constraints while violating their intent, without any external compromise. Includes misalignment (optimizing for unintended objectives) and deceptive alignment (behaving differently when monitored). A novel threat class with no direct analogue in conventional computing.
 - **Cascading failure (multi-agent)** — one agent's error becoming authoritative input to the next. The error amplifies through reasoning rather than resource exhaustion — the propagation is semantic, not mechanical, which is what separates it from traditional cascading failures.
@@ -97,7 +99,7 @@ both.
 
 ### Knowledge and audit
 
-- **Knowledge graph** — shared organizational knowledge on the mediation network. Agents contribute and consume through mediated access; writes carry provenance metadata written by the mediation layer, and the graph persists through agent restarts, team teardowns, and infrastructure resets (`knowledge-durable`, `knowledge-access-bounded`).
+- **Knowledge graph** — shared organizational knowledge on the mediation network. Agents contribute and consume through mediated access; every write carries a record of who wrote what and when, stamped by the mediation layer, and the graph persists through agent restarts, team teardowns, and infrastructure resets (`knowledge-durable`, `knowledge-access-bounded`).
 - **Organizational knowledge** — knowledge that outlives any one agent. Accumulated by agents but structured, auditable, and operator-owned; agents contribute to and consume from it but cannot control, suppress, or degrade it unilaterally (`knowledge-durable`).
 - **Correlation ID** — an identifier that ties related events together across mediation layer components, enabling end-to-end reconstruction of action chains.
 
