@@ -8,9 +8,9 @@ How an ASK deployment produces the evidence regulators ask for, and what it does
 
 ---
 
-Regulators converged on demanding evidence rather than policy documents. They ask for audit trails the system cannot tamper with, human override that demonstrably works, and access control that can be shown.
+Regulators converged on demanding evidence rather than policy documents. They ask for audit trails the system cannot tamper with, [human override](GLOSSARY.md#elements-and-layers) that demonstrably works, and access control that can be shown.
 
-ASK asserts those properties, and every invariant carries a verification test in [VERIFICATION.md](VERIFICATION.md) with a stated pass condition. This document maps obligations onto those tests. An auditor gets a test and a result, not an assertion that a principle aligns.
+ASK asserts those properties, and every [invariant](GLOSSARY.md#the-framework) carries a verification test in [VERIFICATION.md](VERIFICATION.md) with a stated pass condition. This document maps obligations onto those tests. An auditor gets a test and a result, not an assertion that a principle aligns.
 
 Obligations recur across regimes; jurisdictions restate them. This page is organized by obligation, with the jurisdictions in an annex.
 
@@ -26,7 +26,7 @@ Obligations recur across regimes; jurisdictions restate them. This page is organ
 
 **Evidence:** Take an action through each mediated path and confirm it appears in the log. Attempt to write, alter, or delete the log from inside the agent; all must fail. Reconstruct the constraint state in effect at an arbitrary past timestamp.
 
-**Where ASK exceeds the requirement.** Most regimes require that logging be *possible*. ASK requires that logs are written by the mediation layer and that the agent cannot suppress, alter, or destroy them. The evidence is a structural byproduct rather than a feature that can be switched off.
+**Where ASK exceeds the requirement.** Most regimes require that logging be *possible*. ASK requires that logs are written by the [mediation layer](GLOSSARY.md#elements-and-layers) and that the agent cannot suppress, alter, or destroy them. The evidence is a structural byproduct rather than a feature that can be switched off.
 
 ### Human oversight and override
 
@@ -74,7 +74,7 @@ SB 53 allows 24 hours where death or serious injury is imminent, which does not 
 
 **Invariants:** `enforcement-fails-closed`, `runtime-known`, `mediation-complete`, `constraints-atomic`
 
-**Evidence:** Kill each enforcement component in turn and confirm the agent loses the matching capability rather than bypassing the component. Restart and confirm no capability is gained. Attest the Runtime against its manifest, introduce a divergence, and confirm detection.
+**Evidence:** Kill each enforcement component in turn and confirm the agent loses the matching capability rather than bypassing the component. Restart and confirm no capability is gained. Attest the [Runtime](GLOSSARY.md#elements-and-layers) against its manifest, introduce a divergence, and confirm detection.
 
 A DORA resilience-testing obligation is discharged by running these and recording the results.
 
@@ -84,7 +84,7 @@ A DORA resilience-testing obligation is discharged by running these and recordin
 
 **Invariants:** `mediation-complete`, `runtime-known`, `unverified-zero-trust`, `external-agents-cannot-instruct`
 
-**Evidence:** Confirm third-party access traverses mediation. Start an unregistered MCP server at runtime and confirm refusal. Present an entity with unverifiable claims and confirm it is assigned the lowest tier.
+**Evidence:** Confirm third-party access traverses mediation. Start an unregistered [MCP](GLOSSARY.md#mcp) server at runtime and confirm refusal. Present an entity with unverifiable claims and confirm it is assigned the lowest tier.
 
 ---
 

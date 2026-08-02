@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-ASK is a documentation framework, not software. But logical flaws in the invariants, gaps in the threat model, or architectural weaknesses that would undermine a conforming implementation are security-relevant findings.
+ASK is a documentation framework, not software. But logical flaws in the [invariants](GLOSSARY.md#the-framework), gaps in the threat model, or architectural weaknesses that would undermine a conforming implementation are security-relevant findings.
 
 **To report:** Open a [GitHub issue](https://github.com/geoffbelknap/ask/issues) with the label `security`. Include:
 
