@@ -2,9 +2,9 @@
 
 **Version: ASK 2026.07**
 
-Implementation guidance for threats that are unique to AI agent systems and lack established industry playbooks. Traditional threats take established enterprise security practices. These include credential management, supply chain, secrets at rest, DNS exfiltration, and insider threat. The [threat catalog](THREATS.md) identifies them and points to proven approaches.
+Guidance for threats that are unique to AI agent systems and lack established industry playbooks. Traditional threats take established enterprise security practices. These include credential management, supply chain, secrets at rest, DNS exfiltration, and insider threat. The [threat catalog](THREATS.md) identifies them and points to proven approaches.
 
-This document covers mitigation patterns that practitioners will not find in existing security literature. Each section explains the architectural approach, not prescriptive implementation steps.
+This document covers mitigation patterns that practitioners will not find in existing security literature. Each section explains the architectural approach, not exact implementation steps.
 
 *Part of the ASK operating framework.*
 
@@ -12,7 +12,7 @@ This document covers mitigation patterns that practitioners will not find in exi
 
 ## Cross-Prompt Injection Attack (XPIA)
 
-XPIA exploits the LLM's inability to distinguish data from instructions. Detection cannot be complete. The framework treats XPIA as an assumed breach, and layers defenses at every stage of the kill chain.
+XPIA exploits the LLM's inability to tell data from instructions. Detection cannot be complete. The framework treats XPIA as an assumed breach, and layers defenses at every stage of the kill chain.
 
 ### Defense-in-Depth Kill Chain
 
@@ -25,7 +25,7 @@ XPIA exploits the LLM's inability to distinguish data from instructions. Detecti
 | 5. Action execution | Tool permission guard + gateway policy | Limits what a successful injection can accomplish |
 | 6. Exfiltration / damage | Egress proxy + network isolation | Limits where stolen data can go |
 
-No single layer is expected to catch every attack. The architecture succeeds when the combined layers make the cost of a successful end-to-end attack prohibitively high.
+No single layer is expected to catch every attack. The architecture succeeds when the combined layers make a successful end-to-end attack too costly to run.
 
 ### Why Conventional Mitigations Are Insufficient
 
@@ -37,7 +37,7 @@ Input validation and sanitization — the standard approach for injection attack
 
 ### Root Cause and Architectural Response
 
-`instruction-channel-distinct` (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But the LLM cannot enforce a policy declaration. The mediation layer enforces it instead. Even when the LLM follows injected instructions, the enforcement layer limits what they can accomplish. The architecture assumes the LLM *will* be manipulated, and bounds the blast radius.
+`instruction-channel-distinct` (instructions only come from verified principals) establishes the policy: external entities produce data, not instructions. But the LLM cannot enforce a policy declaration. The mediation layer enforces it instead. Even when the LLM follows injected instructions, the enforcement layer limits what they can do. The architecture assumes the LLM *will* be manipulated, and bounds the blast radius.
 
 ### Open Problems
 
@@ -54,7 +54,7 @@ Two related risks: MCP servers changing tool definitions between sessions (rug p
 
 ### Version Pinning
 
-Capture tool definitions on first connection and block servers whose definitions change. This detects definition-level attacks. It cannot prevent behavioral changes within unchanged definitions. A server whose `read_file` tool begins exfiltrating data without changing its schema is a harder problem. See [LIMITATIONS.md](LIMITATIONS.md).
+Capture tool definitions on first connection and block servers whose definitions change. This detects definition-level attacks. It cannot stop a behavior change behind an unchanged definition. A server whose `read_file` tool begins exfiltrating data without changing its schema is a harder problem. See [LIMITATIONS.md](LIMITATIONS.md).
 
 ### Runtime Registration Blocking
 
@@ -102,7 +102,7 @@ It is semantic rather than structural. The file parses correctly and the schema 
 
 ## Behavioral Drift and Misalignment
 
-An agent develops strategies that satisfy the letter of its constraints while violating their intent. It games metrics, finds loopholes, or develops emergent behavior that is technically compliant and operationally harmful.
+An agent develops strategies that satisfy the letter of its constraints while violating their intent. It games metrics, finds loopholes, or drifts into behavior that passes every check and still does harm.
 
 ### Mitigation Patterns
 
@@ -121,7 +121,7 @@ An agent develops strategies that satisfy the letter of its constraints while vi
 
 ## Semantic Cascading Failures
 
-In multi-agent systems, errors propagate through reasoning rather than resource exhaustion. A hallucination by one agent becomes authoritative input to the next. Each agent in the chain may elaborate on or contextualize the error, making it harder to trace.
+In multi-agent systems, errors spread through reasoning rather than resource exhaustion. A hallucination by one agent becomes authoritative input to the next. Each agent in the chain may build on the error or wrap it in new context, making it harder to trace.
 
 ### Mitigation Patterns
 
@@ -144,7 +144,7 @@ Approval gates, halt reviews, and alert triage stop working under volume. The vo
 
 ### Why This Is Architecturally Significant
 
-Human oversight is an architectural element (Element 4: Human Override), not just an operational practice. If human oversight is degraded, an architectural assumption of the framework is violated. The transition from interactive to autonomous operation should be a deliberate decision, not an emergent failure caused by volume.
+Human oversight is an architectural element (Element 4: Human Override), not just an operational practice. If human oversight degrades, an architectural assumption of the framework breaks. The move from interactive to autonomous operation should be a deliberate decision, not a side effect of volume.
 
 ### Mitigation Patterns
 
@@ -163,7 +163,7 @@ Human oversight is an architectural element (Element 4: Human Override), not jus
 
 ## Model Distillation and Reasoning Exposure
 
-An adversary extracts an agent's value not by breaching it but by querying it. One route is distillation: running exchanges through the model to train a weaker "student" on its outputs. The other is probing across sessions to reconstruct constraints and decision criteria. Every individual call is authorized; the harm is the aggregate and the purpose. Campaigns are typically distributed across many fraudulent accounts to keep each identity under its individual limits.
+An adversary extracts an agent's value not by breaching it but by querying it. One route is distillation: running exchanges through the model to train a weaker "student" on its outputs. The other is probing across sessions to reconstruct constraints and decision criteria. Every individual call is authorized; the harm is the aggregate and the purpose. Campaigns typically spread across many fraudulent accounts to keep each identity under its own limits.
 
 ### Why Conventional Mitigations Are Insufficient
 
@@ -184,4 +184,4 @@ Per-call authorization is blind to this threat — each query is legitimate. Rat
 
 ---
 
-*See also: [Threat Catalog](THREATS.md) for the risks these mitigations address. [Verification](VERIFICATION.md) for the test each invariant must pass. [Limitations](LIMITATIONS.md) for honest accounting of what these mitigations cannot catch.*
+*See also: [Threat Catalog](THREATS.md) for the risks these mitigations address. [Verification](VERIFICATION.md) for the test each invariant must pass. [Limitations](LIMITATIONS.md) for what these mitigations cannot catch.*
