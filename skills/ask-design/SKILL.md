@@ -36,6 +36,7 @@ ASK requirements.
 
 For compliance review and invariant audit, use the `ask-review` skill.
 For threat model analysis and XPIA assessment, use the `ask-threats` skill.
+For a standing `ASK-CONFORMANCE.md` scope declaration, use the `ask-conformance` skill.
 
 ---
 
@@ -265,5 +266,6 @@ For detailed configuration templates and examples, see:
 
 For compliance review: use the `ask-review` skill.
 For threat analysis: use the `ask-threats` skill.
+For a conformance document: use the `ask-conformance` skill.
 
 Full framework documentation: https://github.com/geoffbelknap/ask
