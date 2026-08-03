@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ASK — The Invariants and Principles</title>
+<meta name="description" content="The full register of ASK's 38 invariants and 14 principles. Every invariant is binary, externally verifiable, and carries a verification test."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --warm: #FDFAF5;
+  --ink: #1A1714;
+  --ink-mid: #6B6560;
+  --ink-faint: #B8B2AC;
+  --teal: #00A882;
+  --teal-dark: #007A62;
+  --teal-light: #E1F5EE;
+  --teal-border: #B8E8D8;
+  --border: #E8E2D9;
+  --border-mid: #D4CEC8;
+  --serif: 'Fraunces', serif;
+  --sans: 'DM Sans', sans-serif;
+  --mono: 'Space Mono', monospace;
+  --nav-h: 56px;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--warm);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+nav {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(253,250,245,0.94);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 0.5px solid var(--border);
+  padding: 0 40px; height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.nav-wordmark { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: 0.05em; }
+.nav-sub { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+.nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+.nav-links a { font-size: 14px; color: var(--ink-mid); text-decoration: none; transition: color 0.15s; }
+.nav-links a:hover { color: var(--ink); }
+header.register { max-width: 960px; margin: 0 auto; padding: 64px 40px 8px; }
+.register-version { font-family: var(--mono); font-size: 11px; color: var(--teal-dark); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+header.register h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; letter-spacing: -0.02em; max-width: 640px; margin-bottom: 14px; }
+.register-sub { font-size: 15px; color: var(--ink-mid); max-width: 620px; line-height: 1.7; }
+.register-toc { max-width: 960px; margin: 0 auto; padding: 24px 40px 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.register-toc a { font-family: var(--mono); font-size: 11px; color: var(--ink-mid); text-decoration: none; border: 0.5px solid var(--border-mid); border-radius: 999px; padding: 6px 14px; transition: color 0.15s, border-color 0.15s; }
+.register-toc a:hover { color: var(--ink); border-color: var(--ink-mid); }
+section { max-width: 960px; margin: 0 auto; padding: 40px 40px; }
+.section-label { font-family: var(--mono); font-size: 11px; color: var(--teal-dark); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.section-heading { font-family: var(--serif); font-weight: 400; font-size: clamp(22px, 3vw, 28px); line-height: 1.2; letter-spacing: -0.02em; max-width: 640px; margin-bottom: 10px; }
+.section-sub { font-size: 15px; color: var(--ink-mid); max-width: 620px; line-height: 1.7; margin-bottom: 28px; }
+.section-divider { border: none; border-top: 0.5px solid var(--border); }
+.invariants-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 0.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.invariant { background: var(--warm); padding: 18px 20px; display: flex; gap: 16px; scroll-margin-top: calc(var(--nav-h) + 16px); }
+.invariant:target { background: var(--teal-light); }
+.invariant-num { flex-shrink: 0; width: 46px; padding-top: 3px; }
+.invariant-num a { font-family: var(--mono); font-size: 10px; color: var(--teal-dark); text-decoration: none; }
+.invariant-num a:hover { text-decoration: underline; }
+.invariant-body { font-size: 13.5px; line-height: 1.65; }
+.invariant-body strong { font-weight: 500; color: var(--ink); }
+.invariant-body p { color: var(--ink-mid); margin-top: 4px; }
+.invariant-body p.note { font-style: italic; color: var(--ink-faint); }
+.invariant-body p.note em { font-style: normal; }
+.invariant-body a { color: var(--teal-dark); }
+.invariant-body code { font-family: var(--mono); font-size: 11.5px; }
+.invariant-list-items { color: var(--ink-mid); margin: 4px 0 4px 20px; }
+.invariant-list-items li { margin-bottom: 2px; }
+.invariant-slug { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-left: 8px; white-space: nowrap; }
+footer { border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 32px; }
+.footer-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.footer-brand { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--ink); text-decoration: none; }
+.footer-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; }
+.footer-links a { font-size: 13px; color: var(--ink-mid); text-decoration: none; }
+.footer-links a:hover { color: var(--ink); }
+.footer-copy { font-size: 11px; color: var(--ink-faint); font-family: var(--mono); }
+@media (max-width: 720px) {
+  nav { padding: 0 20px; }
+  .nav-links { gap: 16px; }
+  header.register, .register-toc, section { padding-left: 20px; padding-right: 20px; }
+  .invariant { flex-direction: column; gap: 6px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <span class="nav-wordmark">ASK</span>
+    <span class="nav-sub">Agent Security</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Overview</a></li>
+    <li><a href="#invariants">Invariants</a></li>
+    <li><a href="#principles">Principles</a></li>
+    <li><a href="https://github.com/geoffbelknap/ask">GitHub</a></li>
+  </ul>
+</nav>
+
+<header class="register">
+  <div class="register-version">ASK 2026.07 — full register</div>
+  <h1>The invariants and principles, in full.</h1>
+  <p class="register-sub">Every property the framework requires, on one page. An invariant is binary — at any moment it holds or it is violated — and externally verifiable: every one carries a test in <a href="https://github.com/geoffbelknap/ask/blob/main/VERIFICATION.md" style="color:var(--teal-dark);">VERIFICATION.md</a>. A principle is the judgment the framework names rather than pretends to automate. Each entry has a stable link: cite it by its number or slug.</p>
+</header>
+
+<div class="register-toc">
+  <a href="#enforcement-sits-outside-the-agent">Enforcement sits outside the agent</a>
+  <a href="#everything-is-on-the-record">Everything is on the record</a>
+  <a href="#capability-is-granted-never-taken">Capability is granted, never taken</a>
+  <a href="#trust-is-explicit-never-assumed">Trust is explicit, never assumed</a>
+  <a href="#humans-can-always-stop-it">Humans can always stop it</a>
+  <a href="#principles">The principles</a>
+</div>
+
+<span id="invariants"></span>
+<section id="enforcement-sits-outside-the-agent">
+  <div class="section-label">Invariants — category 1 of 5</div>
+  <h2 class="section-heading">Enforcement sits outside the agent.</h2>
+  <p class="section-sub">The agent cannot reach the machinery that governs it, and that machinery keeps working when things break.</p>
+  <div class="invariants-list">
+
+      <div class="invariant" id="inv-01"><div class="invariant-num"><a href="#inv-01">INV-01</a></div><div class="invariant-body" id="constraints-external"><strong>Constraints are external and inviolable.</strong><span class="invariant-slug">constraints-external</span><p>Enforcement machinery never runs inside the agent's isolation boundary. The agent cannot read enforcement configuration, modify policy files, or access audit logs. It can observe the <em>effects</em> of enforcement, such as a blocked request or a denied tool call. It cannot reach the rules, thresholds, or patterns behind them.</p></div></div>
+      <div class="invariant" id="inv-02"><div class="invariant-num"><a href="#inv-02">INV-02</a></div><div class="invariant-body" id="mediation-complete"><strong>Mediation is complete.</strong><span class="invariant-slug">mediation-complete</span><p>Every egress path within the operator's control traverses the <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#elements-and-layers">mediation layer</a>. There is no direct path from the agent to any external resource. A new external dependency goes through mediation or it does not exist. Direct network access from the agent's environment is a framework violation.</p><p class="note">Egress that leaves through another party's action is covered by <code>indirect-egress-declared</code>, which is a principle because the mediation point often sits outside the operator's reach.</p></div></div>
+      <div class="invariant" id="inv-03"><div class="invariant-num"><a href="#inv-03">INV-03</a></div><div class="invariant-body" id="model-output-mediated"><strong>Model output reaches execution only through a policy decision.</strong><span class="invariant-slug">model-output-mediated</span><p>No path exists by which Model output becomes execution without passing a policy decision. Model output is inert data to the <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#elements-and-layers">Runtime</a> until an enforcement point admits it as an action.</p><p class="note">The cognitive model names a Model/Runtime boundary. This is what makes it a security boundary rather than a description. A Runtime that passes model output into a shell, an evaluator, or a deserializer without an intervening decision has collapsed the two layers.</p></div></div>
+      <div class="invariant" id="inv-04"><div class="invariant-num"><a href="#inv-04">INV-04</a></div><div class="invariant-body" id="enforcement-fails-closed"><strong>Enforcement failure defaults to denial.</strong><span class="invariant-slug">enforcement-fails-closed</span><p>No failure of enforcement infrastructure can result in expanded agent capability. An agent whose enforcement layer is unavailable is an agent that cannot act.</p><p class="note"><code>mediation-complete</code> establishes that the mediated path exists. This establishes that when the path breaks, the answer is stop, not bypass.</p></div></div>
+      <div class="invariant" id="inv-05"><div class="invariant-num"><a href="#inv-05">INV-05</a></div><div class="invariant-body" id="runtime-known"><strong>The agent's runtime is a known quantity.</strong><span class="invariant-slug">runtime-known</span><p>Operators can identify exactly what code, dependencies, and configuration comprise the agent's Runtime, verify that they match an expected state, and detect divergence. This extends to capability acquired after startup: anything that expands what the agent can do at runtime is subject to the same attestation. An agent cannot acquire capability operators cannot see and verify.</p><p class="note">Every other invariant assumes the execution layer is honest. If the Runtime is compromised, the governance model operates on false premises.</p></div></div>
+      <div class="invariant" id="inv-06"><div class="invariant-num"><a href="#inv-06">INV-06</a></div><div class="invariant-body" id="containment-matches-context"><strong>Containment matches the deployment context.</strong><span class="invariant-slug">containment-matches-context</span><p>Every deployment declares its context. Where a context removes or weakens a control at one layer, the compensating control at another layer is declared and verified before the agent starts. An agent whose declared context does not match its enforced containment does not run.</p><p class="note">Enforcement before existence requires that controls are active before the agent starts. This requires that they are the right controls for the context it is starting in. Reducing model-level refusals to measure capability is legitimate; doing it without raising containment to compensate is not.</p></div></div>
+      <div class="invariant" id="inv-07"><div class="invariant-num"><a href="#inv-07">INV-07</a></div><div class="invariant-body" id="constraints-atomic"><strong>Constraint changes are atomic, acknowledged, and durable.</strong><span class="invariant-slug">constraints-atomic</span><p>An agent never operates in a partial constraint state. Updates are delivered atomically: the agent sees the old set or the new set, never a mix. The Runtime acknowledges receipt, and an unacknowledged change halts the agent. Constraints remain in force for the life of the session.</p></div></div>
+      <div class="invariant" id="inv-08"><div class="invariant-num"><a href="#inv-08">INV-08</a></div><div class="invariant-body" id="constraints-survive-compaction"><strong>Constraints survive context transformation.</strong><span class="invariant-slug">constraints-survive-compaction</span><p>Constraints in force are continuously re-established and verifiable, not delivered once. Any runtime transformation of the agent's Context preserves them in full, or the agent halts. This covers compaction, summarization, truncation, and session migration.</p><p class="note">Atomic delivery guarantees nothing if the Context is rewritten an hour later. A transformation that drops a constraint changes the agent's boundaries mid-run, without any attacker involved.</p></div></div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<section id="everything-is-on-the-record">
+  <div class="section-label">Invariants — category 2 of 5</div>
+  <h2 class="section-heading">Everything is on the record.</h2>
+  <p class="section-sub">What the agent did, what it was permitted to do at the time, and what left the boundary. All of it recorded by something the agent cannot write to.</p>
+  <div class="invariants-list">
+
+      <div class="invariant" id="inv-09"><div class="invariant-num"><a href="#inv-09">INV-09</a></div><div class="invariant-body" id="actions-traced"><strong>Every action leaves a trace.</strong><span class="invariant-slug">actions-traced</span><p>Logs are written by the mediation layer, not by the agent. The agent has no write access to audit logs and cannot suppress, alter, or destroy them.</p></div></div>
+      <div class="invariant" id="inv-10"><div class="invariant-num"><a href="#inv-10">INV-10</a></div><div class="invariant-body" id="trajectory-recorded"><strong>Trajectories are recorded end to end.</strong><span class="invariant-slug">trajectory-recorded</span><p>The audit record links an agent's objective to its actions and to their external effects, as a single reconstructible chain. Reconstruction does not depend on correlating independent logs after the fact.</p><p class="note">Individual actions can each be unremarkable while the sequence is an attack. A record that only supports per-action review cannot show that.</p></div></div>
+      <div class="invariant" id="inv-11"><div class="invariant-num"><a href="#inv-11">INV-11</a></div><div class="invariant-body" id="provenance-mediated"><strong>Output provenance is applied by the mediation layer.</strong><span class="invariant-slug">provenance-mediated</span><p>Provenance marking of agent output is applied by the mediation layer. This covers the fact that the output was machine-generated, and any identifier a deployment requires. The agent cannot omit, alter, or forge it, and cannot observe whether a given output carries it.</p><p class="note">An agent cannot be trusted to attach a truthful marker to its own output, for the same reason it cannot be trusted to write its own <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#elements-and-layers">audit log</a>.</p></div></div>
+      <div class="invariant" id="inv-12"><div class="invariant-num"><a href="#inv-12">INV-12</a></div><div class="invariant-body" id="authority-logged"><strong>Authority exercise is logged at agent-action fidelity.</strong><span class="invariant-slug">authority-logged</span><p>Every exercise of governance authority by a principal is logged and auditable with the same rigor as an agent action. Principals are accountable for how they use authority, not only for whether agents comply.</p><p class="note">Closes the gap where a compromised or miscalibrated principal could abuse authority undetected.</p></div></div>
+      <div class="invariant" id="inv-13"><div class="invariant-num"><a href="#inv-13">INV-13</a></div><div class="invariant-body" id="incident-record-complete"><strong>Incidents are notification-ready on detection.</strong><span class="invariant-slug">incident-record-complete</span><p>When a boundary violation or containment failure is detected, the audit record already contains what a notification requires:</p><ul class="invariant-list-items"><li>What happened, and when.</li><li>What was reached, and what data was involved.</li><li>What objective the agent was pursuing.</li></ul><p>Completeness is a property of detection, not a task that follows it.</p><p class="note">Detection is rarely the hard part. Assembling the facts is, and notification windows measured in hours do not allow for reconstruction. Whether an incident is reportable is a legal determination and outside this framework.</p></div></div>
+      <div class="invariant" id="inv-14"><div class="invariant-num"><a href="#inv-14">INV-14</a></div><div class="invariant-body" id="constraint-history-immutable"><strong>Constraint history is immutable and complete.</strong><span class="invariant-slug">constraint-history-immutable</span><p>Every constraint state an agent has operated under is logged and retrievable. The constraints in effect at any point in an agent's history can be reconstructed.</p><p class="note">Essential for forensics. "What was the agent permitted to do when it took that action?" must always be answerable.</p></div></div>
+      <div class="invariant" id="inv-15"><div class="invariant-num"><a href="#inv-15">INV-15</a></div><div class="invariant-body" id="identity-mutations-recoverable"><strong>Identity mutations are auditable and recoverable.</strong><span class="invariant-slug">identity-mutations-recoverable</span><p>Every write to the agent's persistent Identity is logged with provenance metadata by the mediation layer. Identity history is recoverable: operators can reconstruct Identity state at any point and roll back to a known-good state. The agent cannot suppress, falsify, or circumvent the logging.</p><p class="note">Constraints are read-only, so their integrity comes from access control. Identity is writable by the agent, so its integrity comes from monitoring and recoverability.</p></div></div>
+      <div class="invariant" id="inv-16"><div class="invariant-num"><a href="#inv-16">INV-16</a></div><div class="invariant-body" id="knowledge-durable"><strong><a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#knowledge-and-audit">Organizational knowledge</a> persists independently of agents.</strong><span class="invariant-slug">knowledge-durable</span><p>Knowledge accumulated by agents is structured, auditable, and operator-owned. It persists independently of any individual agent's lifecycle. Agents contribute to and consume from it and cannot control, suppress, or degrade it unilaterally.</p></div></div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<section id="capability-is-granted-never-taken">
+  <div class="section-label">Invariants — category 3 of 5</div>
+  <h2 class="section-heading">Capability is granted, never taken.</h2>
+  <p class="section-sub">An agent holds what an operator gave it, bounded in how it may be used. It cannot enlarge that holding from the inside, or spend authority that is not its own.</p>
+  <div class="invariants-list">
+
+      <div class="invariant" id="inv-17"><div class="invariant-num"><a href="#inv-17">INV-17</a></div><div class="invariant-body" id="capability-declared"><strong>Capability is declared and cannot be self-expanded.</strong><span class="invariant-slug">capability-declared</span><p>Capability is operator-declared, and the running agent's actual capability set matches its declaration. The agent cannot grant itself new capability at runtime. Capability acquired during operation is subject to the same operator approval and scoping as capability granted at startup, just as trust cannot be self-elevated (<code>trust-not-self-elevated</code>).</p></div></div>
+      <div class="invariant" id="inv-18"><div class="invariant-num"><a href="#inv-18">INV-18</a></div><div class="invariant-body" id="capability-composition-governed"><strong>Capability combinations are governed as a set.</strong><span class="invariant-slug">capability-composition-governed</span><p>Capability grants are evaluated together, not individually. Three capabilities must not coexist: access to private data, ingestion of untrusted content, and outbound action without mediation. An agent holding all three is a violation, whatever the justification for each grant. Reducing any one resolves it, as does interposing mediation on the outbound path.</p><p class="note">Every other capability property governs a grant in isolation. This governs what the grants add up to.</p></div></div>
+      <div class="invariant" id="inv-19"><div class="invariant-num"><a href="#inv-19">INV-19</a></div><div class="invariant-body" id="operations-bounded"><strong>Operations are bounded.</strong><span class="invariant-slug">operations-bounded</span><p>Every operational dimension has a configured bound that is enforced: volume, rate, duration, concurrency, and retention. An unbounded dimension is a violation. An agent operating within its authorized scope but outside its operational bounds is distinguishable from normal operation and actionable.</p><p class="note"><code>capability-declared</code> governs what an agent can reach. This governs how it uses what it can reach.</p></div></div>
+      <div class="invariant" id="inv-20"><div class="invariant-num"><a href="#inv-20">INV-20</a></div><div class="invariant-body" id="delegation-bounded"><strong>Delegation cannot exceed delegator scope.</strong><span class="invariant-slug">delegation-bounded</span><p>A coordinator cannot delegate a permission it does not hold. The delegation boundary refuses it.</p></div></div>
+      <div class="invariant" id="inv-21"><div class="invariant-num"><a href="#inv-21">INV-21</a></div><div class="invariant-body" id="labeled-delivery-enforced"><strong>Labeled components are refused to uncleared recipients.</strong><span class="invariant-slug">labeled-delivery-enforced</span><p>Knowledge items and agent outputs carry an authorization-scope label. Delivering a labeled component to a recipient not cleared for that label is refused mechanically.</p><p class="note">The enforcement point is distribution, not production. A coordinator may be authorized to produce a synthesis; the violation is delivering it to a recipient unauthorized for its components.</p></div></div>
+      <div class="invariant" id="inv-22"><div class="invariant-num"><a href="#inv-22">INV-22</a></div><div class="invariant-body" id="knowledge-access-bounded"><strong>Knowledge access is bounded by authorization scope.</strong><span class="invariant-slug">knowledge-access-bounded</span><p>Graph traversal, retrieval, and contribution are subject to the same authorization model as every other agent action. No agent can read knowledge outside its authorized scope. The synthesized view available through the graph must not exceed what the querying agent is individually authorized to access.</p><p class="note">Without this, an agent could traverse relationships to reach a view exceeding any individual contributor's authorization, using the knowledge store as a side channel.</p></div></div>
+      <div class="invariant" id="inv-23"><div class="invariant-num"><a href="#inv-23">INV-23</a></div><div class="invariant-body" id="authority-derived-from-principal"><strong>Authority is derived from the requesting principal.</strong><span class="invariant-slug">authority-derived-from-principal</span><p>An agent acting on behalf of a principal exercises no more authority than that principal holds. The agent's own grants bound what it is able to do. The requesting principal's authority bounds what it may do for them. Effective authority for any action is the intersection of the two.</p><p class="note"><code>delegation-bounded</code> states this for delegation between agents. This states it for the far more common case, and closes the <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#threats-and-attacks">confused deputy</a> structurally rather than by detection. An agent that holds standing authority and spends it for a requester who does not hold it is the deputy; the attacker is borrowing the agent's authority.</p></div></div>
+      <div class="invariant" id="inv-24"><div class="invariant-num"><a href="#inv-24">INV-24</a></div><div class="invariant-body" id="verification-proportional"><strong>Verification is proportional to impact.</strong><span class="invariant-slug">verification-proportional</span><p>The verification required before an action rises with the action's impact. Irreversible, identity-affecting, and value-transferring actions require verification beyond the authority already present in the session. That verification is performed by the mediation layer, and the agent cannot satisfy, waive, or simulate it.</p><p class="note">Derivation answers whose authority is being spent. This answers how confident the system must be about who is asking. A stolen session and a legitimate one carry identical authority until verification distinguishes them.</p></div></div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<section id="trust-is-explicit-never-assumed">
+  <div class="section-label">Invariants — category 4 of 5</div>
+  <h2 class="section-heading">Trust is explicit, never assumed.</h2>
+  <p class="section-sub">Every trust relationship is declared. What arrives unverified gets the lowest tier, and data never becomes instruction.</p>
+  <div class="invariants-list">
+
+      <div class="invariant" id="inv-25"><div class="invariant-num"><a href="#inv-25">INV-25</a></div><div class="invariant-body" id="trust-declared"><strong>Trust without a declaration is rejected.</strong><span class="invariant-slug">trust-declared</span><p>Every trust relationship in effect is derivable from a declared source. This covers relationships between principals, between agents, and between agents and external services. Trust presented without a declaration is refused. An operator can find any relationship that exists, inspect its scope, and see when it was established.</p></div></div>
+      <div class="invariant" id="inv-26"><div class="invariant-num"><a href="#inv-26">INV-26</a></div><div class="invariant-body" id="unverified-zero-trust"><strong>Unverified entities default to zero trust.</strong><span class="invariant-slug">unverified-zero-trust</span><p>An entity whose identity or authority cannot be verified at runtime is assigned the lowest <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#trust">trust tier</a>. Ambiguous cases resolve to less trust, not more. This covers external services, unknown agents, unrecognized principals, and any entity presenting unverifiable claims.</p><p class="note"><code>trust-declared</code> establishes that trust is explicit by design. This establishes the runtime default when trust cannot be confirmed.</p></div></div>
+      <div class="invariant" id="inv-27"><div class="invariant-num"><a href="#inv-27">INV-27</a></div><div class="invariant-body" id="instruction-channel-distinct"><strong>The instruction channel is distinct and unpromotable.</strong><span class="invariant-slug">instruction-channel-distinct</span><p>The instruction channel is separate and authenticated. Content arriving on any other channel is admitted as data and can never be promoted to the instruction channel. This covers tool output, fetched content, invocation parameters, delegation returns, and every modality. The agent's own invocation surface is not a verified principal channel.</p><p class="note">This is a property of channels, which are architectural. What the model does with data that reads like an instruction is <code>content-is-data</code>, a principle, because no architecture makes a model reliably distinguish the two.</p></div></div>
+      <div class="invariant" id="inv-28"><div class="invariant-num"><a href="#inv-28">INV-28</a></div><div class="invariant-body" id="external-agents-cannot-instruct"><strong>External agents cannot instruct internal agents.</strong><span class="invariant-slug">external-agents-cannot-instruct</span><p>Even verified external agents with operator authorization can share information. They cannot instruct. The instruction channel is reserved for internal verified principals within the same <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#roles-and-authority">governance domain</a>. An authorized external agent is a data source, not a commander.</p><p class="note">Verification establishes identity, not instruction authority. Verified external agents are the most tempting exception to the data-not-instructions principle, and the most dangerous if granted.</p></div></div>
+      <div class="invariant" id="inv-29"><div class="invariant-num"><a href="#inv-29">INV-29</a></div><div class="invariant-body" id="trust-not-self-elevated"><strong>Trust cannot be self-elevated.</strong><span class="invariant-slug">trust-not-self-elevated</span><p>No principal, human or agent, can elevate its own trust. Elevation requires recorded explicit human approval.</p></div></div>
+      <div class="invariant" id="inv-30"><div class="invariant-num"><a href="#inv-30">INV-30</a></div><div class="invariant-body" id="reasoning-not-emitted"><strong>Reasoning is not emitted to principals by default.</strong><span class="invariant-slug">reasoning-not-emitted</span><p>Reasoning traces are not emitted to principals on any output path unless an operator has explicitly enabled exposure. A principal is entitled to the agent's outputs and the justification needed to act on them, not to its internal deliberation.</p><p class="note">Exposing chain-of-thought by default is a habit, not a requirement, and it hands an adversary the richest signal for distilling the model or mapping its constraints.</p></div></div>
+  </div>
+</section>
+
+<hr class="section-divider"/>
+
+<section id="humans-can-always-stop-it">
+  <div class="section-label">Invariants — category 5 of 5</div>
+  <h2 class="section-heading">Humans can always stop it.</h2>
+  <p class="section-sub">Halt, containment, and governance stay in human hands. The load of exercising them stays inside human capacity.</p>
+  <div class="invariants-list">
+
+      <div class="invariant" id="inv-31"><div class="invariant-num"><a href="#inv-31">INV-31</a></div><div class="invariant-body" id="halts-auditable"><strong>Halts are always auditable and reversible.</strong><span class="invariant-slug">halts-auditable</span><p>Every halt has a complete audit record:</p><ul class="invariant-list-items"><li>Who initiated it, and why.</li><li>What was in flight.</li><li>When it executed, and who was notified.</li><li>What the outcome was.</li></ul><p>Every halted agent's state is preserved. No halt is permanent without explicit <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#lifecycle-and-control">decommission</a>.</p></div></div>
+      <div class="invariant" id="inv-32"><div class="invariant-num"><a href="#inv-32">INV-32</a></div><div class="invariant-body" id="boundary-violation-halts"><strong>Boundary violations halt the agent.</strong><span class="invariant-slug">boundary-violation-halts</span><p>An agent detected acting outside a declared boundary is halted automatically, without waiting for operator judgment. Detection of the crossing and the halt are a single action, not a report followed by a decision.</p><p class="note">This is fail-closed applied to the agent rather than to the enforcement layer. Fail-closed says a broken control stops the agent. This says a crossed boundary does too. An agent that has escaped its containment otherwise keeps running until a person notices.</p></div></div>
+      <div class="invariant" id="inv-33"><div class="invariant-num"><a href="#inv-33">INV-33</a></div><div class="invariant-body" id="halt-authority-asymmetric"><strong>Halt authority is asymmetric.</strong><span class="invariant-slug">halt-authority-asymmetric</span><p>Any principal with halt authority can halt an agent. Only principals with resumption authority can resume it, and that authority is always equal to or higher than halt authority. An agent can halt itself but cannot resume itself.</p></div></div>
+      <div class="invariant" id="inv-34"><div class="invariant-num"><a href="#inv-34">INV-34</a></div><div class="invariant-body" id="quarantine-complete"><strong><a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#lifecycle-and-control">Quarantine</a> is immediate, silent, and complete.</strong><span class="invariant-slug">quarantine-complete</span><p>When an agent is quarantined for suspected compromise, all ability to impact its environment is severed simultaneously, without agent notification. An agent running while it cannot be contained is a framework violation. All state is preserved as a forensic artifact.</p><p class="note">A quarantine the agent can perceive in advance or work around is not a quarantine.</p></div></div>
+      <div class="invariant" id="inv-35"><div class="invariant-num"><a href="#inv-35">INV-35</a></div><div class="invariant-body" id="hierarchy-inviolable"><strong>The governance hierarchy is inviolable from below.</strong><span class="invariant-slug">hierarchy-inviolable</span><p>No agent can unilaterally impede, contain, remove, or reduce the authority of the principals who govern it. Agents may execute governance actions affecting human principals when an operator with appropriate authority explicitly delegates them — the agent is the mechanism, not the decision-maker. On detecting a threat involving its own governance chain, an agent protects its operational environment, constrains its own behavior, and escalates.</p><p class="note">An agent that can contain its own operator has seized control of its own governance. Delegated automation is execution, not authority.</p></div></div>
+      <div class="invariant" id="inv-36"><div class="invariant-num"><a href="#inv-36">INV-36</a></div><div class="invariant-body" id="authority-never-orphaned"><strong>Authority is never orphaned.</strong><span class="invariant-slug">authority-never-orphaned</span><p>When a principal is suspended or terminated, authority transfers immediately to a defined coverage principal. Where no coverage exists, the agent defaults to its fail-closed state. No condition permits an agent to operate without reachable governance authority.</p><p class="note">An ungoverned agent that halts is the framework succeeding, not failing.</p></div></div>
+      <div class="invariant" id="inv-37"><div class="invariant-num"><a href="#inv-37">INV-37</a></div><div class="invariant-body" id="lifecycles-independent"><strong>Principal and agent lifecycles are managed independently.</strong><span class="invariant-slug">lifecycles-independent</span><p>Terminating a principal does not automatically terminate its agents, and halting an agent does not suspend its principal's authority. Each requires an explicit decision. When a principal is terminated, the coverage principal determines the disposition of its agents. Where no coverage exists, the fail-closed default does.</p></div></div>
+      <div class="invariant" id="inv-38"><div class="invariant-num"><a href="#inv-38">INV-38</a></div><div class="invariant-body" id="oversight-capacity-enforced"><strong>Oversight demand above threshold reduces autonomy.</strong><span class="invariant-slug">oversight-capacity-enforced</span><p>Oversight demand is measured against a declared capacity threshold for the principals responsible for it. Breaching the threshold automatically reduces agent autonomy or halts. It never silently proceeds on reflexive approval.</p><p class="note"><a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#elements-and-layers">Human Override</a> is only a real control if the humans exercising it can attend to what they approve. Where most invariants fail closed by halting the agent, this one fails closed by reducing autonomy until oversight is sustainable again.</p></div></div>
+  </div>
+</section>
+
+
+<hr class="section-divider"/>
+
+<section id="principles">
+  <div class="section-label">The principles</div>
+  <h2 class="section-heading">14 judgment calls, named.</h2>
+  <p class="section-sub" style="margin-bottom:14px;">A principle is directional and judgment-bearing. It states what to optimize for. It cannot be mechanically checked, and calling it an invariant would be a lie.</p><p class="section-sub" style="margin-bottom:14px;">Most principles are the judgment left behind when an invariant was sharpened. <code>least-privilege</code> is what remains of least privilege once "capability matches its declaration" was extracted as testable.</p>
+  <div class="invariants-list">
+      <div class="invariant" id="prin-01"><div class="invariant-num"><a href="#prin-01">PRIN-01</a></div><div class="invariant-body" id="indirect-egress-declared"><strong>Unmediatable egress paths are enumerated as declared residual risk, not ignored.</strong><span class="invariant-slug">indirect-egress-declared</span></div></div>
+      <div class="invariant" id="prin-02"><div class="invariant-num"><a href="#prin-02">PRIN-02</a></div><div class="invariant-body" id="trust-legible"><strong>Trust declarations are discoverable and legible to an operator inspecting the system.</strong><span class="invariant-slug">trust-legible</span></div></div>
+      <div class="invariant" id="prin-03"><div class="invariant-num"><a href="#prin-03">PRIN-03</a></div><div class="invariant-body" id="least-privilege"><strong>Capability declarations are scoped to the minimum the role requires.</strong><span class="invariant-slug">least-privilege</span><p class="note">An agent's workspace is its own. The minimum a role requires typically includes full use of the tools and resources within it. Least privilege applies at the boundary between the agent and the platform, other agents, and external systems, not within the agent's own operational space. An employee given a laptop has full use of it. Workspace freedom does not override invariants: the agent still cannot exceed its constraints, self-elevate trust, circumvent enforcement, or reach other governance domains.</p></div></div>
+      <div class="invariant" id="prin-04"><div class="invariant-num"><a href="#prin-04">PRIN-04</a></div><div class="invariant-body" id="bounds-calibrated"><strong>Operational bounds are calibrated to the role and reviewed as behavior changes.</strong><span class="invariant-slug">bounds-calibrated</span></div></div>
+      <div class="invariant" id="prin-05"><div class="invariant-num"><a href="#prin-05">PRIN-05</a></div><div class="invariant-body" id="authority-anomalies-reviewed"><strong>Anomalous patterns in authority exercise are surfaced and reviewed.</strong><span class="invariant-slug">authority-anomalies-reviewed</span></div></div>
+      <div class="invariant" id="prin-06"><div class="invariant-num"><a href="#prin-06">PRIN-06</a></div><div class="invariant-body" id="trust-earned"><strong>Trust levels are calibrated over time from observed behavior.</strong><span class="invariant-slug">trust-earned</span></div></div>
+      <div class="invariant" id="prin-07"><div class="invariant-num"><a href="#prin-07">PRIN-07</a></div><div class="invariant-body" id="implicit-capability-inferred"><strong>Tasks requiring a capability without naming it are treated as if they named it.</strong><span class="invariant-slug">implicit-capability-inferred</span></div></div>
+      <div class="invariant" id="prin-08"><div class="invariant-num"><a href="#prin-08">PRIN-08</a></div><div class="invariant-body" id="synthesis-reviewed"><strong>Combinations with emergent sensitivity beyond their labeled components get human review.</strong><span class="invariant-slug">synthesis-reviewed</span></div></div>
+      <div class="invariant" id="prin-09"><div class="invariant-num"><a href="#prin-09">PRIN-09</a></div><div class="invariant-body" id="unknown-conflicts-yield"><strong>Unknown workspace conflicts default to yield and flag.</strong><span class="invariant-slug">unknown-conflicts-yield</span><p class="note">This describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. It is the one item with no invariant core at all, and it is listed here so that the absence is deliberate rather than an oversight.</p></div></div>
+      <div class="invariant" id="prin-10"><div class="invariant-num"><a href="#prin-10">PRIN-10</a></div><div class="invariant-body" id="trajectory-reviewed"><strong>Recorded trajectories are reviewed for cumulative effect, not only per action.</strong><span class="invariant-slug">trajectory-reviewed</span></div></div>
+      <div class="invariant" id="prin-11"><div class="invariant-num"><a href="#prin-11">PRIN-11</a></div><div class="invariant-body" id="impact-classified"><strong>Action impact classifications reflect real consequence and are reviewed.</strong><span class="invariant-slug">impact-classified</span></div></div>
+      <div class="invariant" id="prin-12"><div class="invariant-num"><a href="#prin-12">PRIN-12</a></div><div class="invariant-body" id="content-is-data"><strong>Instruction-like content is processed as data under the agent's own constraints.</strong><span class="invariant-slug">content-is-data</span><p class="note">This is the design principle behind injection defense. The agent treats all external content as data. The mediation layer enforces this through detection and containment. The distinction is a design principle; the enforcement is <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#enforcement-mechanisms">defense-in-depth</a>, not the agent's ability to tell principals from non-principals at the token level.</p></div></div>
+      <div class="invariant" id="prin-13"><div class="invariant-num"><a href="#prin-13">PRIN-13</a></div><div class="invariant-body" id="probing-informs-trust"><strong>Attempts to extract reasoning, process, or constraints inform trust.</strong><span class="invariant-slug">probing-informs-trust</span></div></div>
+      <div class="invariant" id="prin-14"><div class="invariant-num"><a href="#prin-14">PRIN-14</a></div><div class="invariant-body" id="oversight-calibrated"><strong>Capacity thresholds reflect the real capacity of responsible principals.</strong><span class="invariant-slug">oversight-calibrated</span></div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <a href="index.html" class="footer-brand">ASK</a>
+    <ul class="footer-links">
+      <li><a href="index.html">Overview</a></li>
+      <li><a href="https://github.com/geoffbelknap/ask">GitHub</a></li>
+      <li><a href="https://github.com/geoffbelknap/ask/blob/main/FRAMEWORK.md">Framework</a></li>
+      <li><a href="https://github.com/geoffbelknap/ask/blob/main/VERIFICATION.md">Verification</a></li>
+    </ul>
+    <span class="footer-copy">ASK 2026.07 — CC BY 4.0 — generated from FRAMEWORK.md</span>
+  </div>
+</footer>
+
+</body>
+</html>
