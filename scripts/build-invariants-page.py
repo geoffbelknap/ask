@@ -361,17 +361,21 @@ openTarget();
 """
 
 
-def render_test(test, slug):
+def render_test(test, slug, indent="        "):
+    """One line per element so the page source stays grep- and sed-friendly."""
     if not test or not test["steps"]:
         return ""
-    steps = "".join(f"<li>{md_inline(s)}</li>" for s in test["steps"])
-    paras = "".join(f"<p>{md_inline(p)}</p>" for p in test["paras"])
-    return (
-        f'<details class="invariant-test" id="test-{slug}">'
-        f'<summary>Verification test<a class="test-link" href="#test-{slug}" '
-        f'title="Link to this test">#test-{slug}</a></summary>'
-        f"<ul>{steps}</ul>{paras}</details>"
-    )
+    i = indent
+    lines = [
+        f'{i}<details class="invariant-test" id="test-{slug}">',
+        f'{i}  <summary>Verification test<a class="test-link" href="#test-{slug}" title="Link to this test">#test-{slug}</a></summary>',
+        f"{i}  <ul>",
+    ]
+    lines += [f"{i}    <li>{md_inline(s)}</li>" for s in test["steps"]]
+    lines.append(f"{i}  </ul>")
+    lines += [f"{i}  <p>{md_inline(p)}</p>" for p in test["paras"]]
+    lines.append(f"{i}</details>")
+    return "\n" + "\n".join(lines)
 
 
 def render(version, categories, principles, prin_intro_paras):
@@ -384,15 +388,18 @@ def render(version, categories, principles, prin_intro_paras):
         )
         entries = []
         for e in cat["entries"]:
-            paras = "".join(md_block(p) for p in e["body"])
-            notes = "".join(f'<p class="note">{md_inline(p)}</p>' for p in e["notes"])
+            paras = "\n".join(f"        {md_block(p)}" for p in e["body"])
+            notes = "\n".join(f'        <p class="note">{md_inline(p)}</p>' for p in e["notes"])
             entries.append(
-                f'      <div class="invariant" id="inv-{e["num"]}">'
-                f'<div class="invariant-num"><a href="#inv-{e["num"]}">INV-{e["num"]}</a></div>'
-                f'<div class="invariant-body" id="{e["slug"]}">'
-                f'<strong>{md_inline(e["statement"])}.</strong>'
-                f'<a class="invariant-slug" href="#{e["slug"]}" title="Link to this invariant">{e["slug"]}</a>'
-                f"{paras}{notes}{render_test(e['test'], e['slug'])}</div></div>"
+                f'    <div class="invariant" id="inv-{e["num"]}">\n'
+                f'      <div class="invariant-num"><a href="#inv-{e["num"]}">INV-{e["num"]}</a></div>\n'
+                f'      <div class="invariant-body" id="{e["slug"]}">\n'
+                f'        <strong>{md_inline(e["statement"])}.</strong>\n'
+                f'        <a class="invariant-slug" href="#{e["slug"]}" title="Link to this invariant">{e["slug"]}</a>\n'
+                + paras
+                + (f"\n{notes}" if notes else "")
+                + render_test(e["test"], e["slug"])
+                + "\n      </div>\n    </div>"
             )
         divider = '<span id="invariants"></span>\n' if i == 0 else '<hr class="section-divider"/>\n\n'
         sections.append(
@@ -411,20 +418,22 @@ def render(version, categories, principles, prin_intro_paras):
         note = f'<p class="note">{md_inline(p["note"])}</p>' if p["note"] else ""
         no_test = ""
         if p["test"] and p["test"].get("no_test"):
-            body = "".join(f"<p>{md_inline(t)}</p>" for t in p["test"]["paras"])
+            i = "        "
+            body = "\n".join(f"{i}  <p>{md_inline(t)}</p>" for t in p["test"]["paras"])
             no_test = (
-                f'<details class="invariant-test" id="test-{p["slug"]}">'
-                f'<summary>No test — why<a class="test-link" href="#test-{p["slug"]}" '
-                f'title="Link to this entry">#test-{p["slug"]}</a></summary>'
-                f"{body}</details>"
+                f'\n{i}<details class="invariant-test" id="test-{p["slug"]}">\n'
+                f'{i}  <summary>No test — why<a class="test-link" href="#test-{p["slug"]}" title="Link to this entry">#test-{p["slug"]}</a></summary>\n'
+                f"{body}\n{i}</details>"
             )
         prin_rows.append(
-            f'      <div class="invariant" id="prin-{p["num"]}">'
-            f'<div class="invariant-num"><a href="#prin-{p["num"]}">PRIN-{p["num"]}</a></div>'
-            f'<div class="invariant-body" id="{p["slug"]}">'
-            f'<strong>{md_inline(p["statement"])}.</strong>'
-            f'<a class="invariant-slug" href="#{p["slug"]}" title="Link to this principle">{p["slug"]}</a>'
-            f'{note}{no_test}</div></div>'
+            f'    <div class="invariant" id="prin-{p["num"]}">\n'
+            f'      <div class="invariant-num"><a href="#prin-{p["num"]}">PRIN-{p["num"]}</a></div>\n'
+            f'      <div class="invariant-body" id="{p["slug"]}">\n'
+            f'        <strong>{md_inline(p["statement"])}.</strong>\n'
+            f'        <a class="invariant-slug" href="#{p["slug"]}" title="Link to this principle">{p["slug"]}</a>'
+            + (f"\n        {note}" if note else "")
+            + no_test
+            + "\n      </div>\n    </div>"
         )
     prin_intro = "".join(
         f'<p class="section-sub" style="margin-bottom:14px;">{md_inline(p)}</p>'
