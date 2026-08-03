@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FRAMEWORK = ROOT / "FRAMEWORK.md"
+VERIFICATION = ROOT / "VERIFICATION.md"
 OUTPUT = ROOT / "invariants.html"
 REPO_BLOB = "https://github.com/geoffbelknap/ask/blob/main/"
 
@@ -51,6 +52,25 @@ def md_block(para):
             lead.append(line)
     lead_html = f"<p>{md_inline(' '.join(lead))}</p>" if lead else ""
     return f'{lead_html}<ul class="invariant-list-items">{"".join(out)}</ul>'
+
+
+def parse_verification(src):
+    """Map slug -> test content (bullet steps and trailing paragraphs)."""
+    tests = {}
+    for m in re.finditer(
+        r"^\*\*.*?\.\*\* `([a-z0-9-]+)`( — \*\*No test\.\*\*)?\n(.*?)(?=^\*\*.*?\*\* `|\n### |\Z)",
+        src,
+        re.M | re.S,
+    ):
+        slug, no_test, body = m.group(1), m.group(2), m.group(3)
+        steps = [line[2:].strip() for line in body.splitlines() if line.startswith("- ")]
+        paras = [
+            p.strip().replace("\n", " ")
+            for p in body.split("\n\n")
+            if p.strip() and not p.strip().startswith("- ") and p.strip() != "---"
+        ]
+        tests[slug] = {"steps": steps, "paras": paras, "no_test": bool(no_test)}
+    return tests
 
 
 def parse_framework(src):
@@ -121,6 +141,16 @@ def parse_framework(src):
         )
     if len(principles) != 14:
         sys.exit(f"build-invariants-page: expected 14 principles, parsed {len(principles)}")
+
+    tests = parse_verification(VERIFICATION.read_text())
+    missing = [s for s in got_inv if s not in tests or not tests[s]["steps"]]
+    if missing:
+        sys.exit(f"build-invariants-page: invariants with no test in VERIFICATION.md: {missing}")
+    for c in categories:
+        for e in c["entries"]:
+            e["test"] = tests[e["slug"]]
+    for p in principles:
+        p["test"] = tests.get(p["slug"])
 
     return version, categories, principles, prin_intro
 
@@ -203,6 +233,18 @@ section {{ max-width: 960px; margin: 0 auto; padding: 40px 40px; }}
 .invariant-body code {{ font-family: var(--mono); font-size: 11.5px; }}
 .invariant-list-items {{ color: var(--ink-mid); margin: 4px 0 4px 20px; }}
 .invariant-list-items li {{ margin-bottom: 2px; }}
+details.invariant-test {{ margin-top: 10px; border-top: 0.5px dashed var(--border); padding-top: 8px; }}
+details.invariant-test summary {{ font-family: var(--mono); font-size: 10.5px; color: var(--teal-dark); letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; user-select: none; }}
+details.invariant-test summary:hover {{ color: var(--teal); }}
+details.invariant-test[open] summary {{ margin-bottom: 6px; }}
+details.invariant-test ul {{ color: var(--ink-mid); margin: 0 0 4px 20px; }}
+details.invariant-test li {{ margin-bottom: 3px; }}
+details.invariant-test p {{ color: var(--ink-mid); margin-top: 4px; }}
+.scroll-toc {{ position: fixed; left: 28px; top: 90px; z-index: 100; list-style: none; display: flex; flex-direction: column; }}
+.scroll-toc li a {{ display: block; font-family: var(--sans); font-size: 12px; color: var(--ink-faint); text-decoration: none; padding: 6px 12px; border-left: 2px solid var(--border); transition: color 0.2s, border-color 0.2s; white-space: nowrap; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }}
+.scroll-toc li a:hover {{ color: var(--ink-mid); border-left-color: var(--ink-faint); }}
+.scroll-toc li a.active {{ color: var(--ink); border-left-color: var(--teal); font-weight: 500; }}
+@media (max-width: 1420px) {{ .scroll-toc {{ display: none; }} }}
 .invariant-slug {{ font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-left: 8px; white-space: nowrap; }}
 footer {{ border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 32px; }}
 .footer-inner {{ max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }}
@@ -237,8 +279,12 @@ footer {{ border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top:
 <header class="register">
   <div class="register-version">{version} — full register</div>
   <h1>The invariants and principles, in full.</h1>
-  <p class="register-sub">Every property the framework requires, on one page. An invariant is binary — at any moment it holds or it is violated — and externally verifiable: every one carries a test in <a href="{blob}VERIFICATION.md" style="color:var(--teal-dark);">VERIFICATION.md</a>. A principle is the judgment the framework names rather than pretends to automate. Each entry has a stable link: cite it by its number or slug.</p>
+  <p class="register-sub">Every property the framework requires, on one page. An invariant is binary — at any moment it holds or it is violated — and externally verifiable: every entry carries its verification test, from <a href="{blob}VERIFICATION.md" style="color:var(--teal-dark);">VERIFICATION.md</a>, ready to expand. A principle is the judgment the framework names rather than pretends to automate. Each entry has a stable link: cite it by its number or slug.</p>
 </header>
+
+<ul class="scroll-toc" id="scrollToc">
+{side_toc}
+</ul>
 
 <div class="register-toc">
 {toc}
@@ -270,16 +316,54 @@ footer {{ border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top:
   </div>
 </footer>
 
+<script>
+const tocLinks = document.querySelectorAll('.scroll-toc a');
+const tocSections = Array.from(tocLinks).map(a => ({{
+  link: a,
+  section: document.getElementById(a.dataset.section)
+}})).filter(s => s.section);
+
+function updateToc() {{
+  const scrollY = window.scrollY + window.innerHeight / 3;
+  let current = tocSections[0];
+  for (const s of tocSections) {{
+    if (s.section.offsetTop <= scrollY) current = s;
+  }}
+  tocLinks.forEach(a => a.classList.remove('active'));
+  if (current) current.link.classList.add('active');
+}}
+
+window.addEventListener('scroll', updateToc, {{ passive: true }});
+updateToc();
+
+// A link to an entry inside a collapsed test should still land visibly:
+// entries themselves are never hidden, so only highlight handling is needed.
+</script>
+
 </body>
 </html>
 """
 
 
+def render_test(test):
+    if not test or not test["steps"]:
+        return ""
+    steps = "".join(f"<li>{md_inline(s)}</li>" for s in test["steps"])
+    paras = "".join(f"<p>{md_inline(p)}</p>" for p in test["paras"])
+    return (
+        '<details class="invariant-test"><summary>Verification test</summary>'
+        f"<ul>{steps}</ul>{paras}</details>"
+    )
+
+
 def render(version, categories, principles, prin_intro_paras):
-    toc_items, sections = [], []
+    toc_items, side_toc_items, sections = [], [], []
     for i, cat in enumerate(categories):
         cat_id = re.sub(r"[^a-z0-9]+", "-", cat["title"].lower()).strip("-")
         toc_items.append(f'  <a href="#{cat_id}">{html.escape(cat["title"])}</a>')
+        side_toc_items.append(
+            f'  <li><a href="#{cat_id}" data-section="{cat_id}">{html.escape(cat["title"])}</a></li>'
+        )
         entries = []
         for e in cat["entries"]:
             paras = "".join(md_block(p) for p in e["body"])
@@ -290,7 +374,7 @@ def render(version, categories, principles, prin_intro_paras):
                 f'<div class="invariant-body" id="{e["slug"]}">'
                 f'<strong>{md_inline(e["statement"])}.</strong>'
                 f'<span class="invariant-slug">{e["slug"]}</span>'
-                f"{paras}{notes}</div></div>"
+                f"{paras}{notes}{render_test(e['test'])}</div></div>"
             )
         divider = '<span id="invariants"></span>\n' if i == 0 else '<hr class="section-divider"/>\n\n'
         sections.append(
@@ -302,16 +386,24 @@ def render(version, categories, principles, prin_intro_paras):
         )
         sections.append("\n".join(entries) + "\n  </div>\n</section>\n")
     toc_items.append('  <a href="#principles">The principles</a>')
+    side_toc_items.append('  <li><a href="#principles" data-section="principles">The principles</a></li>')
 
     prin_rows = []
     for p in principles:
         note = f'<p class="note">{md_inline(p["note"])}</p>' if p["note"] else ""
+        no_test = ""
+        if p["test"] and p["test"].get("no_test"):
+            body = "".join(f"<p>{md_inline(t)}</p>" for t in p["test"]["paras"])
+            no_test = (
+                '<details class="invariant-test"><summary>No test — why</summary>'
+                f"{body}</details>"
+            )
         prin_rows.append(
             f'      <div class="invariant" id="prin-{p["num"]}">'
             f'<div class="invariant-num"><a href="#prin-{p["num"]}">PRIN-{p["num"]}</a></div>'
             f'<div class="invariant-body" id="{p["slug"]}">'
             f'<strong>{md_inline(p["statement"])}.</strong>'
-            f'<span class="invariant-slug">{p["slug"]}</span>{note}</div></div>'
+            f'<span class="invariant-slug">{p["slug"]}</span>{note}{no_test}</div></div>'
         )
     prin_intro = "".join(
         f'<p class="section-sub" style="margin-bottom:14px;">{md_inline(p)}</p>'
@@ -325,6 +417,7 @@ def render(version, categories, principles, prin_intro_paras):
         inv_count=inv_count,
         prin_count=len(principles),
         toc="\n".join(toc_items),
+        side_toc="\n".join(side_toc_items),
         sections="\n".join(sections),
         prin_intro=prin_intro,
         principles="\n".join(prin_rows),

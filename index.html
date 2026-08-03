@@ -929,50 +929,28 @@ footer {
   <div class="invariant-category fade-up">
     <div class="invariant-cat-label">Enforcement sits outside the agent</div>
     <p style="font-size:13px; color:var(--ink-mid); line-height:1.6; margin:0 0 14px; max-width:640px;">The agent cannot reach the machinery that governs it, and that machinery keeps working when things break.</p>
-    <div class="invariants-list">
-      <div class="invariant"><span class="invariant-num">INV-01</span><div class="invariant-body"><strong>Constraints are external and inviolable.</strong> <span>Enforcement machinery never runs inside the agent's isolation boundary. The agent can see that a request was blocked. It cannot see, or change, the rule that blocked it.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-02</span><div class="invariant-body"><strong>Mediation is complete.</strong> <span>No path from the agent to any external resource bypasses the mediation layer. A new dependency goes through it or it does not exist.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-04</span><div class="invariant-body"><strong>Enforcement failure defaults to denial.</strong> <span>No failure of enforcement infrastructure can expand what the agent can do. An agent whose enforcement is unavailable is an agent that cannot act.</span></div></div>
-    </div>
   </div>
   <div class="invariant-category fade-up">
     <div class="invariant-cat-label">Everything is on the record</div>
     <p style="font-size:13px; color:var(--ink-mid); line-height:1.6; margin:0 0 14px; max-width:640px;">What the agent did, what it was allowed to do at the time, and what left the boundary. Recorded by something the agent cannot write to.</p>
-    <div class="invariants-list">
-      <div class="invariant"><span class="invariant-num">INV-09</span><div class="invariant-body"><strong>Every action leaves a trace.</strong> <span>Logs are written by the mediation layer, not the agent. The agent has no write access and cannot suppress, alter, or destroy them.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-10</span><div class="invariant-body"><strong>Trajectories are recorded end to end.</strong> <span>The record links an objective to its actions and to their external effects, as one chain. Individual actions can each look ordinary while the sequence is an attack.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-14</span><div class="invariant-body"><strong>Constraint history is immutable and complete.</strong> <span>“What was the agent permitted to do when it took that action?” must always be answerable.</span></div></div>
-    </div>
   </div>
   <div class="invariant-category fade-up">
     <div class="invariant-cat-label">Capability is granted, never taken</div>
     <p style="font-size:13px; color:var(--ink-mid); line-height:1.6; margin:0 0 14px; max-width:640px;">An agent holds what an operator gave it, bounded in how it may be used, and cannot enlarge that holding from the inside.</p>
-    <div class="invariants-list">
-      <div class="invariant"><span class="invariant-num">INV-17</span><div class="invariant-body"><strong>Capability is declared and cannot be self-expanded.</strong> <span>The running agent's capability set matches its declaration. It cannot grant itself a tool, a server, or a credential at runtime.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-18</span><div class="invariant-body"><strong>Capability combinations are governed as a set.</strong> <span>Private data, untrusted content, and unmediated outbound action must not coexist in one agent — however well each grant is justified on its own.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-19</span><div class="invariant-body"><strong>Operations are bounded.</strong> <span>Volume, rate, duration, concurrency, and retention each carry an enforced bound. An unbounded dimension is a violation.</span></div></div>
-    </div>
   </div>
   <div class="invariant-category fade-up">
     <div class="invariant-cat-label">Trust is explicit, never assumed</div>
     <p style="font-size:13px; color:var(--ink-mid); line-height:1.6; margin:0 0 14px; max-width:640px;">Every trust relationship is declared. What arrives unverified gets the lowest tier, and data never becomes instruction.</p>
-    <div class="invariants-list">
-      <div class="invariant"><span class="invariant-num">INV-26</span><div class="invariant-body"><strong>Unverified entities default to zero trust.</strong> <span>An entity whose identity cannot be verified gets the lowest tier. Ambiguous cases resolve to less trust, not more.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-27</span><div class="invariant-body"><strong>The instruction channel is distinct and unpromotable.</strong> <span>Tool output, fetched content, invocation parameters, delegation returns, any modality — all admitted as data, none promotable to instruction.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-29</span><div class="invariant-body"><strong>Trust cannot be self-elevated.</strong> <span>No principal, human or agent, raises its own trust. Elevation takes recorded human approval.</span></div></div>
-    </div>
   </div>
   <div class="invariant-category fade-up">
     <div class="invariant-cat-label">Humans can always stop it</div>
     <p style="font-size:13px; color:var(--ink-mid); line-height:1.6; margin:0 0 14px; max-width:640px;">Halt, containment, and governance stay in human hands — and the load of exercising them stays inside human capacity.</p>
-    <div class="invariants-list">
-      <div class="invariant"><span class="invariant-num">INV-33</span><div class="invariant-body"><strong>Halt authority is asymmetric.</strong> <span>Anyone with halt authority can halt. Only equal or higher authority can resume. An agent can stop itself and cannot restart itself.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-34</span><div class="invariant-body"><strong>Quarantine is immediate, silent, and complete.</strong> <span>Every ability to affect the environment is severed at once, with no warning to the agent. State is preserved as evidence.</span></div></div>
-      <div class="invariant"><span class="invariant-num">INV-38</span><div class="invariant-body"><strong>Oversight demand above threshold reduces autonomy.</strong> <span>When approvals outrun the people responsible for them, the system reduces autonomy or halts. It never quietly falls back on reflexive approval.</span></div></div>
-    </div>
   </div>
 
-  <p class="fade-up" style="font-size:14px; color:var(--ink-mid); line-height:1.7; max-width:680px; margin-top:36px;">Fifteen of <strong style="color:var(--ink); font-weight:500;">38 invariants</strong>. Alongside them sit <strong style="color:var(--ink); font-weight:500;">14 principles</strong> — the judgment calls the framework names rather than pretends to automate. Every invariant carries a verification test: <a href="invariants.html">read the full register</a> — all 38 invariants and all 14 principles, on one page.</p>
+  <p class="fade-up" style="font-size:14px; color:var(--ink-mid); line-height:1.7; max-width:680px; margin-top:36px;">Behind these five claims sit <strong style="color:var(--ink); font-weight:500;">38 invariants</strong>, each with its verification test, and <strong style="color:var(--ink); font-weight:500;">14 principles</strong> — the judgment calls the framework names rather than pretends to automate. All of them live in the full register, each with a stable link you can cite.</p>
+  <div class="fade-up" style="margin-top:20px;">
+    <a href="invariants.html" class="btn-primary">Read the full register →</a>
+  </div>
 
 </section>
 
@@ -1128,7 +1106,7 @@ footer {
     <a href="invariants.html" class="doc-card fade-up">
       <div class="doc-card-label">Full register</div>
       <h4>The invariants &amp; principles</h4>
-      <p>All 38 invariants and 14 principles on one page, each with a stable link you can cite. For auditors, policy readers, and anyone who prefers a page to a repository.</p>
+      <p>All 38 invariants and 14 principles on one page, each with its verification test and a stable link you can cite. For auditors, policy readers, and anyone who prefers a page to a repository.</p>
       <div class="doc-card-arrow">Read →</div>
     </a>
     <a href="https://github.com/geoffbelknap/ask/blob/main/FRAMEWORK.md" class="doc-card fade-up">
