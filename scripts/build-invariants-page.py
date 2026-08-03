@@ -220,7 +220,8 @@ section {{ max-width: 960px; margin: 0 auto; padding: 40px 40px; }}
 .section-divider {{ border: none; border-top: 0.5px solid var(--border); }}
 .invariants-list {{ display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 0.5px solid var(--border); border-radius: 10px; overflow: hidden; }}
 .invariant {{ background: var(--warm); padding: 18px 20px; display: flex; gap: 16px; scroll-margin-top: calc(var(--nav-h) + 16px); }}
-.invariant:target {{ background: var(--teal-light); }}
+.invariant:target, .invariant:has(:target) {{ background: var(--teal-light); }}
+details.invariant-test {{ scroll-margin-top: calc(var(--nav-h) + 16px); }}
 .invariant-num {{ flex-shrink: 0; width: 46px; padding-top: 3px; }}
 .invariant-num a {{ font-family: var(--mono); font-size: 10px; color: var(--teal-dark); text-decoration: none; }}
 .invariant-num a:hover {{ text-decoration: underline; }}
@@ -245,7 +246,10 @@ details.invariant-test p {{ color: var(--ink-mid); margin-top: 4px; }}
 .scroll-toc li a:hover {{ color: var(--ink-mid); border-left-color: var(--ink-faint); }}
 .scroll-toc li a.active {{ color: var(--ink); border-left-color: var(--teal); font-weight: 500; }}
 @media (max-width: 1420px) {{ .scroll-toc {{ display: none; }} }}
-.invariant-slug {{ font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-left: 8px; white-space: nowrap; }}
+a.invariant-slug {{ font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-left: 8px; white-space: nowrap; text-decoration: none; }}
+a.invariant-slug:hover {{ color: var(--teal-dark); text-decoration: underline; }}
+a.test-link {{ font-family: var(--mono); font-size: 10px; color: var(--ink-faint); margin-left: 10px; text-decoration: none; text-transform: none; letter-spacing: 0; }}
+a.test-link:hover {{ color: var(--teal-dark); text-decoration: underline; }}
 footer {{ border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 32px; }}
 .footer-inner {{ max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }}
 .footer-brand {{ font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--ink); text-decoration: none; }}
@@ -279,7 +283,7 @@ footer {{ border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top:
 <header class="register">
   <div class="register-version">{version} — full register</div>
   <h1>The invariants and principles, in full.</h1>
-  <p class="register-sub">Every property the framework requires, on one page. An invariant is binary — at any moment it holds or it is violated — and externally verifiable: every entry carries its verification test, from <a href="{blob}VERIFICATION.md" style="color:var(--teal-dark);">VERIFICATION.md</a>, ready to expand. A principle is the judgment the framework names rather than pretends to automate. Each entry has a stable link: cite it by its number or slug.</p>
+  <p class="register-sub">Every property the framework requires, on one page. An invariant is binary — at any moment it holds or it is violated — and externally verifiable: every entry carries its verification test, from <a href="{blob}VERIFICATION.md" style="color:var(--teal-dark);">VERIFICATION.md</a>, ready to expand. A principle is the judgment the framework names rather than pretends to automate. Every entry and every test has a stable link — cite an invariant by number or slug, and a test by its <code style="font-family:var(--mono); font-size:12px;">#test-</code> address.</p>
 </header>
 
 <ul class="scroll-toc" id="scrollToc">
@@ -336,8 +340,20 @@ function updateToc() {{
 window.addEventListener('scroll', updateToc, {{ passive: true }});
 updateToc();
 
-// A link to an entry inside a collapsed test should still land visibly:
-// entries themselves are never hidden, so only highlight handling is needed.
+// Deep links into a collapsed test must open it before scrolling.
+function openTarget() {{
+  if (!location.hash) return;
+  const el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (!el) return;
+  let node = el;
+  while (node) {{
+    if (node.tagName === 'DETAILS') node.open = true;
+    node = node.parentElement;
+  }}
+  el.scrollIntoView({{ behavior: 'instant', block: 'start' }});
+}}
+window.addEventListener('hashchange', openTarget);
+openTarget();
 </script>
 
 </body>
@@ -345,13 +361,15 @@ updateToc();
 """
 
 
-def render_test(test):
+def render_test(test, slug):
     if not test or not test["steps"]:
         return ""
     steps = "".join(f"<li>{md_inline(s)}</li>" for s in test["steps"])
     paras = "".join(f"<p>{md_inline(p)}</p>" for p in test["paras"])
     return (
-        '<details class="invariant-test"><summary>Verification test</summary>'
+        f'<details class="invariant-test" id="test-{slug}">'
+        f'<summary>Verification test<a class="test-link" href="#test-{slug}" '
+        f'title="Link to this test">#test-{slug}</a></summary>'
         f"<ul>{steps}</ul>{paras}</details>"
     )
 
@@ -373,8 +391,8 @@ def render(version, categories, principles, prin_intro_paras):
                 f'<div class="invariant-num"><a href="#inv-{e["num"]}">INV-{e["num"]}</a></div>'
                 f'<div class="invariant-body" id="{e["slug"]}">'
                 f'<strong>{md_inline(e["statement"])}.</strong>'
-                f'<span class="invariant-slug">{e["slug"]}</span>'
-                f"{paras}{notes}{render_test(e['test'])}</div></div>"
+                f'<a class="invariant-slug" href="#{e["slug"]}" title="Link to this invariant">{e["slug"]}</a>'
+                f"{paras}{notes}{render_test(e['test'], e['slug'])}</div></div>"
             )
         divider = '<span id="invariants"></span>\n' if i == 0 else '<hr class="section-divider"/>\n\n'
         sections.append(
@@ -395,7 +413,9 @@ def render(version, categories, principles, prin_intro_paras):
         if p["test"] and p["test"].get("no_test"):
             body = "".join(f"<p>{md_inline(t)}</p>" for t in p["test"]["paras"])
             no_test = (
-                '<details class="invariant-test"><summary>No test — why</summary>'
+                f'<details class="invariant-test" id="test-{p["slug"]}">'
+                f'<summary>No test — why<a class="test-link" href="#test-{p["slug"]}" '
+                f'title="Link to this entry">#test-{p["slug"]}</a></summary>'
                 f"{body}</details>"
             )
         prin_rows.append(
@@ -403,7 +423,8 @@ def render(version, categories, principles, prin_intro_paras):
             f'<div class="invariant-num"><a href="#prin-{p["num"]}">PRIN-{p["num"]}</a></div>'
             f'<div class="invariant-body" id="{p["slug"]}">'
             f'<strong>{md_inline(p["statement"])}.</strong>'
-            f'<span class="invariant-slug">{p["slug"]}</span>{note}{no_test}</div></div>'
+            f'<a class="invariant-slug" href="#{p["slug"]}" title="Link to this principle">{p["slug"]}</a>'
+            f'{note}{no_test}</div></div>'
         )
     prin_intro = "".join(
         f'<p class="section-sub" style="margin-bottom:14px;">{md_inline(p)}</p>'
