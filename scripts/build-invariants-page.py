@@ -55,21 +55,26 @@ def md_block(para):
 
 
 def parse_verification(src):
-    """Map slug -> test content (bullet steps and trailing paragraphs)."""
+    """Map slug -> test content (number, bullet steps, trailing paragraphs).
+
+    Every test entry must carry its INV/PRIN number — VERIFICATION.md promises
+    that numbers are searchable there, and render-time cross-checking against
+    FRAMEWORK.md keeps the two files from drifting apart.
+    """
     tests = {}
     for m in re.finditer(
-        r"^\*\*.*?\.\*\* `([a-z0-9-]+)`( — \*\*No test\.\*\*)?\n(.*?)(?=^\*\*.*?\*\* `|\n### |\Z)",
+        r"^\*\*((?:INV|PRIN)-\d{2}) — .*?\.\*\* `([a-z0-9-]+)`( — \*\*No test\.\*\*)?\n(.*?)(?=^\*\*(?:INV|PRIN)-|\n### |\Z)",
         src,
         re.M | re.S,
     ):
-        slug, no_test, body = m.group(1), m.group(2), m.group(3)
+        num, slug, no_test, body = m.groups()
         steps = [line[2:].strip() for line in body.splitlines() if line.startswith("- ")]
         paras = [
             p.strip().replace("\n", " ")
             for p in body.split("\n\n")
             if p.strip() and not p.strip().startswith("- ") and p.strip() != "---"
         ]
-        tests[slug] = {"steps": steps, "paras": paras, "no_test": bool(no_test)}
+        tests[slug] = {"num": num, "steps": steps, "paras": paras, "no_test": bool(no_test)}
     return tests
 
 
@@ -146,6 +151,23 @@ def parse_framework(src):
     missing = [s for s in got_inv if s not in tests or not tests[s]["steps"]]
     if missing:
         sys.exit(f"build-invariants-page: invariants with no test in VERIFICATION.md: {missing}")
+    renumbered = [
+        (s, f"INV-{e['num']}", tests[s]["num"])
+        for c in categories
+        for e in c["entries"]
+        for s in [e["slug"]]
+        if tests[s]["num"] != f"INV-{e['num']}"
+    ]
+    renumbered += [
+        (p["slug"], f"PRIN-{p['num']}", tests[p["slug"]]["num"])
+        for p in principles
+        if p["slug"] in tests and tests[p["slug"]]["num"] != f"PRIN-{p['num']}"
+    ]
+    if renumbered:
+        sys.exit(
+            "build-invariants-page: VERIFICATION.md numbers disagree with FRAMEWORK.md "
+            f"(slug, framework, verification): {renumbered}"
+        )
     for c in categories:
         for e in c["entries"]:
             e["test"] = tests[e["slug"]]
