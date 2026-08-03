@@ -129,10 +129,15 @@ def parse_framework(src):
         num, statement, slug = m.groups()
         statement = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", statement)
         principles.append({"num": num, "statement": statement, "slug": slug, "note": None})
-    for m in re.finditer(r"\*\*On `([a-z0-9-]+)` \(PRIN-\d{2}\)\.\*\* (.*?)(?=\n\n|\Z)", prin_section, re.S):
-        slug, note = m.group(1), m.group(2).strip().replace("\n", " ")
+    for m in re.finditer(r"\*\*On `([a-z0-9-]+)` \(PRIN-(\d{2})\)\.\*\* (.*?)(?=\n\n|\Z)", prin_section, re.S):
+        slug, note_num, note = m.group(1), m.group(2), m.group(3).strip().replace("\n", " ")
         for p in principles:
             if p["slug"] == slug:
+                if p["num"] != note_num:
+                    sys.exit(
+                        f"build-invariants-page: note 'On `{slug}`' says PRIN-{note_num} "
+                        f"but the table says PRIN-{p['num']}"
+                    )
                 p["note"] = note
 
     # Cross-check against the Reference tables.
