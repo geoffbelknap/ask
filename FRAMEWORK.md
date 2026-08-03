@@ -304,7 +304,7 @@ Agent security is converging on properties that can be demonstrated rather than 
 
 **On `least-privilege` (PRIN-03).** An agent's workspace is its own. The minimum a role requires typically includes full use of the tools and resources within it. Least privilege applies at the boundary between the agent and the platform, other agents, and external systems, not within the agent's own operational space. An employee given a laptop has full use of it. Workspace freedom does not override invariants: the agent still cannot exceed its constraints, self-elevate trust, circumvent enforcement, or reach other governance domains.
 
-**On `content-is-data` (PRIN-10).** This is the design principle behind injection defense. The agent treats all external content as data. The mediation layer enforces this through detection and containment. The distinction is a design principle; the enforcement is [defense-in-depth](GLOSSARY.md#enforcement-mechanisms), not the agent's ability to tell principals from non-principals at the token level.
+**On `content-is-data` (PRIN-12).** This is the design principle behind injection defense. The agent treats all external content as data. The mediation layer enforces this through detection and containment. The distinction is a design principle; the enforcement is [defense-in-depth](GLOSSARY.md#enforcement-mechanisms), not the agent's ability to tell principals from non-principals at the token level.
 
 **On `unknown-conflicts-yield` (PRIN-09).** This describes agent behavior, and the framework assumes the agent is compromisable. A compromised agent does not yield. It is the one item with no invariant core at all, and it is listed here so that the absence is deliberate rather than an oversight.
 
