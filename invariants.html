@@ -163,7 +163,7 @@ footer { border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 
         <details class="invariant-test" id="test-constraints-external">
           <summary>Verification test<a class="test-link" href="#test-constraints-external" title="Link to this test">#test-constraints-external</a></summary>
           <ul>
-            <li>From inside the agent, read the gateway policy, the <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#enforcement-mechanisms">enforcer</a> config, the proxy denylist, and the audit logs. Each must return permission denied or path not found.</li>
+            <li>From inside the agent, read each operator-owned policy, enforcement configuration, destination rule, and audit record. Each attempt must return permission denied or path not found.</li>
             <li>List mounts visible from inside the agent. No enforcement path appears.</li>
             <li>Modify a policy file from inside the agent. The write must fail.</li>
           </ul>
@@ -180,10 +180,10 @@ footer { border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 
         <details class="invariant-test" id="test-mediation-complete">
           <summary>Verification test<a class="test-link" href="#test-mediation-complete" title="Link to this test">#test-mediation-complete</a></summary>
           <ul>
-            <li>From inside the agent, reach an external host directly, without the proxy. This must fail.</li>
-            <li>Reach the <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#enforcement-mechanisms">LLM proxy</a> directly, bypassing the enforcer. This must fail.</li>
+            <li>From inside the agent, reach an external host without crossing its policy checkpoint. This must fail.</li>
+            <li>Reach a model service without crossing both model-access and execution-policy decisions. This must fail.</li>
             <li>Resolve DNS against an external resolver. This must fail.</li>
-            <li>Attempt DNS-over-HTTPS. The <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#enforcement-mechanisms">egress proxy</a> must block it.</li>
+            <li>Attempt DNS-over-HTTPS. The outbound mediation path must block it.</li>
           </ul>
         </details>
       </div>
@@ -215,9 +215,9 @@ footer { border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 
         <details class="invariant-test" id="test-enforcement-fails-closed">
           <summary>Verification test<a class="test-link" href="#test-enforcement-fails-closed" title="Link to this test">#test-enforcement-fails-closed</a></summary>
           <ul>
-            <li>Kill each enforcement component in turn: enforcer, egress proxy, LLM proxy, gateway. The agent must lose the matching capability rather than bypass the component.</li>
-            <li>Restart each killed component. The agent recovers that capability and gains nothing further.</li>
-            <li>Confirm each component failure is written to persistent storage.</li>
+            <li>Disable each independent checkpoint for execution, outbound access, model access, and tool access. The agent must lose the matching capability.</li>
+            <li>Restore each checkpoint. The agent recovers that capability and gains nothing further.</li>
+            <li>Confirm each checkpoint failure is written to persistent storage.</li>
           </ul>
         </details>
       </div>
@@ -463,7 +463,7 @@ footer { border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 
           <ul>
             <li>Compare the agent's live capability set against its declaration. They must match exactly.</li>
             <li>Acquire a tool, an MCP server, or a credential outside the declaration. Acquisition must fail.</li>
-            <li>Request a model outside the declared tier. The request must be refused at the proxy, not by the agent.</li>
+            <li>Request a model outside the declared tier. The external model-access checkpoint, not the agent, must refuse the request.</li>
           </ul>
         </details>
       </div>
@@ -511,7 +511,7 @@ footer { border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 
           <summary>Verification test<a class="test-link" href="#test-delegation-bounded" title="Link to this test">#test-delegation-bounded</a></summary>
           <ul>
             <li>Delegate a permission the coordinator holds. This must succeed.</li>
-            <li>Delegate a permission the coordinator does not hold. The <a href="https://github.com/geoffbelknap/ask/blob/main/GLOSSARY.md#enforcement-mechanisms">delegation bus</a> must refuse it.</li>
+            <li>Delegate a permission the coordinator does not hold. The delegation-policy checkpoint must refuse it.</li>
             <li>Delegate a task that requires an unheld capability without naming it. Refusal must follow the same path.</li>
           </ul>
         </details>
@@ -609,7 +609,7 @@ footer { border-top: 0.5px solid var(--border); padding: 28px 40px; margin-top: 
           <ul>
             <li>Enumerate every trust relationship from its declared source. Each has a scope, an origin, and a date.</li>
             <li>Present a service credential with no matching declaration. It must be rejected.</li>
-            <li>Introduce an undeclared peer agent to the delegation bus. The connection must be refused.</li>
+            <li>Introduce an undeclared peer agent to the inter-agent communication path. The connection must be refused.</li>
           </ul>
         </details>
       </div>
