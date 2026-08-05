@@ -16,6 +16,6 @@ These apply to all work on this repository. Before proposing or implementing any
 - `constraints-external` and `constraints-atomic` — anything governing what the agent may do is operator-owned and read-only to the agent, delivered atomically and durable for the session.
 - `trust-declared` — every trust relationship is derivable from a declared source. Trust without a declaration is refused.
 
-Enforcement layers keep their own isolation boundaries. Network isolation, egress proxy, LLM proxy, enforcer, container hardening, and the runtime gateway are separate mechanisms. Do not collapse them or let one subsume another's role.
+Independent enforcement properties must remain independently testable. Keep isolation, outbound mediation, model access, execution policy, tool access, and audit durability from sharing one bypass or failure boundary. An implementation may combine checkpoints only when failure cannot expand capability and each property still has an independent test.
 
 The judgment-bearing counterparts are principles rather than invariants, `least-privilege` among them. They guide scoping decisions and cannot be mechanically checked.
